@@ -134,7 +134,7 @@ class Config:
                 if not line or line.startswith("#") or "=" not in line:
                     continue
                 k, _, v = line.partition("=")
-                k, v = k.strip(), v.strip().strip(""'")
+                k, v = k.strip(), v.strip().strip("\"'")
                 if k and k not in os.environ:
                     os.environ[k] = v
 

@@ -112,7 +112,8 @@ class Engine:
             lines = []
             for pname, pinfo in props.items():
                 tag = " *" if pname in req else ""
-                lines.append(f"      {pname}{tag}: {pinfo.get(\"description\", pinfo.get(\"type\", \"\"))}")
+                desc = pinfo.get("description", pinfo.get("type", ""))
+                lines.append(f"      {pname}{tag}: {desc}")
             param_block = "\n".join(lines) or "      (none)"
             catalog.append(f"  [{g.spec.name}]\n    {g.spec.info}\n    Params:\n{param_block}")
         return _SYSTEM.format(gear_catalog="\n\n".join(catalog))
@@ -220,7 +221,8 @@ class Engine:
 
             messages = self._run_gear(resp, messages)
             for g in (resp.tool_calls or []):
-                yield f"\n  [{g[\'name\']}] running...\n"
+                name = g["name"]
+                yield f"\n  [{name}] running...\n"
 
         yield "\n[Max rounds reached]"
 
