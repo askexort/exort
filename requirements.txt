@@ -1,0 +1,13 @@
+# Core dependencies
+click>=8.0
+pyyaml>=6.0
+
+# LLM Providers (install as needed)
+openai>=1.0       # For OpenAI provider
+groq>=0.4         # For Groq provider (free tier)
+
+# Development
+pytest>=7.0
+pytest-cov>=4.0
+ruff>=0.1.0
+mypy>=1.0

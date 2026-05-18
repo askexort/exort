@@ -1,0 +1,23 @@
+{
+  "name": "openmind-mindtoken",
+  "version": "1.0.0",
+  "description": "MindToken (MIND) - ERC-20 token for the OpenMind ecosystem on Base",
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "deploy:base": "npx hardhat run scripts/deploy.js --network base",
+    "deploy:base-sepolia": "npx hardhat run scripts/deploy.js --network base-sepolia",
+    "deploy:local": "npx hardhat run scripts/deploy.js --network localhost",
+    "node": "npx hardhat node",
+    "coverage": "npx hardhat coverage",
+    "clean": "npx hardhat clean"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.19.0",
+    "dotenv": "^16.3.1"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0"
+  }
+}
