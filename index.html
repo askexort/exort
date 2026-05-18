@@ -1188,6 +1188,59 @@
                 align-items: center;
             }
         }
+        /* How It Works */
+        .how-it-works { padding: 120px 0; position: relative; }
+        .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 60px; }
+        .step-card { text-align: center; padding: 40px 30px; position: relative; }
+        .step-number { width: 64px; height: 64px; border-radius: 20px; background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(168,85,247,0.1)); border: 1px solid rgba(99,102,241,0.2); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 28px; font-weight: 800; color: var(--primary-light); }
+        .step-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 12px; color: #fff; }
+        .step-card p { color: var(--text-secondary); font-size: 15px; line-height: 1.7; }
+        .step-connector { position: absolute; top: 72px; right: -20px; color: var(--text-secondary); font-size: 20px; opacity: 0.3; }
+        .step-card:last-child .step-connector { display: none; }
+
+        /* Providers */
+        .providers-section { padding: 120px 0; position: relative; }
+        .providers-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 60px; }
+        .provider-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 24px; padding: 40px 32px; transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .provider-card:hover { border-color: rgba(99,102,241,0.3); transform: translateY(-4px); }
+        .provider-card .provider-badge { display: inline-block; padding: 4px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+        .provider-card .badge-free { background: rgba(52,211,153,0.15); color: #34d399; }
+        .provider-card .badge-paid { background: rgba(251,191,36,0.15); color: #fbbf24; }
+        .provider-card .badge-local { background: rgba(96,165,250,0.15); color: #60a5fa; }
+        .provider-card h3 { font-size: 22px; font-weight: 700; margin-bottom: 8px; color: #fff; }
+        .provider-card .provider-model { color: var(--text-secondary); font-size: 13px; margin-bottom: 20px; }
+        .provider-card ul { list-style: none; }
+        .provider-card li { color: var(--text-secondary); font-size: 14px; padding: 8px 0; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+        .provider-card li i { color: var(--primary-light); font-size: 12px; }
+
+        /* Use Cases */
+        .usecases-section { padding: 120px 0; position: relative; }
+        .usecases-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-top: 60px; }
+        .usecase-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 24px; padding: 36px; transition: all 0.3s ease; }
+        .usecase-card:hover { border-color: rgba(99,102,241,0.3); transform: translateY(-3px); }
+        .usecase-icon { font-size: 36px; margin-bottom: 16px; }
+        .usecase-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 10px; color: #fff; }
+        .usecase-card p { color: var(--text-secondary); font-size: 15px; line-height: 1.7; }
+        .usecase-card code { background: rgba(99,102,241,0.1); padding: 2px 8px; border-radius: 6px; font-size: 13px; color: var(--primary-light); }
+
+        /* FAQ */
+        .faq-section { padding: 120px 0; position: relative; }
+        .faq-grid { max-width: 800px; margin: 60px auto 0; }
+        .faq-item { border: 1px solid var(--border); border-radius: 16px; margin-bottom: 12px; overflow: hidden; transition: all 0.3s ease; }
+        .faq-item:hover { border-color: rgba(99,102,241,0.2); }
+        .faq-question { padding: 24px 28px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); }
+        .faq-question h3 { font-size: 16px; font-weight: 600; color: #fff; flex: 1; }
+        .faq-question i { color: var(--text-secondary); transition: transform 0.3s ease; font-size: 14px; }
+        .faq-item.open .faq-question i { transform: rotate(180deg); }
+        .faq-answer { padding: 0 28px; max-height: 0; overflow: hidden; transition: all 0.3s ease; }
+        .faq-item.open .faq-answer { padding: 0 28px 24px; max-height: 300px; }
+        .faq-answer p { color: var(--text-secondary); font-size: 15px; line-height: 1.8; }
+        .faq-answer code { background: rgba(99,102,241,0.1); padding: 2px 8px; border-radius: 6px; font-size: 13px; color: var(--primary-light); }
+
+        @media (max-width: 768px) {
+            .steps-grid, .providers-grid, .usecases-grid { grid-template-columns: 1fr; }
+            .step-connector { display: none; }
+        }
     </style>
 </head>
 <body>
@@ -1230,6 +1283,8 @@
             </a>
             <ul class="nav-links">
                 <li><a href="#features">Features</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#providers">Providers</a></li>
                 <li><a href="#code">Code</a></li>
                 <li><a href="https://github.com/askexort/exort">GitHub</a></li>
                 <li><a href="https://t.me/askexort_bot" class="btn btn-primary"><i class="fab fa-telegram"></i> Try Bot</a></li>
@@ -1454,6 +1509,172 @@ response = agent.<span class="function">chat</span>(<span class="string">"Hello!
         </div>
     </section>
 
+    <!-- How It Works -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag"><i class="fas fa-magic"></i> Simple Process</span>
+                <h2 class="section-title">How It <span class="gradient-text">Works</span></h2>
+                <p class="section-subtitle">Three simple steps to get your AI agent up and running.</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <span class="step-connector"><i class="fas fa-arrow-right"></i></span>
+                    <h3>Install</h3>
+                    <p>Install Exort with pip. One command, zero dependencies to configure manually.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <span class="step-connector"><i class="fas fa-arrow-right"></i></span>
+                    <h3>Configure</h3>
+                    <p>Set your API key and choose a provider. Groq, OpenAI, Ollama, and more supported.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h3>Build</h3>
+                    <p>Write your agent logic with tools, memory, and reasoning. Deploy anywhere.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Provider Comparison -->
+    <section class="providers-section" id="providers">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag"><i class="fas fa-server"></i> Multi-Provider</span>
+                <h2 class="section-title">Choose Your <span class="gradient-text">Provider</span></h2>
+                <p class="section-subtitle">Exort works with multiple AI providers. Pick the one that fits your needs.</p>
+            </div>
+            <div class="providers-grid">
+                <div class="provider-card">
+                    <span class="provider-badge badge-free">Free</span>
+                    <h3>Groq</h3>
+                    <div class="provider-model">llama-3.3-70b-versatile</div>
+                    <ul>
+                        <li><i class="fas fa-check"></i> Lightning fast inference</li>
+                        <li><i class="fas fa-check"></i> Free tier available</li>
+                        <li><i class="fas fa-check"></i> No credit card required</li>
+                        <li><i class="fas fa-check"></i> Great for getting started</li>
+                    </ul>
+                </div>
+                <div class="provider-card">
+                    <span class="provider-badge badge-paid">Premium</span>
+                    <h3>OpenAI</h3>
+                    <div class="provider-model">gpt-4o / gpt-4o-mini</div>
+                    <ul>
+                        <li><i class="fas fa-check"></i> Best reasoning quality</li>
+                        <li><i class="fas fa-check"></i> Tool use support</li>
+                        <li><i class="fas fa-check"></i> Vision capabilities</li>
+                        <li><i class="fas fa-check"></i> Production ready</li>
+                    </ul>
+                </div>
+                <div class="provider-card">
+                    <span class="provider-badge badge-local">Local</span>
+                    <h3>Ollama</h3>
+                    <div class="provider-model">llama3 / mistral / codellama</div>
+                    <ul>
+                        <li><i class="fas fa-check"></i> 100% private &amp; local</li>
+                        <li><i class="fas fa-check"></i> No API key needed</li>
+                        <li><i class="fas fa-check"></i> Offline capable</li>
+                        <li><i class="fas fa-check"></i> Full control</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Use Cases -->
+    <section class="usecases-section" id="usecases">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag"><i class="fas fa-lightbulb"></i> Possibilities</span>
+                <h2 class="section-title">What You Can <span class="gradient-text">Build</span></h2>
+                <p class="section-subtitle">From simple chatbots to autonomous research agents.</p>
+            </div>
+            <div class="usecases-grid">
+                <div class="usecase-card">
+                    <div class="usecase-icon">🤖</div>
+                    <h3>Smart Chatbots</h3>
+                    <p>Build conversational agents that remember context, use tools, and provide accurate answers. Deploy on Telegram, Discord, or web.</p>
+                </div>
+                <div class="usecase-card">
+                    <div class="usecase-icon">🔬</div>
+                    <h3>Research Assistants</h3>
+                    <p>Agents that search the web, read papers, summarize findings, and compile reports automatically.</p>
+                </div>
+                <div class="usecase-card">
+                    <div class="usecase-icon">⚡</div>
+                    <h3>Task Automation</h3>
+                    <p>Automate repetitive workflows with AI. Process files, manage data, and integrate with APIs using natural language instructions.</p>
+                </div>
+                <div class="usecase-card">
+                    <div class="usecase-icon">💻</div>
+                    <h3>Coding Assistants</h3>
+                    <p>AI pair programmers that write code, run tests, debug issues, and help with refactoring. Use <code>code_execution</code> tool for live coding.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq-section" id="faq">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag"><i class="fas fa-question-circle"></i> FAQ</span>
+                <h2 class="section-title">Frequently Asked <span class="gradient-text">Questions</span></h2>
+            </div>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        <h3>Is Exort really free?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Yes! Exort is open source under the MIT license. You can use it for personal and commercial projects. You only pay for the AI provider API usage (Groq offers a free tier).</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        <h3>Do I need an API key?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>For cloud providers like Groq or OpenAI, yes. But if you use Ollama for local models, no API key is needed — everything runs on your machine.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        <h3>Can I use it with my own tools?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Absolutely! Exort has a plugin-based tool system. Create custom tools by defining a function and registering it with <code>agent.add_tool()</code>.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        <h3>Which model should I start with?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>For beginners, we recommend Groq with <code>llama-3.3-70b-versatile</code> — it's free and fast. For production, use OpenAI <code>gpt-4o</code> for best results.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        <h3>How does memory work?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Exort supports short-term (conversation) and long-term (persistent) memory. Agents remember context across turns and can store important information for future reference.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Donate & Get Rewarded -->
     <section class="donate-section">
         <div class="container">
@@ -1497,6 +1718,10 @@ response = agent.<span class="function">chat</span>(<span class="string">"Hello!
                     <h4>Product</h4>
                     <ul>
                         <li><a href="#features">Features</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#providers">Providers</a></li>
+                        <li><a href="#usecases">Use Cases</a></li>
+                        <li><a href="#faq">FAQ</a></li>
                         <li><a href="#code">Quick Start</a></li>
                         <li><a href="https://github.com/askexort/exort">Documentation</a></li>
                         <li><a href="https://github.com/askexort/exort/releases">Changelog</a></li>
