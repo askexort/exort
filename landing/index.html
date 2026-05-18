@@ -958,6 +958,53 @@
             letter-spacing: 2px;
         }
 
+        .mind-teaser {
+            margin-top: 24px;
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 2;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+            animation: teaserFadeIn 2s ease-out;
+        }
+
+        .mind-teaser em {
+            color: var(--primary-light);
+            font-style: normal;
+            font-weight: 600;
+        }
+
+        .mind-teaser-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .mind-teaser-dots span {
+            width: 8px;
+            height: 8px;
+            background: var(--secondary);
+            border-radius: 50%;
+            opacity: 0.4;
+            animation: dotPulse 1.5s ease-in-out infinite;
+        }
+
+        .mind-teaser-dots span:nth-child(2) { animation-delay: 0.3s; }
+        .mind-teaser-dots span:nth-child(3) { animation-delay: 0.6s; }
+
+        @keyframes dotPulse {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.4); }
+        }
+
+        @keyframes teaserFadeIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
         /* Footer */
         footer {
             padding: 80px 0 40px;
@@ -1449,6 +1496,13 @@ response = agent.<span class="function">chat</span>(<span class="string">'Hello!
         <div class="container">
             <div class="mind-ticker">
                 <span class="mind-ticker-symbol">$MIND</span>
+            </div>
+            <p class="mind-teaser">
+                Something is brewing in the Exort ecosystem. <em>Think deeper. Build smarter.</em><br>
+                The mind that powers the agents is evolving. Stay close.
+            </p>
+            <div class="mind-teaser-dots">
+                <span></span><span></span><span></span>
             </div>
         </div>
     </section>
