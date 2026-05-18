@@ -947,8 +947,11 @@ def main():
     # Errors
     app.add_error_handler(error_handler)
 
-    # Background scanner
-    app.post_init = lambda a: asyncio.create_task(token_scanner(a))
+    # Background scanner — use post_init with proper async
+    async def start_scanner(application: Application):
+        asyncio.create_task(token_scanner(application))
+
+    app.post_init = start_scanner
 
     print("✅ Bot running! Press Ctrl+C to stop.")
     app.run_polling(drop_pending_updates=True)
