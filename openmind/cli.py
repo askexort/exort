@@ -8,8 +8,6 @@ and running the agent.
 from __future__ import annotations
 
 import sys
-import os
-from typing import Optional
 
 try:
     import click
@@ -20,7 +18,6 @@ except ImportError:
 from openmind import __version__
 from openmind.config import Config
 from openmind.utils import Colors, colorize
-
 
 BANNER = r"""
    ____                    __  __           _ __
@@ -36,7 +33,7 @@ BANNER = r"""
 @click.version_option(version=__version__, prog_name="openmind")
 @click.option("--config", "-c", "config_path", default=None, help="Path to config file.")
 @click.pass_context
-def cli(ctx: click.Context, config_path: Optional[str] = None) -> None:
+def cli(ctx: click.Context, config_path: str | None = None) -> None:
     """OpenMind — Open-source AI Agent Framework.
 
     Create autonomous AI agents with tool use, memory, and
@@ -57,12 +54,12 @@ def cli(ctx: click.Context, config_path: Optional[str] = None) -> None:
 @click.pass_context
 def chat(
     ctx: click.Context,
-    provider: Optional[str],
-    model: Optional[str],
+    provider: str | None,
+    model: str | None,
     stream: bool,
-    system: Optional[str],
-    conversation: Optional[str],
-    temperature: Optional[float],
+    system: str | None,
+    conversation: str | None,
+    temperature: float | None,
 ) -> None:
     """Start an interactive chat session.
 
@@ -122,7 +119,10 @@ def chat(
             model=model_name,
             config=config,
             system_prompt=system,
-            on_thought=lambda t: click.echo(colorize(f"  💭 {t}", Colors.YELLOW) if config.get("ui.color") else f"  💭 {t}"),
+            on_thought=lambda t: click.echo(
+                colorize(f"  💭 {t}", Colors.YELLOW)
+                if config.get("ui.color") else f"  💭 {t}"
+            ),
             on_action=lambda n, a: click.echo(
                 f"  ⚡ Using tool: {n}" +
                 (colorize(f"({a})", Colors.DIM) if config.get("ui.color") else f"({a})")
@@ -230,8 +230,8 @@ def chat(
 @click.pass_context
 def config(
     ctx: click.Context,
-    key: Optional[str],
-    value: Optional[str],
+    key: str | None,
+    value: str | None,
     list_config: bool,
     init: bool,
 ) -> None:
@@ -302,7 +302,7 @@ def serve(ctx: click.Context, host: str, port: int) -> None:
 @click.option("--provider", "-p", default=None, help="Provider to test.")
 @click.option("--query", "-q", default="Say hello in one sentence.", help="Test query.")
 @click.pass_context
-def test(ctx: click.Context, provider: Optional[str], query: str) -> None:
+def test(ctx: click.Context, provider: str | None, query: str) -> None:
     """Test a provider with a simple query.
 
     Examples:
@@ -336,7 +336,8 @@ def providers() -> None:
 
     click.echo("\n📡 Available Providers:\n")
     for name, cls in PROVIDERS.items():
-        click.echo(f"  • {name:12s} - {cls.__doc__.strip().splitlines()[0] if cls.__doc__ else 'LLM provider'}")
+        doc = cls.__doc__.strip().splitlines()[0] if cls.__doc__ else "LLM provider"
+        click.echo(f"  • {name:12s} - {doc}")
     click.echo()
 
 

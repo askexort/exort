@@ -9,11 +9,10 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional
-
+from typing import Any
 
 # Default configuration
-DEFAULTS: Dict[str, Any] = {
+DEFAULTS: dict[str, Any] = {
     "provider": "groq",
     "model": None,  # Use provider default
     "temperature": 0.7,
@@ -62,10 +61,10 @@ class Config:
 
     def __init__(
         self,
-        config_path: Optional[str] = None,
-        overrides: Optional[Dict[str, Any]] = None,
+        config_path: str | None = None,
+        overrides: dict[str, Any] | None = None,
     ) -> None:
-        self._data: Dict[str, Any] = {}
+        self._data: dict[str, Any] = {}
         self._config_path = config_path
 
         # Layer 1: Defaults
@@ -92,7 +91,7 @@ class Config:
             return Path(self._config_path)
         return Path.home() / ".openmind" / "config.yaml"
 
-    def _load_yaml_config(self, path: Optional[str] = None) -> Dict[str, Any]:
+    def _load_yaml_config(self, path: str | None = None) -> dict[str, Any]:
         """Load config from YAML file."""
         config_file = Path(path) if path else self.config_path
         if not config_file.exists():
@@ -105,15 +104,15 @@ class Config:
             return self._parse_simple_yaml(config_file)
 
         try:
-            with open(config_file, "r", encoding="utf-8") as f:
+            with open(config_file, encoding="utf-8") as f:
                 data = yaml.safe_load(f)
             return data if isinstance(data, dict) else {}
         except Exception:
             return {}
 
-    def _parse_simple_yaml(self, path: Path) -> Dict[str, Any]:
+    def _parse_simple_yaml(self, path: Path) -> dict[str, Any]:
         """Minimal YAML parser for flat key-value configs."""
-        config: Dict[str, Any] = {}
+        config: dict[str, Any] = {}
         try:
             for line in path.read_text(encoding="utf-8").splitlines():
                 line = line.strip()
@@ -139,9 +138,9 @@ class Config:
             pass
         return config
 
-    def _load_env_config(self) -> Dict[str, Any]:
+    def _load_env_config(self) -> dict[str, Any]:
         """Load config from OPENMIND_* environment variables."""
-        config: Dict[str, Any] = {}
+        config: dict[str, Any] = {}
         prefix = "OPENMIND_"
 
         env_map = {
@@ -171,7 +170,7 @@ class Config:
 
         return config
 
-    def save(self, path: Optional[str] = None) -> None:
+    def save(self, path: str | None = None) -> None:
         """Save current config to YAML file.
 
         Args:
@@ -240,7 +239,7 @@ class Config:
     def __contains__(self, key: str) -> bool:
         return key in self._data
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return a copy of the config as a dict."""
         return _deep_copy(self._data)
 
@@ -248,9 +247,9 @@ class Config:
         return f"<Config provider={self._data.get('provider')!r}>"
 
 
-def _deep_copy(d: Dict[str, Any]) -> Dict[str, Any]:
+def _deep_copy(d: dict[str, Any]) -> dict[str, Any]:
     """Deep copy a dict (no external deps)."""
-    result: Dict[str, Any] = {}
+    result: dict[str, Any] = {}
     for k, v in d.items():
         if isinstance(v, dict):
             result[k] = _deep_copy(v)
@@ -259,7 +258,7 @@ def _deep_copy(d: Dict[str, Any]) -> Dict[str, Any]:
     return result
 
 
-def _deep_merge(base: Dict[str, Any], override: Dict[str, Any]) -> None:
+def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> None:
     """Merge override into base (mutates base)."""
     for key, value in override.items():
         if key in base and isinstance(base[key], dict) and isinstance(value, dict):

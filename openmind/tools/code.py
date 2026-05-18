@@ -6,18 +6,20 @@ Provides a sandboxed Python code execution tool.
 
 from __future__ import annotations
 
-import json
 import io
+import json
 import sys
 import traceback
-from typing import Optional
 
 from openmind.tools.base import tool
 
 
 @tool(
     name="execute_python",
-    description="Execute Python code in a sandboxed environment and return the output. Use for calculations, data processing, etc.",
+    description=(
+        "Execute Python code in a sandboxed environment and return the output. "
+        "Use for calculations, data processing, etc."
+    ),
 )
 def execute_python(
     code: str,

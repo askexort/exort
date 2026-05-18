@@ -8,9 +8,7 @@ All paths are sandboxed to prevent directory traversal attacks.
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
-from typing import Optional
 
 from openmind.tools.base import tool
 
@@ -57,7 +55,10 @@ def read_file(path: str, max_lines: int = 500) -> str:
 
 @tool(
     name="write_file",
-    description="Write content to a file. Creates the file if it doesn't exist, overwrites if it does.",
+    description=(
+        "Write content to a file. Creates the file if it "
+        "doesn't exist, overwrites if it does."
+    ),
 )
 def write_file(path: str, content: str) -> str:
     """Write content to a file.

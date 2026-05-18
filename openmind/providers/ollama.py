@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from openmind.providers.base import BaseProvider, ProviderResponse
 
@@ -26,9 +26,9 @@ class OllamaProvider(BaseProvider):
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
-        model: Optional[str] = None,
-        base_url: Optional[str] = None,
+        api_key: str | None = None,
+        model: str | None = None,
+        base_url: str | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(api_key=api_key, model=model, base_url=base_url, **kwargs)
@@ -43,8 +43,8 @@ class OllamaProvider(BaseProvider):
 
     def generate(
         self,
-        messages: List[Dict[str, str]],
-        tools: Optional[List[Dict[str, Any]]] = None,
+        messages: list[dict[str, str]],
+        tools: list[dict[str, Any]] | None = None,
         temperature: float = 0.7,
         max_tokens: int = 4096,
         **kwargs: Any,
@@ -52,7 +52,7 @@ class OllamaProvider(BaseProvider):
         """Send a chat request to the Ollama API."""
         import urllib.request
 
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "model": self.model,
             "messages": messages,
             "stream": False,
@@ -82,7 +82,7 @@ class OllamaProvider(BaseProvider):
             ) from exc
 
         message = result.get("message", {})
-        tool_calls: List[Dict[str, Any]] = []
+        tool_calls: list[dict[str, Any]] = []
         if message.get("tool_calls"):
             for tc in message["tool_calls"]:
                 func = tc.get("function", {})

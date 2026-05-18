@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import sys
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 # ANSI color codes
@@ -63,7 +63,7 @@ def print_colored(text: str, color: str, bold: bool = False, file=None) -> None:
     print(colorize(text, color, bold), file=file or sys.stderr)
 
 
-def format_tool_call(name: str, arguments: Dict[str, Any], color: bool = True) -> str:
+def format_tool_call(name: str, arguments: dict[str, Any], color: bool = True) -> str:
     """Format a tool call for display.
 
     Args:
@@ -103,7 +103,7 @@ def format_tool_result(result: str, color: bool = True) -> str:
     return f"  📋 Result:\n  {display}"
 
 
-def format_token_usage(usage: Dict[str, int], color: bool = True) -> str:
+def format_token_usage(usage: dict[str, int], color: bool = True) -> str:
     """Format token usage for display.
 
     Args:
@@ -150,7 +150,7 @@ def truncate_text(text: str, max_length: int = 100) -> str:
     return text[: max_length - 3] + "..."
 
 
-def safe_json_parse(text: str) -> Optional[Dict[str, Any]]:
+def safe_json_parse(text: str) -> dict[str, Any] | None:
     """Safely parse JSON, returning None on failure.
 
     Args:

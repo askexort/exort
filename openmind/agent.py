@@ -13,23 +13,16 @@ from __future__ import annotations
 
 import json
 import logging
-import sys
-import time
-from typing import Any, Callable, Dict, Generator, List, Optional
+from collections.abc import Callable, Generator
+from typing import Any
 
 from openmind.config import Config
 from openmind.memory.store import MemoryStore
-from openmind.providers.base import BaseProvider, ProviderResponse
 from openmind.providers import get_provider
+from openmind.providers.base import BaseProvider
 from openmind.tools.base import ToolRegistry
 from openmind.utils import (
-    Colors,
-    format_tool_call,
-    format_tool_result,
-    format_token_usage,
     generate_id,
-    print_colored,
-    estimate_tokens,
 )
 
 logger = logging.getLogger(__name__)
@@ -75,15 +68,15 @@ class Agent:
     def __init__(
         self,
         provider: str | BaseProvider = "groq",
-        model: Optional[str] = None,
-        config: Optional[Config] = None,
-        system_prompt: Optional[str] = None,
-        tools: Optional[ToolRegistry] = None,
-        memory: Optional[MemoryStore] = None,
-        on_thought: Optional[Callable[[str], None]] = None,
-        on_action: Optional[Callable[[str, Dict], None]] = None,
-        on_observation: Optional[Callable[[str], None]] = None,
-        on_response: Optional[Callable[[str], None]] = None,
+        model: str | None = None,
+        config: Config | None = None,
+        system_prompt: str | None = None,
+        tools: ToolRegistry | None = None,
+        memory: MemoryStore | None = None,
+        on_thought: Callable[[str], None] | None = None,
+        on_action: Callable[[str, dict], None] | None = None,
+        on_observation: Callable[[str], None] | None = None,
+        on_response: Callable[[str], None] | None = None,
     ) -> None:
         self.config = config or Config()
 
@@ -107,7 +100,7 @@ class Agent:
         )
 
         self.system_prompt = system_prompt or SYSTEM_PROMPT
-        self.conversation_id: Optional[str] = None
+        self.conversation_id: str | None = None
         self.max_iterations = self.config.get("max_iterations", 10)
 
         # Callbacks
@@ -123,9 +116,9 @@ class Agent:
     def _build_messages(
         self,
         user_message: str,
-        conversation_id: Optional[str] = None,
+        conversation_id: str | None = None,
         include_history: bool = True,
-    ) -> List[Dict[str, str]]:
+    ) -> list[dict[str, str]]:
         """Build the message list for the LLM.
 
         Args:
@@ -136,7 +129,7 @@ class Agent:
         Returns:
             List of message dicts in OpenAI format.
         """
-        messages: List[Dict[str, str]] = [
+        messages: list[dict[str, str]] = [
             {"role": "system", "content": self.system_prompt}
         ]
 
@@ -154,9 +147,9 @@ class Agent:
 
     def _handle_tool_calls(
         self,
-        tool_calls: List[Dict[str, Any]],
-        messages: List[Dict[str, str]],
-    ) -> List[Dict[str, str]]:
+        tool_calls: list[dict[str, Any]],
+        messages: list[dict[str, str]],
+    ) -> list[dict[str, str]]:
         """Execute tool calls and add results to messages.
 
         Args:
@@ -211,10 +204,10 @@ class Agent:
     def chat(
         self,
         message: str,
-        conversation_id: Optional[str] = None,
-        stream: Optional[bool] = None,
-        temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None,
+        conversation_id: str | None = None,
+        stream: bool | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
     ) -> str:
         """Send a message and get a response.
 
@@ -305,9 +298,9 @@ class Agent:
     def chat_stream(
         self,
         message: str,
-        conversation_id: Optional[str] = None,
-        temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None,
+        conversation_id: str | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
     ) -> Generator[str, None, None]:
         """Stream a chat response token by token.
 
@@ -338,7 +331,7 @@ class Agent:
         tokens = max_tokens or self.config.get("max_tokens", 4096)
 
         # For streaming, we handle tool calls non-streaming
-        for iteration in range(self.max_iterations):
+        for _iteration in range(self.max_iterations):
             last_response = None
             for chunk in self.provider.generate_stream(
                 messages=messages,
@@ -362,7 +355,10 @@ class Agent:
                 conversation_id,
                 "assistant",
                 last_response.content,
-                token_count=last_response.usage.get("completion_tokens", 0) if last_response.usage else 0,
+                token_count=(
+                    last_response.usage.get("completion_tokens", 0)
+                    if last_response.usage else 0
+                ),
             )
             break
 
@@ -372,7 +368,7 @@ class Agent:
         self._total_tokens = 0
         self._iteration_count = 0
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get agent usage statistics.
 
         Returns:

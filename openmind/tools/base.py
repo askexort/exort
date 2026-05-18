@@ -8,9 +8,9 @@ the :func:`tool` decorator.
 
 from __future__ import annotations
 
-import json
 import inspect
-from typing import Any, Callable, Dict, List, Optional, Type
+from collections.abc import Callable
+from typing import Any
 
 
 class BaseTool:
@@ -32,20 +32,20 @@ class BaseTool:
     name: str = ""
     description: str = ""
 
-    def get_parameters_schema(self) -> Dict[str, Any]:
+    def get_parameters_schema(self) -> dict[str, Any]:
         """Return an OpenAI-compatible parameters JSON schema.
 
         Override for custom schemas. Default implementation inspects
         the ``execute`` method signature.
         """
         sig = inspect.signature(self.execute)
-        properties: Dict[str, Any] = {}
-        required: List[str] = []
+        properties: dict[str, Any] = {}
+        required: list[str] = []
 
         for param_name, param in sig.parameters.items():
             if param_name == "self":
                 continue
-            prop: Dict[str, Any] = {"type": "string"}
+            prop: dict[str, Any] = {"type": "string"}
             if param.annotation != inspect.Parameter.empty:
                 type_map = {
                     str: "string",
@@ -58,7 +58,7 @@ class BaseTool:
                 required.append(param_name)
             properties[param_name] = prop
 
-        schema: Dict[str, Any] = {
+        schema: dict[str, Any] = {
             "type": "object",
             "properties": properties,
         }
@@ -66,7 +66,7 @@ class BaseTool:
             schema["required"] = required
         return schema
 
-    def to_openai_tool(self) -> Dict[str, Any]:
+    def to_openai_tool(self) -> dict[str, Any]:
         """Return the tool definition in OpenAI function-calling format."""
         return {
             "type": "function",
@@ -99,8 +99,8 @@ class ToolDecoratorTool(BaseTool):
 
 
 def tool(
-    name: Optional[str] = None,
-    description: Optional[str] = None,
+    name: str | None = None,
+    description: str | None = None,
 ) -> Callable:
     """Decorator to register a function as a tool.
 
@@ -140,7 +140,7 @@ class ToolRegistry:
     """
 
     def __init__(self) -> None:
-        self._tools: Dict[str, BaseTool] = {}
+        self._tools: dict[str, BaseTool] = {}
 
     def register(self, tool_instance: BaseTool) -> None:
         """Register a tool instance."""
@@ -151,8 +151,8 @@ class ToolRegistry:
     def register_function(
         self,
         func: Callable[..., str],
-        name: Optional[str] = None,
-        description: Optional[str] = None,
+        name: str | None = None,
+        description: str | None = None,
     ) -> None:
         """Register a plain function as a tool."""
         tool_name = name or func.__name__
@@ -176,19 +176,19 @@ class ToolRegistry:
             except ImportError:
                 pass
 
-    def get(self, name: str) -> Optional[BaseTool]:
+    def get(self, name: str) -> BaseTool | None:
         """Get a tool by name."""
         return self._tools.get(name)
 
-    def list_tools(self) -> List[str]:
+    def list_tools(self) -> list[str]:
         """Return sorted list of registered tool names."""
         return sorted(self._tools.keys())
 
-    def get_tool_definitions(self) -> List[Dict[str, Any]]:
+    def get_tool_definitions(self) -> list[dict[str, Any]]:
         """Return all tools in OpenAI function-calling format."""
         return [t.to_openai_tool() for t in self._tools.values()]
 
-    def execute(self, name: str, arguments: Dict[str, Any]) -> str:
+    def execute(self, name: str, arguments: dict[str, Any]) -> str:
         """Execute a tool by name.
 
         Args:

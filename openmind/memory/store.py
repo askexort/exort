@@ -8,11 +8,10 @@ maintain context and recall previous interactions.
 from __future__ import annotations
 
 import json
-import os
 import sqlite3
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class MemoryStore:
@@ -33,7 +32,7 @@ class MemoryStore:
         history = store.get_history("conv-1")
     """
 
-    def __init__(self, db_path: Optional[str] = None) -> None:
+    def __init__(self, db_path: str | None = None) -> None:
         if db_path is None:
             config_dir = Path.home() / ".openmind"
             config_dir.mkdir(parents=True, exist_ok=True)
@@ -82,10 +81,10 @@ class MemoryStore:
     def create_conversation(
         self,
         conversation_id: str,
-        title: Optional[str] = None,
-        provider: Optional[str] = None,
-        model: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        title: str | None = None,
+        provider: str | None = None,
+        model: str | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> str:
         """Create a new conversation.
 
@@ -122,9 +121,9 @@ class MemoryStore:
         conversation_id: str,
         role: str,
         content: str,
-        tool_calls: Optional[List[Dict[str, Any]]] = None,
-        tool_call_id: Optional[str] = None,
-        name: Optional[str] = None,
+        tool_calls: list[dict[str, Any]] | None = None,
+        tool_call_id: str | None = None,
+        name: str | None = None,
         token_count: int = 0,
     ) -> int:
         """Add a message to a conversation.
@@ -169,8 +168,8 @@ class MemoryStore:
     def get_history(
         self,
         conversation_id: str,
-        limit: Optional[int] = None,
-    ) -> List[Dict[str, str]]:
+        limit: int | None = None,
+    ) -> list[dict[str, str]]:
         """Get conversation history in OpenAI message format.
 
         Args:
@@ -203,9 +202,9 @@ class MemoryStore:
         if limit:
             rows = list(reversed(rows))
 
-        messages: List[Dict[str, str]] = []
+        messages: list[dict[str, str]] = []
         for row in rows:
-            msg: Dict[str, Any] = {
+            msg: dict[str, Any] = {
                 "role": row["role"],
                 "content": row["content"],
             }
@@ -219,7 +218,7 @@ class MemoryStore:
 
         return messages
 
-    def get_conversations(self, limit: int = 50) -> List[Dict[str, Any]]:
+    def get_conversations(self, limit: int = 50) -> list[dict[str, Any]]:
         """List recent conversations.
 
         Args:
@@ -269,7 +268,7 @@ class MemoryStore:
         self._conn.commit()
         return cursor.rowcount > 0
 
-    def get_token_usage(self, conversation_id: str) -> Dict[str, int]:
+    def get_token_usage(self, conversation_id: str) -> dict[str, int]:
         """Get total token usage for a conversation.
 
         Args:
@@ -294,7 +293,7 @@ class MemoryStore:
         """Close the database connection."""
         self._conn.close()
 
-    def __enter__(self) -> "MemoryStore":
+    def __enter__(self) -> MemoryStore:
         return self
 
     def __exit__(self, *args: Any) -> None:

@@ -7,16 +7,18 @@ Provides tools for searching the web and fetching URLs.
 from __future__ import annotations
 
 import json
-import urllib.request
 import urllib.parse
-from typing import Optional
+import urllib.request
 
 from openmind.tools.base import tool
 
 
 @tool(
     name="web_search",
-    description="Search the web using DuckDuckGo. Returns a list of search results with titles, URLs, and snippets.",
+    description=(
+        "Search the web using DuckDuckGo. Returns a list of "
+        "search results with titles, URLs, and snippets."
+    ),
 )
 def web_search(query: str, max_results: int = 5) -> str:
     """Search the web using DuckDuckGo's HTML API.

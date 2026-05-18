@@ -8,7 +8,7 @@ an OpenAI-compatible endpoint (e.g. Together, Anyscale, vLLM).
 from __future__ import annotations
 
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from openmind.providers.base import BaseProvider, ProviderResponse
 
@@ -26,19 +26,19 @@ class OpenAIProvider(BaseProvider):
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
-        model: Optional[str] = None,
-        base_url: Optional[str] = None,
+        api_key: str | None = None,
+        model: str | None = None,
+        base_url: str | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(api_key=api_key, model=model, base_url=base_url, **kwargs)
         try:
             from openai import OpenAI
-        except ImportError:
+        except ImportError as err:
             raise ImportError(
                 "The 'openai' package is required. Install it with: "
                 "pip install openai"
-            )
+            ) from err
         self.client = OpenAI(
             api_key=self.api_key or os.environ.get("OPENAI_API_KEY"),
             base_url=self.base_url,
@@ -50,14 +50,14 @@ class OpenAIProvider(BaseProvider):
 
     def generate(
         self,
-        messages: List[Dict[str, str]],
-        tools: Optional[List[Dict[str, Any]]] = None,
+        messages: list[dict[str, str]],
+        tools: list[dict[str, Any]] | None = None,
         temperature: float = 0.7,
         max_tokens: int = 4096,
         **kwargs: Any,
     ) -> ProviderResponse:
         """Send a chat completion request to the OpenAI API."""
-        params: Dict[str, Any] = {
+        params: dict[str, Any] = {
             "model": self.model,
             "messages": messages,
             "temperature": temperature,
@@ -70,7 +70,7 @@ class OpenAIProvider(BaseProvider):
         response = self.client.chat.completions.create(**params)
         choice = response.choices[0]
 
-        tool_calls: List[Dict[str, Any]] = []
+        tool_calls: list[dict[str, Any]] = []
         if choice.message.tool_calls:
             for tc in choice.message.tool_calls:
                 tool_calls.append({
@@ -101,14 +101,14 @@ class OpenAIProvider(BaseProvider):
 
     def generate_stream(
         self,
-        messages: List[Dict[str, str]],
-        tools: Optional[List[Dict[str, Any]]] = None,
+        messages: list[dict[str, str]],
+        tools: list[dict[str, Any]] | None = None,
         temperature: float = 0.7,
         max_tokens: int = 4096,
         **kwargs: Any,
     ):
         """Stream chat completion tokens from the OpenAI API."""
-        params: Dict[str, Any] = {
+        params: dict[str, Any] = {
             "model": self.model,
             "messages": messages,
             "temperature": temperature,
@@ -122,7 +122,7 @@ class OpenAIProvider(BaseProvider):
         stream = self.client.chat.completions.create(**params)
 
         collected_content = ""
-        collected_tool_calls: Dict[int, Dict[str, Any]] = {}
+        collected_tool_calls: dict[int, dict[str, Any]] = {}
 
         for chunk in stream:
             if not chunk.choices:

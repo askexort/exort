@@ -8,8 +8,6 @@ from __future__ import annotations
 
 import json
 import subprocess
-import shlex
-from typing import Optional
 
 from openmind.tools.base import tool
 
@@ -23,10 +21,7 @@ BLOCKED_COMMANDS = frozenset({
 def _is_safe_command(command: str) -> bool:
     """Basic safety check for shell commands."""
     cmd_lower = command.lower().strip()
-    for blocked in BLOCKED_COMMANDS:
-        if blocked in cmd_lower:
-            return False
-    return True
+    return all(blocked not in cmd_lower for blocked in BLOCKED_COMMANDS)
 
 
 @tool(
@@ -36,7 +31,7 @@ def _is_safe_command(command: str) -> bool:
 def run_shell(
     command: str,
     timeout: int = 30,
-    working_directory: Optional[str] = None,
+    working_directory: str | None = None,
 ) -> str:
     """Execute a shell command.
 

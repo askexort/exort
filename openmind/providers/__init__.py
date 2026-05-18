@@ -9,9 +9,9 @@ Supported providers:
 """
 
 from openmind.providers.base import BaseProvider, ProviderResponse
-from openmind.providers.openai import OpenAIProvider
-from openmind.providers.ollama import OllamaProvider
 from openmind.providers.groq import GroqProvider
+from openmind.providers.ollama import OllamaProvider
+from openmind.providers.openai import OpenAIProvider
 
 PROVIDERS = {
     "openai": OpenAIProvider,
