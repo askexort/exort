@@ -1,1 +1,1 @@
-"""Exort Telegram bot — AI agent accessible via Telegram."""
+"""Exort Telegram bot — talk to the engine from Telegram."""

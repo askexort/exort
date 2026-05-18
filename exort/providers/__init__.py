@@ -1,48 +1,37 @@
 """
-Provider registry — maps provider names to implementations.
+Provider registry — maps names to LLM backends.
 
-Supported providers:
-  - groq: Groq Cloud (free tier available, very fast)
-  - openai: OpenAI / any OpenAI-compatible API
-  - ollama: Local models via Ollama
-  - anthropic: Anthropic Claude models
+Supported: groq (free), openai, ollama (local), anthropic
 """
 
 from typing import Optional
-
 from exort.providers.base import BaseProvider, ProviderResponse
 
+_registry = {}
 
-_providers = {}
 
-
-def register_provider(name: str, provider_class: type):
-    """Register a provider class."""
-    _providers[name] = provider_class
+def register(name: str, cls: type):
+    _registry[name] = cls
 
 
 def get_provider(name: str, **kwargs) -> BaseProvider:
-    """Get a provider instance by name."""
-    if name not in _providers:
-        raise ValueError(f"Unknown provider: {name}. Available: {list(_providers.keys())}")
-    return _providers[name](**kwargs)
+    if name not in _registry:
+        raise ValueError(f"Unknown provider: {name}. Available: {list(_registry.keys())}")
+    return _registry[name](**kwargs)
 
 
 def list_providers() -> list[str]:
-    """List available provider names."""
-    return list(_providers.keys())
+    return list(_registry.keys())
 
 
-# Auto-register providers
-def _discover():
-    """Import provider modules to trigger registration."""
+# Auto-register
+def _boot():
     from exort.providers import groq_provider, openai_provider, ollama_provider
     try:
         from exort.providers import anthropic_provider
     except ImportError:
-        pass  # anthropic SDK not installed
+        pass
 
+_boot()
 
-_discover()
-
-__all__ = ["BaseProvider", "ProviderResponse", "get_provider", "register_provider", "list_providers"]
+__all__ = ["BaseProvider", "ProviderResponse", "get_provider", "register", "list_providers"]

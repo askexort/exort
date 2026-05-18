@@ -1,5 +1,5 @@
-"""Exort tool system — built-in tools for the AI agent."""
+"""Exort gear (tool) system — built-in capabilities for the agent."""
 
-from exort.tools.registry import ToolRegistry
+from exort.tools.gear import GearBox
 
-__all__ = ["ToolRegistry"]
+__all__ = ["GearBox"]

@@ -1,100 +1,50 @@
 """
-OpenAI / OpenAI-compatible provider.
-
-Works with OpenAI, together.ai, fireworks.ai, groq, or any
-OpenAI-compatible API endpoint.
+OpenAI / compatible provider.
 """
 
 import json
-from typing import Generator, Optional
-
+from typing import Optional
 from exort.providers.base import BaseProvider, ProviderResponse
-from exort.providers import register_provider
+from exort.providers import register
 
 
 class OpenAIProvider(BaseProvider):
     name = "openai"
-    requires_api_key = True
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, **kw):
+        super().__init__(**kw)
         try:
             from openai import OpenAI
-            self._client = OpenAI(
-                api_key=self.api_key or "dummy",
-                base_url=self.base_url,
-            )
+            self._c = OpenAI(api_key=self.api_key or "x", base_url=self.base_url)
         except ImportError:
-            self._client = None
+            self._c = None
 
-    def chat(
-        self,
-        messages: list[dict],
-        model: Optional[str] = None,
-        tools: Optional[list[dict]] = None,
-        temperature: float = 0.7,
-        max_tokens: int = 4096,
-        stream: bool = False,
-    ):
-        if not self._client:
-            raise RuntimeError("openai package not installed. Run: pip install openai")
-
+    def chat(self, messages, model=None, tools=None, temperature=0.7,
+             max_tokens=4096, stream=False):
+        if not self._c:
+            raise RuntimeError("pip install openai")
         model = model or self.default_model or "gpt-4o-mini"
-        kwargs = {
-            "model": model,
-            "messages": messages,
-            "temperature": temperature,
-            "max_tokens": max_tokens,
-        }
+        kw = dict(model=model, messages=messages, temperature=temperature, max_tokens=max_tokens)
         if tools:
-            kwargs["tools"] = tools
-            kwargs["tool_choice"] = "auto"
-
+            kw["tools"], kw["tool_choice"] = tools, "auto"
         if stream:
-            return self._stream(**kwargs)
+            return self._do_stream(**kw)
+        r = self._c.chat.completions.create(**kw)
+        ch = r.choices[0]
+        tc = [{"id": t.id, "name": t.function.name, "arguments": json.loads(t.function.arguments)}
+              for t in (ch.message.tool_calls or [])]
+        u = {"prompt_tokens": r.usage.prompt_tokens, "completion_tokens": r.usage.completion_tokens,
+             "total_tokens": r.usage.total_tokens} if r.usage else {}
+        return ProviderResponse(content=ch.message.content or "", tool_calls=tc,
+                                usage=u, model=r.model, finish_reason=ch.finish_reason or "")
 
-        response = self._client.chat.completions.create(**kwargs)
-        choice = response.choices[0]
-
-        tool_calls = []
-        if choice.message.tool_calls:
-            for tc in choice.message.tool_calls:
-                tool_calls.append({
-                    "id": tc.id,
-                    "name": tc.function.name,
-                    "arguments": json.loads(tc.function.arguments),
-                })
-
-        usage = {}
-        if response.usage:
-            usage = {
-                "prompt_tokens": response.usage.prompt_tokens,
-                "completion_tokens": response.usage.completion_tokens,
-                "total_tokens": response.usage.total_tokens,
-            }
-
-        return ProviderResponse(
-            content=choice.message.content or "",
-            tool_calls=tool_calls,
-            usage=usage,
-            model=response.model,
-            finish_reason=choice.finish_reason or "",
-        )
-
-    def _stream(self, **kwargs):
-        """Streaming generator."""
-        stream = self._client.chat.completions.create(**kwargs, stream=True)
-        for chunk in stream:
+    def _do_stream(self, **kw):
+        for chunk in self._c.chat.completions.create(**kw, stream=True):
             if chunk.choices and chunk.choices[0].delta.content:
                 yield chunk.choices[0].delta.content
 
-    def validate(self) -> bool:
-        if not self._client:
-            return False
-        if not self.api_key:
-            return False
-        return True
+    def ok(self):
+        return bool(self._c and self.api_key)
 
 
-# Register with provider name variants
-register_provider("openai", OpenAIProvider)
+register("openai", OpenAIProvider)

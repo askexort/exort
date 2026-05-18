@@ -4,15 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "exort-agent"
-version = "1.0.0"
-description = "Exort — AI Agent for Everyone. An open-source AI agent with tool use, memory, skills, and multi-provider support."
+version = "2.0.0"
+description = "Exort — The Open Agent Engine. Free AI for Everyone. An autonomous AI agent with tool use, memory, and multi-provider support."
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.10"
 authors = [
-    {name = "Exort Team"},
+    {name = "Exort Contributors"},
 ]
-keywords = ["ai", "agent", "llm", "chatbot", "open-source", "tools", "groq", "ollama"]
+keywords = ["ai", "agent", "llm", "chatbot", "open-source", "tools", "groq", "ollama", "free"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -49,7 +49,6 @@ exort = "exort.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/askexort/exort"
-Documentation = "https://github.com/askexort/exort#readme"
 Repository = "https://github.com/askexort/exort"
 Issues = "https://github.com/askexort/exort/issues"
 

@@ -1,5 +1,5 @@
-"""Exort memory system — persistent conversation storage."""
+"""Exort memory — persistent conversation storage."""
 
-from exort.memory.store import MemoryStore
+from exort.memory.store import ConversationStore
 
-__all__ = ["MemoryStore"]
+__all__ = ["ConversationStore"]

@@ -1,303 +1,292 @@
 """
-Exort CLI — interactive command-line interface for the AI agent.
+Exort Shell — the interactive command-line interface.
 
-Commands:
-    exort chat              # Start interactive REPL
-    exort chat "question"   # Ask a single question
-    exort config show       # Show configuration
-    exort config set KEY VALUE  # Set config value
-    exort serve             # Start Telegram bot
-    exort history           # Show conversation history
-    exort providers         # List available providers
-    exort tools             # List available tools
+Launch with `exort` or `exort shell`.  This is where users
+spend most of their time.  It should feel like Exort's own
+terminal — not a generic REPL.
+
+Commands use a colon-prefix convention (Exort-native):
+    :help           Show commands
+    :new            New session
+    :status         Engine stats
+    :gear           List gear
+    :providers      List providers
+    :switch <prov>  Switch provider
+    :model <name>   Switch model
+    :history        Show chat history
+    :sessions       List saved sessions
+    :load <id>      Resume a session
+    :clear          Clear screen
+    :quit           Exit
+
+Everything else is sent to the engine as a message.
 """
 
-import json
 import os
 import sys
 import time
 
 import click
 
-from exort.config import Config, ensure_exort_home
-from exort.utils import (
-    Colors, print_banner, colorize, format_tokens, format_duration,
-    get_terminal_width, truncate,
-)
+from exort.config import Config, ensure_exort_dir
+from exort.utils import C, banner, fmt_tokens, fmt_time
 
 
-def _create_agent(config: Config, provider: str = None, model: str = None, verbose: bool = False):
-    """Create an Agent instance from config."""
-    from exort.agent import Agent
-    return Agent(
-        provider=provider,
-        model=model,
-        config=config,
-        verbose=verbose,
-    )
+def _make_engine(config, provider=None, model=None, verbose=False):
+    from exort.engine import Engine
+    return Engine(provider=provider, model=model, config=config, verbose=verbose)
 
 
-def _print_help():
-    """Print REPL help."""
-    help_text = f"""
-{Colors.BOLD}Exort CLI Commands:{Colors.RESET}
-  /help           Show this help
-  /new            Start a new conversation
-  /history        Show recent conversations
-  /sessions       List saved sessions
-  /load <id>      Load a conversation by ID
-  /status         Show agent status (provider, model, usage)
-  /model <name>   Switch model
-  /provider <name> Switch provider
-  /tools          List available tools
-  /providers      List available providers
-  /clear          Clear screen
-  /save           Save current conversation
-  /quit, /exit    Exit
+def _show_help():
+    print(f"""
+{C.B}{C.ACC}  Exort Commands{C.RST}
+  ─────────────────────────────────────
+  {C.CYN}:help{C.RST}            Show this list
+  {C.CYN}:new{C.RST}             Start a fresh session
+  {C.CYN}:status{C.RST}          Provider, model, token stats
+  {C.CYN}:gear{C.RST}            List available gear (tools)
+  {C.CYN}:providers{C.RST}       List LLM backends
+  {C.CYN}:switch <prov>{C.RST}   Switch LLM provider
+  {C.CYN}:model <name>{C.RST}    Switch model
+  {C.CYN}:history{C.RST}         Show current conversation
+  {C.CYN}:sessions{C.RST}        List saved sessions
+  {C.CYN}:load <id>{C.RST}       Resume a session
+  {C.CYN}:clear{C.RST}           Clear screen
+  {C.CYN}:quit{C.RST}            Exit
 
-{Colors.DIM}Type your message and press Enter to chat.
-The agent can use tools to search the web, run code, manage files, and more.{Colors.RESET}
-"""
-    print(help_text)
+  {C.DIM}Type anything else to talk to the engine.{C.RST}
+""")
 
 
-class ExortREPL:
-    """Interactive Read-Eval-Print Loop for Exort Agent."""
+class ExortShell:
+    """The interactive Exort terminal."""
 
-    def __init__(self, agent, config: Config):
-        self.agent = agent
-        self.config = config
+    def __init__(self, engine, config):
+        self.engine = engine
+        self.cfg = config
         self.running = True
 
     def run(self):
-        """Main REPL loop."""
-        print_banner()
-        status = self.agent.get_status()
-        provider = status["provider"]
-        model = status["model"]
-        tools_count = status["tools_available"]
-
-        print(f"  {Colors.DIM}Provider: {provider} | Model: {model} | Tools: {tools_count}{Colors.RESET}")
-        print(f"  {Colors.DIM}Type /help for commands, /quit to exit{Colors.RESET}")
+        banner()
+        st = self.engine.status()
+        print(f"  {C.DIM}provider: {st['provider']}  model: {st['model']}  gear: {st['gear_count']}{C.RST}")
+        print(f"  {C.DIM}type :help for commands, :quit to exit{C.RST}")
         print()
 
         while self.running:
             try:
-                user_input = self._get_input()
-                if not user_input:
+                line = self._prompt()
+                if not line:
                     continue
-                self._handle_input(user_input)
+                if line.startswith(":"):
+                    self._command(line)
+                else:
+                    self._chat(line)
             except KeyboardInterrupt:
-                print("\n")
+                print()
                 continue
             except EOFError:
-                print("\nGoodbye!")
+                print(f"\n{C.DIM}goodbye.{C.RST}")
                 break
 
-    def _get_input(self) -> str:
-        """Get user input with a prompt."""
+    def _prompt(self) -> str:
         try:
-            return input(f"{Colors.CYAN}You>{Colors.RESET} ").strip()
+            return input(f"{C.ACC}exort ▸{C.RST} ").strip()
         except (EOFError, KeyboardInterrupt):
             raise
 
-    def _handle_input(self, user_input: str):
-        """Handle user input — commands or chat."""
-        if user_input.startswith("/"):
-            self._handle_command(user_input)
-        else:
-            self._handle_chat(user_input)
+    def _command(self, line: str):
+        parts = line.split(maxsplit=1)
+        cmd = parts[0].lower()
+        arg = parts[1].strip() if len(parts) > 1 else ""
 
-    def _handle_command(self, cmd: str):
-        """Handle slash commands."""
-        parts = cmd.split(maxsplit=1)
-        command = parts[0].lower()
-        args = parts[1] if len(parts) > 1 else ""
-
-        if command in ("/quit", "/exit", "/q"):
-            print("Goodbye!")
+        if cmd in (":quit", ":q", ":exit"):
+            print(f"{C.DIM}goodbye.{C.RST}")
             self.running = False
 
-        elif command == "/help":
-            _print_help()
+        elif cmd == ":help":
+            _show_help()
 
-        elif command == "/new":
-            self.agent.start_session("New Chat")
-            print(f"{Colors.GREEN}New conversation started.{Colors.RESET}")
+        elif cmd == ":new":
+            self.engine.open("new session")
+            print(f"{C.GRN}✓ new session started{C.RST}")
 
-        elif command == "/status":
-            status = self.agent.get_status()
-            print(f"\n{Colors.BOLD}Agent Status:{Colors.RESET}")
-            print(f"  Provider:    {status['provider']}")
-            print(f"  Model:       {status['model']}")
-            print(f"  Conversation: {status['conversation_id'] or 'none'}")
-            print(f"  Turns:       {status['turns']}")
-            print(f"  Tool calls:  {status['tool_calls']}")
-            usage = status['usage']
-            print(f"  Tokens:      {usage['prompt_tokens']} in / {usage['completion_tokens']} out / {usage['total_tokens']} total")
-            print(f"  Tools:       {status['tools_available']} available")
+        elif cmd == ":status":
+            s = self.engine.status()
+            t = s["tokens"]
+            print(f"""
+{C.B}  Engine Status{C.RST}
+  ──────────────────────────────
+  provider    {C.ACC}{s['provider']}{C.RST}
+  model       {s['model']}
+  session     {s['session'] or '(none)'}
+  turns       {s['turns']}
+  gear calls  {s['gear_calls']}
+  tokens      {t['prompt_tok']} in / {t['completion_tok']} out / {t['total_tok']} total
+  gear        {s['gear_count']} available
+""")
+
+        elif cmd == ":gear":
+            names = self.engine.gear.names()
+            print(f"\n{C.B}  Gear ({len(names)}){C.RST}")
+            for n in names:
+                g = self.engine.gear._gear[n]
+                warn = f" {C.RED}⚠ unsafe{C.RST}" if g.unsafe else ""
+                desc = g.spec.info[:70]
+                print(f"  {C.CYN}{n}{C.RST}{warn}")
+                print(f"    {C.DIM}{desc}{C.RST}")
             print()
 
-        elif command == "/tools":
-            tools = self.agent.tools.get_tool_names()
-            print(f"\n{Colors.BOLD}Available Tools ({len(tools)}):{Colors.RESET}")
-            for t in tools:
-                tool_obj = self.agent.tools._tools.get(t)
-                desc = tool_obj.schema.description[:80] if tool_obj else ""
-                danger = " ⚠️" if (tool_obj and tool_obj.dangerous) else ""
-                print(f"  {Colors.CYAN}{t}{Colors.RESET}{danger} — {Colors.DIM}{desc}{Colors.RESET}")
-            print()
-
-        elif command == "/providers":
+        elif cmd == ":providers":
             from exort.providers import list_providers
-            providers = list_providers()
-            print(f"\n{Colors.BOLD}Available Providers:{Colors.RESET}")
-            for p in providers:
-                current = " ← current" if p == self.agent._provider_name else ""
-                print(f"  {Colors.CYAN}{p}{Colors.RESET}{current}")
+            ps = list_providers()
+            print(f"\n{C.B}  Providers{C.RST}")
+            for p in ps:
+                cur = f" {C.ACC}← current{C.RST}" if p == self.engine._prov_name else ""
+                print(f"  {C.CYN}{p}{C.RST}{cur}")
             print()
 
-        elif command == "/model":
-            if not args:
-                print(f"Current model: {self.agent._model or 'default'}")
-                print(f"Usage: /model <model_name>")
-            else:
-                self.agent._model = args.strip()
-                print(f"Model changed to: {args.strip()}")
+        elif cmd == ":switch":
+            if not arg:
+                print(f"  usage: :switch <provider>")
+                return
+            try:
+                self.engine = _make_engine(self.cfg, provider=arg)
+                print(f"{C.GRN}✓ switched to {arg}{C.RST}")
+            except Exception as e:
+                print(f"{C.RED}✗ {e}{C.RST}")
 
-        elif command == "/provider":
-            if not args:
-                print(f"Current provider: {self.agent._provider_name}")
-                print(f"Usage: /provider <provider_name>")
+        elif cmd == ":model":
+            if not arg:
+                print(f"  current: {self.engine._model or 'default'}")
+                print(f"  usage: :model <model_name>")
             else:
-                try:
-                    self.agent = _create_agent(self.config, provider=args.strip())
-                    print(f"Provider changed to: {args.strip()}")
-                except Exception as e:
-                    print(f"{Colors.RED}Error: {e}{Colors.RESET}")
+                self.engine._model = arg
+                print(f"{C.GRN}✓ model → {arg}{C.RST}")
 
-        elif command == "/history":
-            if self.agent._conversation_id:
-                messages = self.agent._messages
-                print(f"\n{Colors.BOLD}Conversation ({len(messages)} messages):{Colors.RESET}")
-                for msg in messages[-20:]:
-                    role = msg["role"]
-                    content = msg["content"][:100] + "..." if len(msg.get("content", "")) > 100 else msg.get("content", "")
-                    if role == "user":
-                        print(f"  {Colors.CYAN}You:{Colors.RESET} {content}")
-                    elif role == "assistant":
-                        print(f"  {Colors.GREEN}Exort:{Colors.RESET} {content}")
-                    elif role == "tool":
-                        print(f"  {Colors.YELLOW}[tool result]{Colors.RESET} {content[:60]}...")
-                print()
-            else:
-                print("No active conversation. Start chatting to begin.")
+        elif cmd == ":history":
+            for m in self.engine._history[-20:]:
+                role = m["role"]
+                txt = m.get("content", "")[:100]
+                if role == "user":
+                    print(f"  {C.CYN}you:{C.RST} {txt}")
+                elif role == "assistant":
+                    print(f"  {C.GRN}exort:{C.RST} {txt}")
+            print()
 
-        elif command == "/sessions":
-            sessions = self.agent.memory.get_recent_conversations(10)
+        elif cmd == ":sessions":
+            sessions = self.engine.mem.recent(10)
             if sessions:
-                print(f"\n{Colors.BOLD}Recent Sessions:{Colors.RESET}")
+                print(f"\n{C.B}  Sessions{C.RST}")
                 for s in sessions:
-                    print(f"  {Colors.CYAN}{s['id']}{Colors.RESET} — {s['title']} ({s['updated_at'][:10]})")
+                    print(f"  {C.CYN}{s['id']}{C.RST}  {s['title']}  ({s['updated'][:10]})")
                 print()
             else:
-                print("No saved sessions.")
+                print(f"  {C.DIM}no saved sessions{C.RST}")
 
-        elif command == "/load":
-            if not args:
-                print("Usage: /load <conversation_id>")
+        elif cmd == ":load":
+            if not arg:
+                print("  usage: :load <session_id>")
             else:
                 try:
-                    self.agent.load_session(args.strip())
-                    title = self.agent.memory.get_conversation_title(args.strip())
-                    print(f"Loaded: {title}")
+                    self.engine.resume(arg)
+                    title = self.engine.mem.title(arg)
+                    print(f"{C.GRN}✓ loaded: {title}{C.RST}")
                 except Exception as e:
-                    print(f"{Colors.RED}Error loading session: {e}{Colors.RESET}")
+                    print(f"{C.RED}✗ {e}{C.RST}")
 
-        elif command == "/clear":
+        elif cmd == ":clear":
             os.system("cls" if os.name == "nt" else "clear")
 
-        elif command == "/save":
-            if self.agent._conversation_id:
-                print(f"Conversation saved: {self.agent._conversation_id}")
-            else:
-                print("No active conversation to save.")
-
         else:
-            print(f"{Colors.YELLOW}Unknown command: {command}. Type /help for commands.{Colors.RESET}")
+            print(f"  {C.DIM}unknown command: {cmd} — type :help{C.RST}")
 
-    def _handle_chat(self, user_input: str):
-        """Handle chat message — send to agent and display response."""
-        start_time = time.time()
-        print(f"\n{Colors.GREEN}Exort>{Colors.RESET} ", end="", flush=True)
+    def _chat(self, text: str):
+        """Send message to engine and display response."""
+        t0 = time.time()
+        print(f"\n{C.GRN}exort ▸{C.RST} ", end="", flush=True)
 
         try:
-            # Use streaming
-            full_response = ""
-            for chunk in self.agent.chat(user_input, stream=True):
+            full = ""
+            for chunk in self.engine.talk(text, stream=True):
                 print(chunk, end="", flush=True)
-                full_response += chunk
+                full += chunk
             print()
 
-            # Show stats
-            elapsed = time.time() - start_time
-            usage = self.agent.usage
-            if self.config.get("display.show_token_usage"):
-                stats = f"{Colors.DIM}[{format_duration(elapsed)}"
-                if usage.get("total_tokens"):
-                    stats += f" | {format_tokens(usage)}"
-                stats += f" | {self.agent.tool_call_count} tools]{Colors.RESET}"
-                print(stats)
+            elapsed = time.time() - t0
+            st = self.engine.stats
+            if self.cfg.get("display.show_tokens"):
+                line = f"{C.DIM}  [{fmt_time(elapsed)}"
+                if st.get("total_tok"):
+                    line += f" | {fmt_tokens(st)}"
+                line += f" | {st.get('gear_calls', 0)} gear]{C.RST}"
+                print(line)
 
         except KeyboardInterrupt:
-            print(f"\n{Colors.YELLOW}[Interrupted]{Colors.RESET}")
+            print(f"\n{C.YEL}  interrupted{C.RST}")
         except Exception as e:
-            print(f"\n{Colors.RED}Error: {e}{Colors.RESET}")
+            print(f"\n{C.RED}  error: {e}{C.RST}")
 
         print()
 
 
-@click.group()
-@click.version_option(version="1.0.0", prog_name="exort")
-def cli():
-    """Exort — AI Agent for Everyone.
+# ══════════════════════════════════════════════════════════
+# CLI entry points (click)
+# ══════════════════════════════════════════════════════════
 
-    An open-source AI agent with tool use, memory, and multi-provider support.
-    """
-    ensure_exort_home()
+@click.group()
+@click.version_option(version="2.0.0", prog_name="exort")
+def cli():
+    """Exort — The Open Agent Engine. Free AI for Everyone."""
+    ensure_exort_dir()
 
 
 @cli.command()
 @click.argument("question", required=False)
 @click.option("--provider", "-p", help="LLM provider (groq, openai, ollama, anthropic)")
-@click.option("--model", "-m", help="Model name to use")
-@click.option("--verbose", "-v", is_flag=True, help="Verbose output (show tool calls)")
-@click.option("--no-stream", is_flag=True, help="Disable streaming")
-def chat(question, provider, model, verbose, no_stream):
-    """Chat with the AI agent. Start interactive REPL or ask a single question.
+@click.option("--model", "-m", help="Model name")
+@click.option("--verbose", "-v", is_flag=True, help="Show gear calls")
+def shell(question, provider, model, verbose):
+    """Launch the interactive Exort shell.
 
     \b
     Examples:
-        exort chat                        # Interactive REPL
-        exort chat "What is Python?"      # Single question
-        exort chat -p ollama -m llama3.1  # Use local Ollama
+        exort shell                  # interactive mode
+        exort shell "what is Rust?"  # one-shot
+        exort shell -p ollama        # use local Ollama
     """
-    config = Config()
-    agent = _create_agent(config, provider=provider, model=model, verbose=verbose)
+    cfg = Config()
+    engine = _make_engine(cfg, provider=provider, model=model, verbose=verbose)
 
     if question:
-        # Single question mode
-        if no_stream:
-            response = agent.chat(question, stream=False)
-            print(response)
-        else:
-            for chunk in agent.chat(question, stream=True):
-                print(chunk, end="", flush=True)
-            print()
+        for chunk in engine.talk(question, stream=True):
+            print(chunk, end="", flush=True)
+        print()
     else:
-        # Interactive REPL
-        repl = ExortREPL(agent, config)
-        repl.run()
+        ExortShell(engine, cfg).run()
+
+
+@cli.command()
+@click.argument("question", required=False)
+@click.option("--provider", "-p")
+@click.option("--model", "-m")
+@click.option("--verbose", "-v", is_flag=True)
+def ask(question, provider, model, verbose):
+    """Ask a single question (no interactive mode).
+
+    \b
+    Examples:
+        exort ask "what is the capital of France?"
+        exort ask -p ollama "explain recursion"
+    """
+    cfg = Config()
+    engine = _make_engine(cfg, provider=provider, model=model, verbose=verbose)
+    if not question:
+        print("Usage: exort ask <question>")
+        return
+    for chunk in engine.talk(question, stream=True):
+        print(chunk, end="", flush=True)
+    print()
 
 
 @cli.command()
@@ -305,150 +294,122 @@ def chat(question, provider, model, verbose, no_stream):
 @click.argument("key", required=False)
 @click.argument("value", required=False)
 def config(action, key, value):
-    """Manage Exort configuration.
+    """View or change Exort configuration.
 
     \b
     Examples:
-        exort config show                           # Show all config
-        exort config set provider openai            # Change provider
-        exort config set model gpt-4o               # Change model
-        exort config set agent.temperature 0.5      # Change temperature
+        exort config show
+        exort config set engine.provider openai
+        exort config get engine.temperature
     """
     cfg = Config()
-
     if action == "show" or action is None:
-        print(f"\n{Colors.BOLD}Exort Configuration:{Colors.RESET}")
-        print(f"  Config file: {cfg._path}")
-        print(f"  Home dir:    {cfg._home}")
-        print()
-        print(yaml.dump(cfg.data, default_flow_style=False))
-
-    elif action == "set":
-        if not key or not value:
-            print("Usage: exort config set <key> <value>")
-            return
-        # Try to parse as JSON for nested values
         try:
-            parsed = json.loads(value)
-        except (json.JSONDecodeError, ValueError):
-            parsed = value
-        cfg.set(key, parsed)
+            import yaml
+            print(f"\n{C.B}Config: {cfg._path}{C.RST}\n")
+            print(yaml.dump(cfg.data, default_flow_style=False))
+        except ImportError:
+            for k, v in cfg.data.items():
+                print(f"  {k}: {v}")
+    elif action == "set" and key and value:
+        try:
+            import json
+            value = json.loads(value)
+        except Exception:
+            pass
+        cfg.set(key, value)
         cfg.save()
-        print(f"{Colors.GREEN}Set {key} = {value}{Colors.RESET}")
-
-    elif action == "get":
-        if not key:
-            print("Usage: exort config get <key>")
-            return
-        val = cfg.get(key)
-        print(f"{key} = {val}")
-
+        print(f"{C.GRN}✓ {key} = {value}{C.RST}")
+    elif action == "get" and key:
+        print(f"{key} = {cfg.get(key)}")
     else:
-        print(f"Unknown config action: {action}. Use: show, set, get")
+        print("Usage: exort config [show|set|get] [key] [value]")
 
 
 @cli.command()
 def providers():
     """List available LLM providers."""
     from exort.providers import list_providers
-    available = list_providers()
-    print(f"\n{Colors.BOLD}Available Providers:{Colors.RESET}")
-    for p in available:
+    for p in list_providers():
         print(f"  • {p}")
-    print(f"\n{Colors.DIM}Use: exort chat -p <provider> to switch{Colors.RESET}")
 
 
 @cli.command()
-def tools():
-    """List available tools."""
-    from exort.tools.registry import ToolRegistry
-    registry = ToolRegistry()
-    registry.discover()
-    names = registry.get_tool_names()
-    print(f"\n{Colors.BOLD}Available Tools ({len(names)}):{Colors.RESET}")
-    for name in names:
-        tool = registry._tools[name]
-        danger = " ⚠️ dangerous" if tool.dangerous else ""
-        print(f"  • {Colors.CYAN}{name}{Colors.RESET}{danger}")
-        print(f"    {tool.schema.description[:100]}")
+def gear():
+    """List available gear (tools)."""
+    from exort.tools.gear import GearBox
+    gb = GearBox()
+    gb.discover()
+    print(f"\n{C.B}Gear ({len(gb)}){C.RST}")
+    for n in gb.names():
+        g = gb._gear[n]
+        warn = " ⚠" if g.unsafe else ""
+        print(f"  {C.CYN}{n}{C.RST}{warn}")
+        print(f"    {C.DIM}{g.spec.info[:90]}{C.RST}")
     print()
 
 
 @cli.command()
-def serve():
-    """Start the Telegram bot server."""
-    from exort.config import Config
+def bot():
+    """Start the Telegram bot."""
     cfg = Config()
-    token = os.environ.get(cfg.get("telegram.token_env", "TELEGRAM_BOT_TOKEN"))
+    token = os.environ.get(cfg.get("telegram.token_var", "TELEGRAM_BOT_TOKEN"))
     if not token:
-        print(f"{Colors.RED}Error: TELEGRAM_BOT_TOKEN not set.{Colors.RESET}")
-        print("Set it in ~/.exort/.env or as an environment variable.")
-        print("Get a token from @BotFather on Telegram.")
+        print(f"{C.RED}TELEGRAM_BOT_TOKEN not set.{C.RST}")
+        print(f"Add it to ~/.exort/.env")
         return
-
     from exort.bot.telegram_bot import run_bot
     run_bot(token, cfg)
 
 
 @cli.command()
 def setup():
-    """Interactive setup wizard for first-time configuration."""
-    print_banner()
-    print(f"{Colors.BOLD}Exort Setup Wizard{Colors.RESET}\n")
+    """First-time setup wizard."""
+    banner()
+    print(f"{C.B}  Setup Wizard{C.RST}\n")
 
     cfg = Config()
-    home = ensure_exort_home()
+    d = ensure_exort_dir()
+    print(f"  data dir: {d}\n")
 
-    print(f"Exort home: {home}")
-    print()
-
-    # Provider selection
-    print("Which LLM provider do you want to use?")
-    print("  1. Groq (FREE, fast, recommended for getting started)")
-    print("  2. OpenAI (GPT-4, requires API key)")
-    print("  3. Ollama (100% local, no API key needed)")
-    print("  4. Anthropic (Claude, requires API key)")
+    print("  Which provider?")
+    print(f"    {C.CYN}1{C.RST}. Groq    (free, fast — recommended)")
+    print(f"    {C.CYN}2{C.RST}. OpenAI  (GPT-4, paid)")
+    print(f"    {C.CYN}3{C.RST}. Ollama  (local, free)")
+    print(f"    {C.CYN}4{C.RST}. Anthropic (Claude, paid)")
 
     try:
-        choice = input("\nEnter choice [1]: ").strip() or "1"
+        choice = input(f"\n  choice [1]: ").strip() or "1"
     except (EOFError, KeyboardInterrupt):
         return
 
-    provider_map = {"1": "groq", "2": "openai", "3": "ollama", "4": "anthropic"}
-    provider = provider_map.get(choice, "groq")
-    cfg.set("provider", provider)
+    prov = {"1": "groq", "2": "openai", "3": "ollama", "4": "anthropic"}.get(choice, "groq")
+    cfg.set("engine.provider", prov)
 
-    # API key setup
-    api_key_env = cfg.get(f"providers.{provider}.api_key_env")
-    if api_key_env:
-        print(f"\nTo use {provider}, set {api_key_env} in {home / '.env'}")
-        print(f"Example: echo '{api_key_env}=your-key-here' > {home / '.env'}")
+    key_var = cfg.get(f"providers.{prov}.key_var")
+    if key_var:
+        print(f"\n  To use {prov}, you need {key_var}.")
+        print(f"  Get a key and paste it below (or press Enter to skip).")
+        if prov == "groq":
+            print(f"  {C.DIM}→ https://console.groq.com (free, no credit card){C.RST}")
 
         try:
-            key = input(f"Enter your {api_key_env} (or press Enter to skip): ").strip()
+            key = input(f"  {key_var}: ").strip()
         except (EOFError, KeyboardInterrupt):
             return
 
         if key:
-            env_path = home / ".env"
-            with open(env_path, "a") as f:
-                f.write(f"\n{api_key_env}={key}\n")
-            os.environ[api_key_env] = key
-            print(f"{Colors.GREEN}API key saved!{Colors.RESET}")
+            env = d / ".env"
+            with open(env, "a") as f:
+                f.write(f"\n{key_var}={key}\n")
+            os.environ[key_var] = key
+            print(f"  {C.GRN}✓ saved to {env}{C.RST}")
 
     cfg.save()
-    print(f"\n{Colors.GREEN}Setup complete! Run 'exort chat' to start.{Colors.RESET}")
-
-
-# Need to import yaml for config command
-try:
-    import yaml
-except ImportError:
-    yaml = None
+    print(f"\n  {C.GRN}✓ Setup complete! Run 'exort shell' to start.{C.RST}\n")
 
 
 def main():
-    """Entry point for the CLI."""
     cli()
 
 

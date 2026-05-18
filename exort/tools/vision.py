@@ -1,60 +1,38 @@
 """
-Vision tool — analyze images using multimodal LLMs.
+Vision gear — prepare images for multimodal analysis.
 """
 
 import base64
 import os
-import urllib.request
-import urllib.parse
 
 
-def _analyze_image(image_path: str, question: str = "Describe this image in detail.") -> dict:
-    """Analyze an image using a vision-capable model."""
+def _load(image_path: str, prompt: str = "Describe this image.") -> dict:
     path = os.path.expanduser(image_path)
     if not os.path.exists(path):
-        return {"error": f"Image not found: {path}"}
-
+        return {"error": f"Not found: {path}"}
     try:
-        # Read and encode the image
         with open(path, "rb") as f:
-            img_data = base64.b64encode(f.read()).decode("utf-8")
-
-        # Detect MIME type
+            b64 = base64.b64encode(f.read()).decode()
         ext = os.path.splitext(path)[1].lower()
-        mime_map = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
-                    ".gif": "image/gif", ".webp": "image/webp", ".bmp": "image/bmp"}
-        mime = mime_map.get(ext, "image/jpeg")
-
-        return {
-            "image_base64": img_data[:100] + "...[truncated]",
-            "mime_type": mime,
-            "path": path,
-            "question": question,
-            "note": "Image analysis requires a vision-capable model (e.g., gpt-4o, llama-3.2-vision). Use the agent with a vision model to analyze this image.",
-        }
-    except Exception as e:
-        return {"error": f"Failed to process image: {e}"}
+        mime = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
+                ".gif": "image/gif", ".webp": "image/webp"}.get(ext, "image/jpeg")
+        return {"base64_preview": b64[:80] + "...", "mime": mime, "path": path, "prompt": prompt,
+                "hint": "Pass this to a vision-capable model for analysis."}
+    except Exception as exc:
+        return {"error": str(exc)}
 
 
-def register_tools(registry):
-    """Register vision tools."""
-    registry.register(
-        name="analyze_image",
-        description="Load an image for analysis. The agent will use a vision-capable model to describe or answer questions about the image. Supports JPG, PNG, GIF, WebP.",
-        parameters={
+def register(gearbox):
+    gearbox.add(
+        name="load_image",
+        info="Load an image for analysis. Use with a vision model (gpt-4o, llama-3.2-vision).",
+        params={
             "type": "object",
             "properties": {
-                "image_path": {
-                    "type": "string",
-                    "description": "Path to the image file",
-                },
-                "question": {
-                    "type": "string",
-                    "description": "What to analyze about the image (default: describe it)",
-                    "default": "Describe this image in detail.",
-                },
+                "image_path": {"type": "string", "description": "Path to image file"},
+                "prompt": {"type": "string", "description": "What to analyze", "default": "Describe this image."},
             },
             "required": ["image_path"],
         },
-        handler=_analyze_image,
+        handler=_load,
     )

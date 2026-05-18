@@ -1,201 +1,212 @@
 """
-Configuration management for Exort Agent.
+Exort configuration system.
 
-Supports:
-  - YAML config at ~/.exort/config.yaml
-  - Environment variables via .env
-  - Multiple profiles
-  - Runtime overrides
+Manages settings, API keys, and runtime preferences.
+All config lives in ~/.exort/ (or EXORT_DIR env override).
+
+Config priority:  runtime args > env vars > config.yaml > defaults
 """
 
 import os
-import shutil
 from pathlib import Path
 from typing import Any, Optional
 
 import yaml
 
 
-def get_exort_home() -> Path:
-    """Get the Exort home directory. Respects EXORT_HOME env var."""
-    home = os.environ.get("EXORT_HOME")
-    if home:
-        return Path(home)
-    return Path.home() / ".exort"
+def exort_dir() -> Path:
+    """Return the Exort data directory. Defaults to ~/.exort/."""
+    override = os.environ.get("EXORT_DIR")
+    return Path(override) if override else Path.home() / ".exort"
 
 
-DEFAULTS = {
-    "provider": "groq",
-    "model": "llama-3.3-70b-versatile",
-    "providers": {
-        "groq": {
-            "api_key_env": "GROQ_API_KEY",
-            "base_url": "https://api.groq.com/openai/v1",
-            "default_model": "llama-3.3-70b-versatile",
-        },
-        "openai": {
-            "api_key_env": "OPENAI_API_KEY",
-            "base_url": "https://api.openai.com/v1",
-            "default_model": "gpt-4o-mini",
-        },
-        "ollama": {
-            "api_key_env": None,
-            "base_url": "http://localhost:11434/v1",
-            "default_model": "llama3.1",
-        },
-        "anthropic": {
-            "api_key_env": "ANTHROPIC_API_KEY",
-            "base_url": "https://api.anthropic.com/v1",
-            "default_model": "claude-sonnet-4-20250514",
-        },
-    },
-    "agent": {
-        "max_iterations": 25,
+# ── Factory Defaults ──────────────────────────────────────
+# These are the sane defaults. Override in ~/.exort/config.yaml.
+
+BUILT_IN_DEFAULTS = {
+    # Which AI backend to use
+    "engine": {
+        "provider": "groq",
+        "model": "llama-3.3-70b-versatile",
+        "max_rounds": 20,           # max tool-call loops per reply
         "max_tokens": 4096,
         "temperature": 0.7,
-        "system_prompt": None,  # Uses built-in default
     },
+
+    # Provider credentials and endpoints
+    "providers": {
+        "groq": {
+            "key_var": "GROQ_API_KEY",
+            "endpoint": "https://api.groq.com/openai/v1",
+            "model": "llama-3.3-70b-versatile",
+        },
+        "openai": {
+            "key_var": "OPENAI_API_KEY",
+            "endpoint": "https://api.openai.com/v1",
+            "model": "gpt-4o-mini",
+        },
+        "ollama": {
+            "key_var": None,
+            "endpoint": "http://localhost:11434/v1",
+            "model": "llama3.1",
+        },
+        "anthropic": {
+            "key_var": "ANTHROPIC_API_KEY",
+            "endpoint": "https://api.anthropic.com/v1",
+            "model": "claude-sonnet-4-20250514",
+        },
+    },
+
+    # Conversation memory
     "memory": {
         "enabled": True,
-        "max_history": 50,
+        "window": 50,               # messages kept in active context
     },
-    "skills": {
+
+    # Gear (tool) settings
+    "gear": {
         "enabled": True,
-        "auto_load": [],
+        "allow_unsafe": False,      # shell/exec require explicit opt-in
     },
-    "tools": {
+
+    # Playbook (knowledge file) settings
+    "playbooks": {
         "enabled": True,
-        "allow_dangerous": False,
+        "autoload": [],
     },
+
+    # Display preferences
     "display": {
-        "show_token_usage": True,
-        "show_tool_calls": True,
+        "stream": True,
+        "show_gear_calls": True,
+        "show_tokens": True,
         "color": True,
-        "streaming": True,
     },
+
+    # Telegram bot
     "telegram": {
-        "token_env": "TELEGRAM_BOT_TOKEN",
+        "token_var": "TELEGRAM_BOT_TOKEN",
         "max_tokens": 2048,
-        "allowed_users": [],  # Empty = allow all
-        "rate_limit_per_min": 10,
+        "rate_per_minute": 10,
+        "allowed_users": [],
     },
 }
 
 
 class Config:
     """
-    Exort configuration manager.
+    Exort configuration.
 
-    Usage:
+    Reads ~/.exort/config.yaml on init, merges with built-in defaults,
+    and exposes .get() / .set() for dot-path access.
+
         cfg = Config()
-        model = cfg.get("model")
-        cfg.set("provider", "openai")
+        provider = cfg.get("engine.provider")       # "groq"
+        cfg.set("engine.temperature", 0.3)
         cfg.save()
     """
 
-    def __init__(self, path: Optional[str] = None, profile: Optional[str] = None):
-        self._home = get_exort_home()
-        self._profile = profile or os.environ.get("EXORT_PROFILE", "default")
-        self._path = Path(path) if path else self._home / "config.yaml"
+    def __init__(self, path: Optional[str] = None):
+        self._dir = exort_dir()
+        self._path = Path(path) if path else self._dir / "config.yaml"
         self._data: dict = {}
-        self._load()
-        self._load_env()
+        self._load_yaml()
+        self._load_dotenv()
 
-    def _load(self):
-        """Load config from YAML, merging with defaults."""
-        merged = self._deep_copy(DEFAULTS)
+    # ── Loading ───────────────────────────────────────────
+
+    def _load_yaml(self):
+        merged = _deepcopy(BUILT_IN_DEFAULTS)
         if self._path.exists():
-            with open(self._path, "r", encoding="utf-8") as f:
-                user_cfg = yaml.safe_load(f) or {}
-            merged = self._deep_merge(merged, user_cfg)
+            with open(self._path, encoding="utf-8") as f:
+                user = yaml.safe_load(f) or {}
+            merged = _deepmerge(merged, user)
         self._data = merged
 
-    def _load_env(self):
-        """Load .env file from exort home directory."""
-        env_path = self._home / ".env"
-        if env_path.exists():
-            with open(env_path, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if line and not line.startswith("#") and "=" in line:
-                        key, _, value = line.partition("=")
-                        key = key.strip()
-                        value = value.strip().strip(""'")
-                        if key and key not in os.environ:
-                            os.environ[key] = value
+    def _load_dotenv(self):
+        """Load key=value pairs from ~/.exort/.env into os.environ."""
+        env = self._dir / ".env"
+        if not env.exists():
+            return
+        with open(env, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                k, _, v = line.partition("=")
+                k, v = k.strip(), v.strip().strip(""'")
+                if k and k not in os.environ:
+                    os.environ[k] = v
 
-    def get(self, key: str, default: Any = None) -> Any:
-        """Get a config value by dot-notation key. e.g. 'providers.groq.api_key_env'"""
-        keys = key.split(".")
-        val = self._data
-        for k in keys:
-            if isinstance(val, dict) and k in val:
-                val = val[k]
+    # ── Access ────────────────────────────────────────────
+
+    def get(self, dotpath: str, default: Any = None) -> Any:
+        """Read a config value by dot-path.  e.g. 'engine.temperature'"""
+        node = self._data
+        for key in dotpath.split("."):
+            if isinstance(node, dict) and key in node:
+                node = node[key]
             else:
                 return default
-        return val
+        return node
 
-    def set(self, key: str, value: Any):
-        """Set a config value by dot-notation key."""
-        keys = key.split(".")
-        d = self._data
+    def set(self, dotpath: str, value: Any):
+        """Write a config value by dot-path."""
+        keys = dotpath.split(".")
+        node = self._data
         for k in keys[:-1]:
-            if k not in d or not isinstance(d[k], dict):
-                d[k] = {}
-            d = d[k]
-        d[keys[-1]] = value
+            if k not in node or not isinstance(node[k], dict):
+                node[k] = {}
+            node = node[k]
+        node[keys[-1]] = value
 
     def save(self):
-        """Save current config to YAML file."""
-        self._home.mkdir(parents=True, exist_ok=True)
+        """Persist current config to YAML."""
+        self._dir.mkdir(parents=True, exist_ok=True)
         with open(self._path, "w", encoding="utf-8") as f:
             yaml.dump(self._data, f, default_flow_style=False, allow_unicode=True)
 
-    def get_api_key(self, provider: Optional[str] = None) -> Optional[str]:
-        """Get API key for a provider from env vars."""
-        provider = provider or self.get("provider", "groq")
-        env_var = self.get(f"providers.{provider}.api_key_env")
-        if env_var:
-            return os.environ.get(env_var)
-        return None
+    # ── Helpers ───────────────────────────────────────────
 
-    def get_provider_config(self, provider: Optional[str] = None) -> dict:
-        """Get full provider config."""
-        provider = provider or self.get("provider", "groq")
-        return self.get(f"providers.{provider}", {})
+    def api_key(self, provider: Optional[str] = None) -> Optional[str]:
+        """Resolve the API key env-var for a provider."""
+        prov = provider or self.get("engine.provider", "groq")
+        var = self.get(f"providers.{prov}.key_var")
+        return os.environ.get(var) if var else None
+
+    def provider_conf(self, provider: Optional[str] = None) -> dict:
+        """Return the full provider sub-dict."""
+        prov = provider or self.get("engine.provider", "groq")
+        return self.get(f"providers.{prov}", {})
 
     @property
     def data(self) -> dict:
         return self._data
 
-    @staticmethod
-    def _deep_merge(base: dict, override: dict) -> dict:
-        result = base.copy()
-        for key, value in override.items():
-            if key in result and isinstance(result[key], dict) and isinstance(value, dict):
-                result[key] = Config._deep_merge(result[key], value)
-            else:
-                result[key] = value
-        return result
-
-    @staticmethod
-    def _deep_copy(d: dict) -> dict:
-        result = {}
-        for k, v in d.items():
-            if isinstance(v, dict):
-                result[k] = Config._deep_copy(v)
-            else:
-                result[k] = v
-        return result
-
     def __repr__(self):
-        return f"Config(path={self._path}, provider={self.get('provider')}, model={self.get('model')})"
+        return f"Config(provider={self.get('engine.provider')}, model={self.get('engine.model')})"
 
 
-def ensure_exort_home():
-    """Create ~/.exort/ directory structure if it doesn't exist."""
-    home = get_exort_home()
-    home.mkdir(parents=True, exist_ok=True)
-    (home / "skills").mkdir(exist_ok=True)
-    (home / "logs").mkdir(exist_ok=True)
-    return home
+# ── Private helpers ───────────────────────────────────────
+
+def _deepcopy(d: dict) -> dict:
+    return {k: _deepcopy(v) if isinstance(v, dict) else v for k, v in d.items()}
+
+
+def _deepmerge(base: dict, override: dict) -> dict:
+    out = base.copy()
+    for k, v in override.items():
+        if k in out and isinstance(out[k], dict) and isinstance(v, dict):
+            out[k] = _deepmerge(out[k], v)
+        else:
+            out[k] = v
+    return out
+
+
+def ensure_exort_dir() -> Path:
+    """Create ~/.exort/ skeleton if missing. Returns the path."""
+    d = exort_dir()
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "playbooks").mkdir(exist_ok=True)
+    (d / "logs").mkdir(exist_ok=True)
+    return d
