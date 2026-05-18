@@ -932,6 +932,32 @@
         }
 
 
+        /* $MIND Ticker */
+        .mind-ticker-section {
+            padding: 40px 0 20px;
+            text-align: center;
+        }
+
+        .mind-ticker {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(168, 85, 247, 0.08);
+            border: 1px solid rgba(168, 85, 247, 0.15);
+            border-radius: 100px;
+            padding: 12px 32px;
+            backdrop-filter: blur(10px);
+        }
+
+        .mind-ticker-symbol {
+            font-size: 20px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+        }
+
         /* Footer */
         footer {
             padding: 80px 0 40px;
@@ -1414,6 +1440,15 @@ response = agent.<span class="function">chat</span>(<span class="string">'Hello!
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- $MIND Ticker -->
+    <section class="mind-ticker-section">
+        <div class="container">
+            <div class="mind-ticker">
+                <span class="mind-ticker-symbol">$MIND</span>
             </div>
         </div>
     </section>
