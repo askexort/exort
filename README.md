@@ -1,553 +1,386 @@
 <div align="center">
 
-# 🤖 Exort
+```
+  ▓█████  ██╗  ██╗  ██████  ██████  ████████╗
+  ▓█   ▀  ╚██╗██╝  ██╔═══██╗██╔══██╗╚══██╔══╝
+  ██████╗  ╚███╝   ██║   ██║██████╔╝   ██║
+  ▓█   ▀  ██╔██╗  ██║   ██║██╔══██╗   ██║
+  ██████╗ ██╔╝ ██╗ ╚██████╔╝██║  ██║   ██║
+  ╚═════╝ ╚═╝  ╚═╝  ╚═════╝ ╚═╝  ╚═╝   ╚═╝
+```
 
-### AI Agent for Everyone
+# The Open Agent Engine
 
-An open-source AI agent that can **search the web**, **write and run code**, **manage files**, and **remember conversations** — all through a simple CLI or Telegram.
+### Free AI for Everyone
+
+An autonomous AI agent that reasons, acts, and learns through direct tool interaction.
+Runs on free-tier APIs or fully offline — no credit card, no gatekeepers.
 
 [![CI](https://github.com/askexort/exort/actions/workflows/ci.yml/badge.svg)](https://github.com/askexort/exort/actions)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://python.org)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Free](https://img.shields.io/badge/price-$0-important)](#getting-started)
 
-[Quick Start](#-quick-start) • [Features](#-features) • [Providers](#-providers) • [Telegram Bot](#-telegram-bot) • [Tools](#-tools) • [API](#-python-api) • [Contributing](#-contributing)
+[Getting Started](#-getting-started) · [What It Does](#-what-it-does) · [Architecture](#-architecture) · [Providers](#-providers) · [Telegram Bot](#-telegram-bot) · [Python API](#-python-api) · [Contributing](#-contributing)
 
 </div>
 
 ---
 
-## 🚀 Quick Start
+## Why Exort?
 
-### Install (30 seconds)
+Most AI agent frameworks are built for enterprises with big budgets. Exort is built for **everyone**:
+
+- **$0 to start** — works with Groq's free API (no credit card needed)
+- **Runs offline** — use Ollama and your data never leaves your machine
+- **Real capabilities** — search the web, run code, manage files, not just chat
+- **Own your data** — conversations stored locally in SQLite, not on someone's cloud
+- **Hackable** — clean Python, no magic, easy to extend
+
+---
+
+## Getting Started
+
+### Install (60 seconds)
 
 ```bash
-# Clone the repo
 git clone https://github.com/askexort/exort.git
 cd exort
-
-# Install
 pip install -e .
 ```
 
-### Set up your API key
+### Pick a provider
 
+**Option A: Groq (free, fast — best for starting out)**
 ```bash
-# Option 1: Groq (FREE, fast — recommended for beginners)
-# Get your key at: https://console.groq.com
-echo "GROQ_API_KEY=your-key-here" > ~/.exort/.env
+# 1. Get a free key at https://console.groq.com (no credit card)
+# 2. Save it:
+mkdir -p ~/.exort
+echo "GROQ_API_KEY=gsk_your_key_here" > ~/.exort/.env
+```
 
-# Option 2: OpenAI
-echo "OPENAI_API_KEY=your-key-here" > ~/.exort/.env
-
-# Option 3: Ollama (100% local, no API key needed)
-# Install Ollama: https://ollama.ai
+**Option B: Ollama (100% local, 100% free)**
+```bash
+# 1. Install Ollama: https://ollama.ai
+# 2. Pull a model:
 ollama pull llama3.1
+# No API key needed.
 ```
 
-### Run it!
+**Option C: OpenAI / Anthropic (paid, higher quality)**
+```bash
+echo "OPENAI_API_KEY=sk-..." > ~/.exort/.env
+# or
+echo "ANTHROPIC_API_KEY=sk-ant-..." > ~/.exort/.env
+```
+
+### Launch
 
 ```bash
-# Interactive chat
-exort chat
-
-# Ask a single question
-exort chat "What is quantum computing?"
-
-# Use a specific provider
-exort chat -p ollama "Hello!"
-
-# Start the Telegram bot
-exort serve
+exort shell              # interactive terminal
+exort ask "hello"        # one-shot question
+exort bot                # telegram bot
 ```
 
-**That's it!** You now have an AI agent that can search the web, run code, manage files, and more.
+That's it. You now have an AI agent with real-world capabilities.
 
 ---
 
-## ✨ Features
+## What It Does
 
-| Feature | Description |
-|---------|-------------|
-| 🧠 **Multi-Provider** | Use Groq (free), OpenAI, Anthropic, or local Ollama |
-| 🔧 **Tool Use** | Web search, code execution, file ops, shell commands |
-| 💾 **Memory** | Persistent conversation history (SQLite-backed) |
-| 💬 **Interactive CLI** | Beautiful REPL with slash commands |
-| 📱 **Telegram Bot** | Deploy as a Telegram bot for mobile access |
-| 🐳 **Docker Ready** | One-command deployment |
-| 🔌 **Extensible** | Easy to add custom tools and providers |
-| 🆓 **Free Tier** | Works with Groq's free API — no credit card needed |
+Exort is not a chatbot. It's an **agent** — it reasons about your request,
+decides what tools to use, executes them, reads the results, and iterates
+until it has a real answer.
+
+```
+You: "What are the top 3 Python web frameworks and their GitHub stars?"
+
+Exort thinks → calls web_search("Python web frameworks 2025")
+  ↓ reads results
+Exort thinks → calls fetch_url("https://github.com/pallets/flask")
+  ↓ reads page
+Exort thinks → calls fetch_url("https://github.com/django/django")
+  ↓ reads page
+Exort responds with a ranked comparison table
+```
+
+### Built-in Gear (Tools)
+
+| Gear | What It Does |
+|------|-------------|
+| `web_search` | Search the internet (DuckDuckGo, no API key) |
+| `fetch_url` | Read any web page's content |
+| `read_file` | View files with line numbers |
+| `write_file` | Create or overwrite files |
+| `list_directory` | Browse folders |
+| `search_files` | Find files or search inside them |
+| `run_shell` | Execute system commands |
+| `exec_python` | Run Python code |
+| `load_image` | Prepare images for vision analysis |
+
+All gear is **opt-in by the engine** — it only calls tools when they're useful.
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 exort/
-├── agent.py          # Core agent loop (think → act → observe)
-├── cli.py            # Interactive CLI with REPL
-├── config.py         # YAML configuration manager
-├── utils.py          # Utilities and terminal formatting
-├── providers/        # LLM provider implementations
-│   ├── base.py       # Abstract provider interface
-│   ├── groq_provider.py    # Groq Cloud (free, fast)
-│   ├── openai_provider.py  # OpenAI / compatible APIs
-│   ├── ollama_provider.py  # Local Ollama
-│   └── anthropic_provider.py  # Anthropic Claude
-├── tools/            # Built-in tools
-│   ├── registry.py   # Tool discovery and registration
-│   ├── web.py        # Web search (DuckDuckGo)
-│   ├── file_ops.py   # Read, write, list, search files
-│   ├── shell.py      # Shell command execution
-│   ├── code.py       # Python code execution
-│   └── vision.py     # Image analysis
+├── engine.py          ← The reasoning core (perceive → reason → act → reflect)
+├── cli.py             ← The Exort Shell (interactive terminal)
+├── config.py          ← YAML config + .env loading
+├── utils.py           ← Terminal formatting, IDs
+├── providers/         ← LLM backends
+│   ├── base.py        ← Abstract provider interface
+│   ├── groq_provider.py
+│   ├── openai_provider.py
+│   ├── ollama_provider.py
+│   └── anthropic_provider.py
+├── tools/             ← Built-in gear
+│   ├── gear.py        ← GearBox (registration + discovery)
+│   ├── web.py         ← Web search + URL fetch
+│   ├── file_ops.py    ← File CRUD
+│   ├── shell.py       ← Shell execution
+│   ├── code.py        ← Python execution
+│   └── vision.py      ← Image loading
 ├── memory/
-│   └── store.py      # SQLite conversation memory
-├── skills/
-│   └── manager.py    # Skill file management
+│   └── store.py       ← SQLite conversation store
+├── playbooks/         ← Knowledge files (markdown)
+│   └── library.py     ← Playbook loader + search
 └── bot/
-    └── telegram_bot.py  # Telegram bot server
+    └── telegram_bot.py  ← Telegram frontend
 ```
 
-### How It Works
+### The Engine Loop
 
 ```
-You: "Search for the latest Python 3.13 features and summarize them"
-
-Agent thinks → calls web_search("Python 3.13 features")
-  ↓
-Agent reads search results
-  ↓
-Agent thinks → calls fetch_url(url_of_top_result)
-  ↓
-Agent reads page content
-  ↓
-Agent responds with a summary
+  ┌─────────────┐
+  │  PERCEIVE   │  Read user input + tool results
+  └──────┬──────┘
+         ▼
+  ┌─────────────┐
+  │   REASON    │  LLM decides: answer now, or call a tool?
+  └──────┬──────┘
+         ▼
+  ┌─────────────┐     ┌──────────┐
+  │     ACT     │────▶│   GEAR   │  Execute tool, get result
+  └──────┬──────┘     └──────────┘
+         ▼
+  ┌─────────────┐
+  │   REFLECT   │  Observe result → loop back to REASON
+  └──────┬──────┘
+         ▼
+     [answer]
 ```
 
-The agent follows a **think → act → observe** loop:
-1. Your message goes to the LLM
-2. The LLM decides if it needs tools
-3. If yes, it calls tools and processes the results
-4. It repeats until it has a final answer
+This is not a fixed pipeline — the engine **decides its own path** based
+on what the user needs. Some questions need zero tools. Others need five.
 
 ---
 
-## 🔌 Providers
+## Providers
 
-Exort supports 4 LLM providers out of the box:
+| Provider | Cost | Speed | Setup |
+|----------|------|-------|-------|
+| **Groq** | Free (30 req/min) | Ultra-fast | [console.groq.com](https://console.groq.com) |
+| **Ollama** | Free (local) | Depends on hardware | [ollama.ai](https://ollama.ai) |
+| **OpenAI** | Pay-per-token | Fast | [platform.openai.com](https://platform.openai.com) |
+| **Anthropic** | Pay-per-token | Fast | [console.anthropic.com](https://console.anthropic.com) |
 
-### Groq (Recommended for Getting Started)
-- **Cost**: FREE (30 requests/min)
-- **Speed**: Fastest inference available
-- **Setup**: Get key at [console.groq.com](https://console.groq.com)
-- **Models**: llama-3.3-70b, llama-3.1-8b, mixtral-8x7b
-
-```bash
-echo "GROQ_API_KEY=gsk_..." > ~/.exort/.env
-exort chat -p groq -m llama-3.3-70b-versatile "Hello!"
+Switch at runtime:
 ```
-
-### OpenAI
-- **Cost**: Pay-per-token
-- **Quality**: GPT-4 class models
-- **Setup**: Get key at [platform.openai.com](https://platform.openai.com/api-keys)
-
-```bash
-echo "OPENAI_API_KEY=sk-..." > ~/.exort/.env
-exort chat -p openai -m gpt-4o-mini "Hello!"
-```
-
-### Anthropic (Claude)
-- **Cost**: Pay-per-token
-- **Quality**: Excellent reasoning
-- **Setup**: Get key at [console.anthropic.com](https://console.anthropic.com)
-- **Extra**: `pip install anthropic`
-
-```bash
-echo "ANTHROPIC_API_KEY=sk-ant-..." > ~/.exort/.env
-exort chat -p anthropic -m claude-sonnet-4-20250514 "Hello!"
-```
-
-### Ollama (100% Local)
-- **Cost**: FREE (runs on your machine)
-- **Privacy**: Everything stays on your computer
-- **Setup**: Install [Ollama](https://ollama.ai), then `ollama pull llama3.1`
-
-```bash
-exort chat -p ollama -m llama3.1 "Hello!"
+exort ▸ :switch ollama
+exort ▸ :model llama3.1
 ```
 
 ---
 
-## 🛠️ Tools
+## The Exort Shell
 
-The agent has access to these built-in tools:
-
-### 🔍 Web Search
-```python
-# The agent can search the web
-"Search for the best Python web frameworks in 2025"
 ```
+  ▓█████  ██╗  ██╗  ██████  ██████  ████████╗
+  ...
 
-### 💻 Code Execution
-```python
-# The agent can write and run Python code
-"Calculate the first 20 Fibonacci numbers"
-"Write a script that renames all .txt files in a directory"
-```
+  provider: groq  model: llama-3.3-70b-versatile  gear: 9
+  type :help for commands, :quit to exit
 
-### 📁 File Operations
-```python
-# The agent can read, write, and manage files
-"Read the contents of config.json"
-"Create a new Python file with a hello world program"
-"List all Python files in the current directory"
-```
+exort ▸ :help
 
-### 🐚 Shell Commands
-```python
-# The agent can run shell commands
-"What's my current directory?"
-"Show me the git log for the last 5 commits"
-"Check if Python is installed and what version"
+  Exort Commands
+  ─────────────────────────────────────
+  :help            Show this list
+  :new             Start a fresh session
+  :status          Provider, model, token stats
+  :gear            List available gear (tools)
+  :providers       List LLM backends
+  :switch <prov>   Switch LLM provider
+  :model <name>    Switch model
+  :history         Show current conversation
+  :sessions        List saved sessions
+  :load <id>       Resume a session
+  :clear           Clear screen
+  :quit            Exit
+
+exort ▸ What is the Fibonacci sequence?
+
+exort ▸ The Fibonacci sequence is a series where each number
+  is the sum of the two preceding ones: 0, 1, 1, 2, 3, 5, 8, 13...
 ```
 
 ---
 
-## 💬 CLI Commands
+## Telegram Bot
 
-When in interactive mode (`exort chat`), use these commands:
+Run Exort as a Telegram bot — AI agent in your pocket.
 
-| Command | Description |
-|---------|-------------|
-| `/help` | Show help |
-| `/new` | Start a new conversation |
-| `/status` | Show agent status (provider, model, tokens) |
-| `/model <name>` | Switch model |
-| `/provider <name>` | Switch provider |
-| `/tools` | List available tools |
-| `/providers` | List available providers |
-| `/history` | Show current conversation |
-| `/sessions` | List saved sessions |
-| `/load <id>` | Load a saved session |
-| `/clear` | Clear screen |
-| `/quit` | Exit |
+```bash
+# 1. Message @BotFather on Telegram → /newbot → copy token
+# 2. Save it:
+echo "TELEGRAM_BOT_TOKEN=your_token" >> ~/.exort/.env
+# 3. Launch:
+exort bot
+```
 
----
-
-## 📱 Telegram Bot
-
-Deploy Exort as a Telegram bot for mobile access:
-
-### Setup
-
-1. **Create a bot**: Message [@BotFather](https://t.me/BotFather) on Telegram, send `/newbot`, follow the prompts
-2. **Save the token**: Copy the bot token
-3. **Configure**:
-   ```bash
-   echo "TELEGRAM_BOT_TOKEN=your-token-here" >> ~/.exort/.env
-   ```
-4. **Run**:
-   ```bash
-   exort serve
-   ```
-
-### Bot Commands
-- `/start` — Welcome message
-- `/new` — Start new conversation
-- `/model` — Switch AI model (inline buttons)
-- `/status` — Show current model and usage
-
-### Features
+Features:
 - Per-user conversation memory
-- Tool use (web search, code execution, etc.)
-- Rate limiting (10 messages/min per user)
-- Group chat support (responds when @mentioned)
+- Full gear access (web search, code execution, etc.)
+- Rate limiting
+- Group chat support (@mention to trigger)
 
 ---
 
-## 🐳 Docker
+## Python API
 
-Run with Docker (no local Python needed):
+```python
+from exort import Engine
 
-```bash
-# Interactive CLI
-docker compose run cli chat
+# Simple
+e = Engine()
+print(e.talk("What is Rust?"))
 
-# Telegram bot
-docker compose up bot
+# Streaming
+for chunk in e.talk("Explain quantum computing", stream=True):
+    print(chunk, end="", flush=True)
 
-# With API key
-GROQ_API_KEY=your-key docker compose run cli chat
+# With memory
+e.open("my project")
+e.talk("Build a REST API with FastAPI")
+e.talk("Now add authentication")  # remembers context
+e.close()
+
+# Local (Ollama)
+e = Engine(provider="ollama", model="llama3.1")
+print(e.talk("Hello!"))
 ```
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
-Exort uses a YAML config file at `~/.exort/config.yaml`:
-
+`~/.exort/config.yaml`:
 ```yaml
-# Default provider and model
-provider: groq
-model: llama-3.3-70b-versatile
+engine:
+  provider: groq
+  model: llama-3.3-70b-versatile
+  max_rounds: 20
+  max_tokens: 4096
+  temperature: 0.7
 
-# Agent settings
-agent:
-  max_iterations: 25      # Max tool call loops per response
-  max_tokens: 4096        # Max response length
-  temperature: 0.7        # Creativity (0.0-1.0)
-
-# Memory settings
 memory:
   enabled: true
-  max_history: 50         # Messages to keep in context
+  window: 50
 
-# Display settings
+gear:
+  enabled: true
+  allow_unsafe: false
+
 display:
-  show_token_usage: true
-  show_tool_calls: true
-  streaming: true
-
-# Telegram settings
-telegram:
-  rate_limit_per_min: 10
-  allowed_users: []       # Empty = allow all
+  stream: true
+  show_gear_calls: true
+  show_tokens: true
 ```
 
-### Config CLI
-
-```bash
-exort config show                          # View all settings
-exort config set provider openai           # Change provider
-exort config set model gpt-4o              # Change model
-exort config set agent.temperature 0.5     # Change temperature
+```
+exort config show                        # view all
+exort config set engine.provider openai  # change provider
+exort config set engine.temperature 0.3  # tune creativity
 ```
 
 ---
 
-## 🐍 Python API
+## Adding Custom Gear
 
-Use Exort as a Python library:
-
-### Simple Usage
+Create `exort/tools/my_gear.py`:
 
 ```python
-from exort import Agent
-
-agent = Agent()
-response = agent.chat("What is the capital of France?")
-print(response)
-```
-
-### With Streaming
-
-```python
-from exort import Agent
-
-agent = Agent(provider="groq", model="llama-3.3-70b-versatile")
-for chunk in agent.chat("Tell me a joke", stream=True):
-    print(chunk, end="", flush=True)
-```
-
-### With Memory
-
-```python
-from exort import Agent
-
-agent = Agent()
-agent.start_session("My Project")
-
-# First message
-print(agent.chat("I'm building a Python web app"))
-
-# Second message — agent remembers context
-print(agent.chat("Add error handling to the code"))
-```
-
-### With Custom Provider
-
-```python
-from exort import Agent
-
-# Use local Ollama
-agent = Agent(provider="ollama", model="llama3.1")
-print(agent.chat("Hello!"))
-
-# Use OpenAI
-agent = Agent(provider="openai", model="gpt-4o")
-print(agent.chat("Hello!"))
-```
-
-### With Custom Tools
-
-```python
-from exort import Agent
-from exort.tools.registry import ToolRegistry
-
-registry = ToolRegistry()
-registry.discover()  # Load built-in tools
-
-# Add custom tool
-registry.register(
-    name="get_weather",
-    description="Get current weather for a city",
-    parameters={
-        "type": "object",
-        "properties": {
-            "city": {"type": "string", "description": "City name"}
-        },
-        "required": ["city"]
-    },
-    handler=lambda city: f"Weather in {city}: 72°F, sunny"
-)
-
-agent = Agent(tools=registry)
-print(agent.chat("What's the weather in Tokyo?"))
-```
-
----
-
-## 🧩 Adding Custom Tools
-
-Create a new tool in 3 steps:
-
-```python
-# 1. Create exort/tools/my_tool.py
-
-def _my_function(param: str) -> dict:
-    """Your tool logic here."""
+def _my_tool(param: str) -> dict:
+    """Your logic here."""
     return {"result": f"Processed: {param}"}
 
-def register_tools(registry):
-    """Called by the tool discovery system."""
-    registry.register(
+def register(gearbox):
+    gearbox.add(
         name="my_tool",
-        description="Does something useful",
-        parameters={
+        info="What it does",
+        params={
             "type": "object",
             "properties": {
-                "param": {
-                    "type": "string",
-                    "description": "Input parameter"
-                }
+                "param": {"type": "string", "description": "Input"}
             },
             "required": ["param"]
         },
-        handler=_my_function,
+        handler=_my_tool,
     )
 ```
 
-```python
-# 2. Add to exort/tools/__init__.py imports (optional — auto-discovered)
-
-# 3. Test it
-from exort import Agent
-agent = Agent()
-print(agent.chat("Use my_tool with param 'hello'"))
-```
+The engine auto-discovers it on next startup.
 
 ---
 
-## 📂 Project Structure
-
-```
-exort/
-├── __init__.py           # Package exports
-├── agent.py              # Core agent loop (think → act → observe)
-├── cli.py                # Interactive CLI + click commands
-├── config.py             # YAML config + .env loading
-├── utils.py              # Colors, formatting, helpers
-├── providers/
-│   ├── __init__.py       # Provider registry
-│   ├── base.py           # Abstract provider interface
-│   ├── groq_provider.py  # Groq Cloud (free!)
-│   ├── openai_provider.py # OpenAI + compatible APIs
-│   ├── ollama_provider.py # Local Ollama
-│   └── anthropic_provider.py # Anthropic Claude
-├── tools/
-│   ├── __init__.py       # Tool registry
-│   ├── registry.py       # Auto-discovery system
-│   ├── base.py           # @tool decorator + BaseTool
-│   ├── web.py            # web_search, fetch_url
-│   ├── file_ops.py       # read_file, write_file, list_directory, search_files
-│   ├── shell.py          # run_shell
-│   ├── code.py           # execute_python
-│   └── vision.py         # analyze_image
-├── memory/
-│   ├── __init__.py
-│   └── store.py          # SQLite conversation store
-├── skills/
-│   ├── __init__.py
-│   └── manager.py        # Skill file manager
-├── bot/
-│   ├── __init__.py
-│   └── telegram_bot.py   # Telegram bot server
-└── tests/
-    ├── test_agent.py     # Agent tests
-    └── test_tools.py     # Tool tests
-```
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! Here's how:
-
-### Quick Contributions
-1. Fork the repo
-2. Create a feature branch: `git checkout -b feature/my-feature`
-3. Make your changes
-4. Run tests: `make test`
-5. Submit a pull request
-
-### Development Setup
+## Docker
 
 ```bash
-# Clone and install in dev mode
+# Interactive shell
+docker compose run cli shell
+
+# Telegram bot
+docker compose up bot
+```
+
+---
+
+## Contributing
+
+We welcome contributions — especially new gear, new providers, and documentation.
+
+```bash
 git clone https://github.com/askexort/exort.git
 cd exort
 pip install -e ".[full,dev]"
-
-# Run tests
-make test
-
-# Lint
-make lint
-
-# Format
-make format
+make test    # run tests
+make lint    # check style
 ```
 
-### Ideas for Contributions
-- 🔌 New LLM providers (Google Gemini, Mistral, etc.)
-- 🛠️ New tools (image generation, PDF reading, database queries)
-- 📱 New platform bots (Discord, Slack, WhatsApp)
-- 📖 Documentation improvements
-- 🧪 More tests
-- 🐛 Bug fixes
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+### Ideas
+- New providers (Google Gemini, Mistral, Cohere)
+- New gear (PDF reader, database queries, image generation)
+- Platform bots (Discord, Slack, WhatsApp)
+- Playbook packs (domain-specific knowledge)
+- Documentation and tutorials
 
 ---
 
-## 📄 License
+## License
 
-MIT License — see [LICENSE](LICENSE) for details.
-
----
-
-## 🙏 Acknowledgments
-
-- [Groq](https://groq.com) for free, fast LLM inference
-- [Ollama](https://ollama.ai) for local model support
-- [OpenAI](https://openai.com) for the API standard
-- The open-source community
+MIT — use it, fork it, ship it. No strings attached.
 
 ---
 
 <div align="center">
 
-**Built with ❤️ for the AI community**
+**Built for everyone who believes AI should be free and open.**
 
-[Star this repo](https://github.com/askexort/exort) • [Report a bug](https://github.com/askexort/exort/issues) • [Request a feature](https://github.com/askexort/exort/issues)
+[Star](https://github.com/askexort/exort) · [Issues](https://github.com/askexort/exort/issues) · [Discussions](https://github.com/askexort/exort/discussions)
 
 </div>
