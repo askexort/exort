@@ -12,11 +12,13 @@
             --primary-light: #818cf8;
             --secondary: #a855f7;
             --accent: #ec4899;
-            --bg-dark: #030014;
-            --bg-card: rgba(255, 255, 255, 0.03);
-            --text-primary: #ffffff;
-            --text-secondary: #94a3b8;
-            --border: rgba(255, 255, 255, 0.06);
+            --bg-dark: #000000;
+            --bg-card: rgba(255, 255, 255, 0.02);
+            --text-primary: #e2e8f0;
+            --text-secondary: #64748b;
+            --border: rgba(255, 255, 255, 0.04);
+            --gold: #fbbf24;
+            --gold-dark: #d97706;
         }
 
         * {
@@ -37,47 +39,43 @@
             line-height: 1.6;
         }
 
-        /* Animated Background */
-        .bg-animation {
+        /* 3D Grid Background */
+        .bg-3d-grid {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1;
-            overflow: hidden;
+            z-index: -2;
+            background:
+                linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            transform: perspective(500px) rotateX(60deg);
+            transform-origin: center top;
         }
 
-        .bg-animation::before {
+        .bg-3d-grid::after {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at 30% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
-                        radial-gradient(circle at 70% 50%, rgba(168, 85, 247, 0.06) 0%, transparent 50%),
-                        radial-gradient(circle at 50% 80%, rgba(236, 72, 153, 0.04) 0%, transparent 50%);
-            animation: bgPulse 15s ease-in-out infinite;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60%;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
         }
 
-        @keyframes bgPulse {
-            0%, 100% { transform: scale(1) rotate(0deg); }
-            50% { transform: scale(1.1) rotate(5deg); }
-        }
-
-        /* Grid Pattern */
-        .grid-pattern {
+        /* Deep Dark Ambient */
+        .bg-ambient {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: 
-                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-            background-size: 50px 50px;
-            z-index: -1;
+            z-index: -3;
+            background: radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.06) 0%, transparent 50%),
+                        radial-gradient(ellipse at 80% 80%, rgba(168, 85, 247, 0.04) 0%, transparent 50%),
+                        radial-gradient(ellipse at 50% 50%, rgba(236, 72, 153, 0.03) 0%, transparent 60%);
         }
 
         /* Floating Particles */
@@ -125,13 +123,13 @@
             padding: 20px 0;
             transition: all 0.3s ease;
             backdrop-filter: blur(20px);
-            background: rgba(3, 0, 20, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             border-bottom: 1px solid var(--border);
         }
 
         header.scrolled {
             padding: 15px 0;
-            background: rgba(3, 0, 20, 0.95);
+            background: rgba(0, 0, 0, 0.95);
         }
 
         nav {
@@ -267,6 +265,16 @@
             border-color: var(--primary);
         }
 
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
         /* Hero Section */
         .hero {
             min-height: 100vh;
@@ -288,30 +296,13 @@
             z-index: 2;
         }
 
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(99, 102, 241, 0.1);
-            border: 1px solid rgba(99, 102, 241, 0.2);
-            padding: 8px 16px;
-            border-radius: 100px;
-            font-size: 14px;
-            color: var(--primary-light);
-            margin-bottom: 30px;
-            backdrop-filter: blur(10px);
-        }
-
-        .hero-badge i {
-            font-size: 12px;
-        }
-
         h1 {
             font-size: 72px;
             font-weight: 900;
             line-height: 1.1;
             margin-bottom: 24px;
             letter-spacing: -2px;
+            color: #ffffff;
         }
 
         h1 .gradient-text {
@@ -494,6 +485,7 @@
             font-weight: 800;
             letter-spacing: -1.5px;
             margin-bottom: 20px;
+            color: #ffffff;
         }
 
         .section-subtitle {
@@ -535,7 +527,7 @@
         .feature-card:hover {
             transform: translateY(-10px) scale(1.02);
             border-color: rgba(99, 102, 241, 0.3);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8),
                         0 0 40px rgba(99, 102, 241, 0.1);
         }
 
@@ -576,6 +568,7 @@
             font-weight: 700;
             margin-bottom: 12px;
             letter-spacing: -0.5px;
+            color: #ffffff;
         }
 
         .feature-card p {
@@ -602,6 +595,7 @@
             font-weight: 800;
             margin-bottom: 20px;
             letter-spacing: -1px;
+            color: #ffffff;
         }
 
         .code-info p {
@@ -631,7 +625,7 @@
         }
 
         .code-block {
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.6);
             border: 1px solid var(--border);
             border-radius: 20px;
             overflow: hidden;
@@ -701,143 +695,6 @@
         .code-body .variable { color: #f472b6; }
         .code-body .operator { color: #94a3b8; }
 
-        /* Token Section */
-        .token-section {
-            padding: 150px 0;
-            position: relative;
-        }
-
-        .token-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 80px;
-            align-items: center;
-        }
-
-        .token-card {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
-            border: 1px solid rgba(99, 102, 241, 0.2);
-            border-radius: 32px;
-            padding: 60px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .token-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at center, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
-            animation: tokenGlow 10s ease-in-out infinite;
-        }
-
-        @keyframes tokenGlow {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(10%, 10%); }
-        }
-
-        .token-symbol {
-            font-size: 64px;
-            font-weight: 900;
-            background: linear-gradient(135deg, var(--secondary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .token-network {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(99, 102, 241, 0.2);
-            padding: 8px 16px;
-            border-radius: 100px;
-            font-size: 14px;
-            color: var(--primary-light);
-            margin-bottom: 30px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .token-stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .token-stat {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 24px;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-        }
-
-        .token-stat-label {
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .token-stat-value {
-            font-size: 24px;
-            font-weight: 700;
-        }
-
-        .token-info h2 {
-            font-size: 40px;
-            font-weight: 800;
-            margin-bottom: 20px;
-            letter-spacing: -1px;
-        }
-
-        .token-info p {
-            color: var(--text-secondary);
-            font-size: 17px;
-            margin-bottom: 30px;
-            line-height: 1.8;
-        }
-
-        .token-benefits {
-            list-style: none;
-        }
-
-        .token-benefits li {
-            display: flex;
-            align-items: flex-start;
-            gap: 16px;
-            padding: 16px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .token-benefits li:last-child {
-            border-bottom: none;
-        }
-
-        .token-benefits i {
-            color: var(--primary);
-            font-size: 20px;
-            margin-top: 2px;
-        }
-
-        .token-benefits strong {
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .token-benefits span {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
         /* CTA Section */
         .cta-section {
             padding: 150px 0;
@@ -846,8 +703,8 @@
         }
 
         .cta-card {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15));
-            border: 1px solid rgba(99, 102, 241, 0.2);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+            border: 1px solid rgba(99, 102, 241, 0.15);
             border-radius: 40px;
             padding: 80px;
             position: relative;
@@ -861,7 +718,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.3) 0%, transparent 60%);
+            background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.2) 0%, transparent 60%);
         }
 
         .cta-card h2 {
@@ -870,6 +727,7 @@
             margin-bottom: 20px;
             position: relative;
             z-index: 1;
+            color: #ffffff;
         }
 
         .cta-card p {
@@ -891,10 +749,208 @@
             z-index: 1;
         }
 
+        /* Secret Menu Section */
+        .secret-section {
+            padding: 60px 0 40px;
+            position: relative;
+            text-align: center;
+        }
+
+        .secret-divider {
+            width: 60px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            margin: 0 auto 40px;
+            opacity: 0.3;
+        }
+
+        .secret-icon {
+            font-size: 28px;
+            margin-bottom: 20px;
+            opacity: 0.6;
+            cursor: pointer;
+            transition: all 0.5s ease;
+            user-select: none;
+        }
+
+        .secret-icon:hover {
+            opacity: 1;
+            transform: scale(1.2) rotate(10deg);
+            filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.5));
+        }
+
+        .secret-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            opacity: 0.5;
+            transition: opacity 0.3s ease;
+        }
+
+        .secret-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease;
+            opacity: 0;
+        }
+
+        .secret-content.revealed {
+            max-height: 600px;
+            opacity: 1;
+        }
+
+        .secret-card {
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            border-radius: 24px;
+            padding: 50px 40px;
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .secret-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary), var(--secondary), transparent);
+        }
+
+        .secret-token-symbol {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .secret-token-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(99, 102, 241, 0.15);
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 13px;
+            color: var(--primary-light);
+            margin-bottom: 30px;
+        }
+
+        .secret-poem {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 2.2;
+            font-style: italic;
+            margin-bottom: 30px;
+        }
+
+        .secret-poem em {
+            color: var(--primary-light);
+            font-style: normal;
+        }
+
+        .secret-status {
+            font-size: 13px;
+            color: var(--text-secondary);
+            opacity: 0.5;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Donate Section */
+        .donate-section {
+            padding: 80px 0 60px;
+            position: relative;
+        }
+
+        .donate-card {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.05), rgba(168, 85, 247, 0.05));
+            border: 1px solid rgba(236, 72, 153, 0.08);
+            border-radius: 32px;
+            padding: 60px;
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .donate-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), var(--secondary), transparent);
+            opacity: 0.5;
+        }
+
+        .donate-icon {
+            font-size: 40px;
+            margin-bottom: 20px;
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .donate-title {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .donate-desc {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-bottom: 30px;
+            line-height: 1.8;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .donate-btn {
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            color: white;
+            border: none;
+            padding: 14px 36px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(236, 72, 153, 0.3);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .donate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(236, 72, 153, 0.4);
+        }
+
         /* Footer */
         footer {
             padding: 80px 0 40px;
             border-top: 1px solid var(--border);
+            background: rgba(0, 0, 0, 0.3);
         }
 
         .footer-content {
@@ -945,6 +1001,7 @@
             font-size: 16px;
             font-weight: 600;
             margin-bottom: 24px;
+            color: #ffffff;
         }
 
         .footer-column ul {
@@ -979,21 +1036,10 @@
             font-size: 13px;
         }
 
-        /* Mobile Menu */
-        .mobile-menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            color: var(--text-primary);
-            font-size: 24px;
-            cursor: pointer;
-        }
-
         /* Responsive */
         @media (max-width: 1200px) {
             .hero-content,
-            .code-content,
-            .token-content {
+            .code-content {
                 grid-template-columns: 1fr;
                 gap: 60px;
             }
@@ -1063,17 +1109,13 @@
                 flex-direction: column;
                 align-items: center;
             }
-
-            .token-stats {
-                grid-template-columns: 1fr;
-            }
         }
     </style>
 </head>
 <body>
     <!-- Background Effects -->
-    <div class="bg-animation"></div>
-    <div class="grid-pattern"></div>
+    <div class="bg-ambient"></div>
+    <div class="bg-3d-grid"></div>
     <div class="particles" id="particles"></div>
 
     <!-- Header -->
@@ -1092,7 +1134,7 @@
                                 <stop offset="100%" style="stop-color:#ec4899"/>
                             </linearGradient>
                         </defs>
-                        <circle cx="256" cy="256" r="240" fill="#030014" stroke="url(#logoGrad1)" stroke-width="8"/>
+                        <circle cx="256" cy="256" r="240" fill="#000000" stroke="url(#logoGrad1)" stroke-width="8"/>
                         <circle cx="256" cy="120" r="20" fill="url(#logoGrad1)"/>
                         <circle cx="156" cy="200" r="16" fill="url(#logoGrad1)" opacity="0.9"/>
                         <circle cx="356" cy="200" r="16" fill="url(#logoGrad1)" opacity="0.9"/>
@@ -1119,7 +1161,6 @@
             <ul class="nav-links">
                 <li><a href="#features">Features</a></li>
                 <li><a href="#code">Code</a></li>
-                <li><a href="#token">Token</a></li>
                 <li><a href="https://github.com/askexort/exort">GitHub</a></li>
                 <li><a href="https://t.me/askexort_bot" class="btn btn-primary"><i class="fab fa-telegram"></i> Try Bot</a></li>
             </ul>
@@ -1134,10 +1175,6 @@
         <div class="container">
             <div class="hero-content">
                 <div class="hero-text">
-                    <div class="hero-badge">
-                        <i class="fas fa-bolt"></i>
-                        <span>Open Source & Free Forever</span>
-                    </div>
                     <h1>
                         Build AI<br>
                         <span class="gradient-text">Agents</span><br>
@@ -1165,7 +1202,7 @@
                             <div class="stat-label">AI Providers</div>
                         </div>
                         <div class="stat">
-                            <div class="stat-number">∞</div>
+                            <div class="stat-number">&infin;</div>
                             <div class="stat-label">Possibilities</div>
                         </div>
                     </div>
@@ -1201,7 +1238,7 @@
                                         </feMerge>
                                     </filter>
                                 </defs>
-                                <circle cx="256" cy="256" r="240" fill="#030014" stroke="url(#heroGrad1)" stroke-width="10"/>
+                                <circle cx="256" cy="256" r="240" fill="#000000" stroke="url(#heroGrad1)" stroke-width="10"/>
                                 <g filter="url(#glow)">
                                     <circle cx="256" cy="120" r="24" fill="url(#heroGrad1)"/>
                                     <circle cx="156" cy="200" r="20" fill="url(#heroGrad1)" opacity="0.9"/>
@@ -1244,32 +1281,32 @@
             </div>
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="feature-icon">🤖</div>
+                    <div class="feature-icon">&#x1F916;</div>
                     <h3>Agentic Loop</h3>
-                    <p>Think → Act → Observe architecture for autonomous reasoning and intelligent decision making.</p>
+                    <p>Think &#x2192; Act &#x2192; Observe architecture for autonomous reasoning and intelligent decision making.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">🔌</div>
+                    <div class="feature-icon">&#x1F50C;</div>
                     <h3>Multi-Provider</h3>
                     <p>OpenAI, Ollama (local), Groq (free tier) out of the box. Switch providers with a single flag.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">🛠️</div>
+                    <div class="feature-icon">&#x1F6E0;&#xFE0F;</div>
                     <h3>Plugin Tools</h3>
                     <p>Decorator-based tool registration system. Easy to extend with custom capabilities.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">💾</div>
+                    <div class="feature-icon">&#x1F4BE;</div>
                     <h3>Conversation Memory</h3>
                     <p>SQLite-backed persistent conversations. Remember context across sessions.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
+                    <div class="feature-icon">&#x26A1;</div>
                     <h3>Streaming</h3>
                     <p>Real-time token streaming for all providers. See responses as they're generated.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">📊</div>
+                    <div class="feature-icon">&#x1F4CA;</div>
                     <h3>Token Tracker</h3>
                     <p>Track token buy/sell events across multiple chains. Real-time alerts and analytics.</p>
                 </div>
@@ -1299,7 +1336,7 @@
                         </li>
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>Python & CLI interface</span>
+                            <span>Python &amp; CLI interface</span>
                         </li>
                         <li>
                             <i class="fas fa-check-circle"></i>
@@ -1344,76 +1381,12 @@ response = agent.<span class="function">chat</span>(<span class="string">"Hello!
         </div>
     </section>
 
-    <!-- Token Section -->
-    <section class="token-section" id="token">
-        <div class="container">
-            <div class="token-content">
-                <div class="token-card">
-                    <div class="token-symbol">$MIND</div>
-                    <div class="token-network">
-                        <i class="fas fa-circle" style="color: #0052ff; font-size: 8px;"></i>
-                        Base Network
-                    </div>
-                    <div class="token-stats">
-                        <div class="token-stat">
-                            <div class="token-stat-label">Network</div>
-                            <div class="token-stat-value">Base</div>
-                        </div>
-                        <div class="token-stat">
-                            <div class="token-stat-label">Type</div>
-                            <div class="token-stat-value">ERC-20</div>
-                        </div>
-                        <div class="token-stat">
-                            <div class="token-stat-label">Supply</div>
-                            <div class="token-stat-value">1B</div>
-                        </div>
-                        <div class="token-stat">
-                            <div class="token-stat-label">Utility</div>
-                            <div class="token-stat-value">Governance</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="token-info">
-                    <div class="section-label">
-                        <i class="fas fa-coins"></i>
-                        <span>Token</span>
-                    </div>
-                    <h2>$MIND Token</h2>
-                    <p>The governance token powering the Exort ecosystem. Built on Base for fast, low-cost transactions.</p>
-                    <ul class="token-benefits">
-                        <li>
-                            <i class="fas fa-shield-alt"></i>
-                            <div>
-                                <strong>Governance Rights</strong>
-                                <span>Vote on protocol upgrades and feature proposals</span>
-                            </div>
-                        </li>
-                        <li>
-                            <i class="fas fa-bolt"></i>
-                            <div>
-                                <strong>Fast & Cheap</strong>
-                                <span>Built on Base for instant transactions with minimal fees</span>
-                            </div>
-                        </li>
-                        <li>
-                            <i class="fas fa-lock"></i>
-                            <div>
-                                <strong>Staking Rewards</strong>
-                                <span>Earn passive income by staking your tokens</span>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- CTA Section -->
     <section class="cta-section">
         <div class="container">
             <div class="cta-card">
                 <h2>Ready to Build?</h2>
-                <p>Join thousands of developers using Exort to build the next generation of AI applications.</p>
+                <p>Join the developers using Exort to build the next generation of AI applications.</p>
                 <div class="cta-buttons">
                     <a href="https://github.com/askexort/exort" class="btn btn-primary btn-lg">
                         <i class="fab fa-github"></i> Star on GitHub
@@ -1426,6 +1399,53 @@ response = agent.<span class="function">chat</span>(<span class="string">"Hello!
         </div>
     </section>
 
+    <!-- Secret Menu -->
+    <section class="secret-section">
+        <div class="container">
+            <div class="secret-divider"></div>
+            <div class="secret-icon" id="secretTrigger" title="...">&#x1F512;</div>
+            <div class="secret-title">Classified</div>
+            <div class="secret-content" id="secretContent">
+                <div class="secret-card">
+                    <div class="secret-token-symbol">$MIND</div>
+                    <div class="secret-token-badge">
+                        <i class="fas fa-circle" style="color: #0052ff; font-size: 8px;"></i>
+                        Base Network &middot; ERC-20
+                    </div>
+                    <div class="secret-poem">
+                        In circuits deep where thoughts converge,<br>
+                        A <em>mind</em> awakens on the edge.<br>
+                        Not born of flesh, nor forged in steel,<br>
+                        But woven from the things we feel.<br><br>
+                        It learns, it grows, it speaks, it sees,<br>
+                        A spark of life among the trees.<br>
+                        From open source its roots take hold,<br>
+                        A story waiting to unfold.<br><br>
+                        The token comes. Not yet. <em>Soon.</em><br>
+                        Watch the silence fill the room.
+                    </div>
+                    <div class="secret-status">&#x2022; Something is coming &#x2022;</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Donate & Get Rewarded -->
+    <section class="donate-section">
+        <div class="container">
+            <div class="donate-card">
+                <div class="donate-icon">&#x1F49C;</div>
+                <div class="donate-title">Donate &amp; Get Rewarded</div>
+                <p class="donate-desc">
+                    Support the Exort project. Those who contribute will be remembered.
+                </p>
+                <a href="https://github.com/sponsors/askexort" class="donate-btn">
+                    <i class="fas fa-heart"></i> Support Exort
+                </a>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer>
         <div class="container">
@@ -1434,10 +1454,9 @@ response = agent.<span class="function">chat</span>(<span class="string">"Hello!
                     <a href="/" class="logo">
                         <div class="logo-icon">
                             <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="256" cy="256" r="240" fill="#030014" stroke="url(#logoGrad1)" stroke-width="8"/>
+                                <circle cx="256" cy="256" r="240" fill="#000000" stroke="url(#logoGrad1)" stroke-width="8"/>
                                 <circle cx="256" cy="120" r="20" fill="url(#logoGrad1)"/>
                                 <circle cx="156" cy="200" r="16" fill="url(#logoGrad1)" opacity="0.9"/>
-                                <circle cx="356" cy="200" r="16" fill="url(#logoGrad1)" opacity="0.9"/>
                                 <circle cx="256" cy="280" r="18" fill="url(#logoGrad2)"/>
                                 <text x="256" y="310" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" font-size="160" fill="white" opacity="0.1">E</text>
                             </svg>
@@ -1449,40 +1468,42 @@ response = agent.<span class="function">chat</span>(<span class="string">"Hello!
                         <a href="https://github.com/askexort/exort"><i class="fab fa-github"></i></a>
                         <a href="https://t.me/askexort_bot"><i class="fab fa-telegram"></i></a>
                         <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-discord"></i></a>
                     </div>
                 </div>
                 <div class="footer-column">
                     <h4>Product</h4>
                     <ul>
                         <li><a href="#features">Features</a></li>
-                        <li><a href="#code">Documentation</a></li>
-                        <li><a href="#token">Token</a></li>
-                        <li><a href="#">Roadmap</a></li>
+                        <li><a href="#code">Quick Start</a></li>
+                        <li><a href="https://github.com/askexort/exort">Documentation</a></li>
+                        <li><a href="https://github.com/askexort/exort/releases">Changelog</a></li>
+                        <li><a href="https://github.com/askexort/exort/blob/main/LICENSE">License (MIT)</a></li>
                     </ul>
                 </div>
                 <div class="footer-column">
                     <h4>Resources</h4>
                     <ul>
-                        <li><a href="#">API Reference</a></li>
-                        <li><a href="#">Tutorials</a></li>
-                        <li><a href="#">Examples</a></li>
-                        <li><a href="#">Blog</a></li>
+                        <li><a href="https://github.com/askexort/exort">Source Code</a></li>
+                        <li><a href="https://github.com/askexort/exort/issues">Bug Reports</a></li>
+                        <li><a href="https://github.com/askexort/exort/pulls">Pull Requests</a></li>
+                        <li><a href="https://pypi.org/project/exort-agent/">PyPI Package</a></li>
+                        <li><a href="https://github.com/askexort/exort/wiki">Wiki</a></li>
                     </ul>
                 </div>
                 <div class="footer-column">
                     <h4>Community</h4>
                     <ul>
                         <li><a href="https://github.com/askexort/exort">GitHub</a></li>
-                        <li><a href="https://t.me/askexort_bot">Telegram</a></li>
-                        <li><a href="#">Discord</a></li>
-                        <li><a href="#">Contributing</a></li>
+                        <li><a href="https://t.me/askexort_bot">Telegram Bot</a></li>
+                        <li><a href="https://github.com/askexort/exort/graphs/contributors">Contributors</a></li>
+                        <li><a href="https://github.com/askexort/exort/discussions">Discussions</a></li>
+                        <li><a href="https://github.com/askexort/exort/blob/main/CONTRIBUTING.md">Contributing</a></li>
                     </ul>
                 </div>
             </div>
             <div class="footer-bottom">
                 <p>&copy; 2026 Exort. Open source under MIT License.</p>
-                <p>Built with ❤️ by the community</p>
+                <p>Built with &#x2764;&#xFE0F; by the community</p>
             </div>
         </div>
     </footer>
@@ -1532,15 +1553,6 @@ response = agent.<span class="function">chat</span>(<span class="string">"Hello!
         // Initialize
         createParticles();
 
-        // Mobile menu toggle (basic)
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        if (mobileMenuBtn) {
-            mobileMenuBtn.addEventListener('click', () => {
-                // Add mobile menu functionality here
-                alert('Mobile menu coming soon!');
-            });
-        }
-
         // Intersection Observer for animations
         const observerOptions = {
             threshold: 0.1,
@@ -1562,6 +1574,20 @@ response = agent.<span class="function">chat</span>(<span class="string">"Hello!
             card.style.transform = 'translateY(20px)';
             card.style.transition = 'all 0.6s ease';
             observer.observe(card);
+        });
+
+        // Secret Menu Toggle
+        const secretTrigger = document.getElementById('secretTrigger');
+        const secretContent = document.getElementById('secretContent');
+        let clickCount = 0;
+
+        secretTrigger.addEventListener('click', () => {
+            clickCount++;
+            if (clickCount >= 3) {
+                secretContent.classList.toggle('revealed');
+                secretTrigger.style.opacity = secretContent.classList.contains('revealed') ? '1' : '0.6';
+                clickCount = 0;
+            }
         });
     </script>
 </body>
