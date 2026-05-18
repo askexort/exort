@@ -1,54 +1,14 @@
 """
-Shell command execution tools.
-
-Provides a tool for running shell commands with safety guards.
+Shell execution tools — run shell commands safely.
 """
 
-from __future__ import annotations
-
-import json
+import os
 import subprocess
-
-from Exort.tools.base import tool
-
-# Commands that are always blocked for safety
-BLOCKED_COMMANDS = frozenset({
-    "rm -rf /", "rm -rf /*", "mkfs", "dd if=", ":(){:|:&};:",
-    "chmod -R 777 /", "shutdown", "reboot", "halt", "poweroff",
-})
+import sys
 
 
-def _is_safe_command(command: str) -> bool:
-    """Basic safety check for shell commands."""
-    cmd_lower = command.lower().strip()
-    return all(blocked not in cmd_lower for blocked in BLOCKED_COMMANDS)
-
-
-@tool(
-    name="run_shell",
-    description="Execute a shell command and return stdout/stderr. Use with caution.",
-)
-def run_shell(
-    command: str,
-    timeout: int = 30,
-    working_directory: str | None = None,
-) -> str:
-    """Execute a shell command.
-
-    Args:
-        command: The shell command to execute.
-        timeout: Timeout in seconds (default 30).
-        working_directory: Working directory for the command.
-
-    Returns:
-        JSON with stdout, stderr, and return code.
-    """
-    if not _is_safe_command(command):
-        return json.dumps({
-            "error": "Command blocked for safety reasons.",
-            "command": command,
-        })
-
+def _run_shell(command: str, timeout: int = 30, cwd: str = None) -> dict:
+    """Run a shell command and capture output."""
     try:
         result = subprocess.run(
             command,
@@ -56,27 +16,49 @@ def run_shell(
             capture_output=True,
             text=True,
             timeout=timeout,
-            cwd=working_directory,
+            cwd=cwd or os.getcwd(),
         )
-        output = {
-            "stdout": result.stdout[:50000],  # Cap output
-            "stderr": result.stderr[:10000],
+        output = result.stdout
+        if result.stderr:
+            output += f"\n[stderr]: {result.stderr}"
+        if len(output) > 5000:
+            output = output[:5000] + "\n...[truncated]"
+        return {
+            "stdout": result.stdout[:5000],
+            "stderr": result.stderr[:2000] if result.stderr else "",
             "returncode": result.returncode,
             "command": command,
         }
-        if result.returncode != 0:
-            output["status"] = "error"
-        else:
-            output["status"] = "success"
-        return json.dumps(output, indent=2)
-
     except subprocess.TimeoutExpired:
-        return json.dumps({
-            "error": f"Command timed out after {timeout}s",
-            "command": command,
-        })
-    except Exception as exc:
-        return json.dumps({
-            "error": f"Failed to execute command: {exc}",
-            "command": command,
-        })
+        return {"error": f"Command timed out after {timeout}s", "command": command}
+    except Exception as e:
+        return {"error": f"Failed to run command: {e}", "command": command}
+
+
+def register_tools(registry):
+    """Register shell tools."""
+    registry.register(
+        name="run_shell",
+        description="Execute a shell command and return the output. Use this for system commands, git operations, package management, etc. Commands timeout after 30 seconds.",
+        parameters={
+            "type": "object",
+            "properties": {
+                "command": {
+                    "type": "string",
+                    "description": "The shell command to execute",
+                },
+                "timeout": {
+                    "type": "integer",
+                    "description": "Timeout in seconds (default: 30)",
+                    "default": 30,
+                },
+                "cwd": {
+                    "type": "string",
+                    "description": "Working directory (optional, defaults to current dir)",
+                },
+            },
+            "required": ["command"],
+        },
+        handler=_run_shell,
+        dangerous=True,
+    )

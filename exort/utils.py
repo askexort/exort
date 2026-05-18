@@ -1,24 +1,23 @@
 """
-Utility functions for Exort.
-
-Contains helpers for formatting, logging, and common operations.
+Utility functions for Exort Agent.
 """
 
-from __future__ import annotations
-
-import json
+import os
 import sys
-import time
+import json
+import uuid
+from datetime import datetime
 from typing import Any
 
 
-# ANSI color codes
+# ── ANSI Colors ──
 class Colors:
-    """ANSI terminal color codes."""
-
+    """ANSI color codes for terminal output."""
     RESET = "\033[0m"
     BOLD = "\033[1m"
     DIM = "\033[2m"
+    ITALIC = "\033[3m"
+    UNDERLINE = "\033[4m"
 
     BLACK = "\033[30m"
     RED = "\033[31m"
@@ -30,150 +29,96 @@ class Colors:
     WHITE = "\033[37m"
 
     BG_BLACK = "\033[40m"
-    BG_RED = "\033[41m"
-    BG_GREEN = "\033[42m"
-    BG_YELLOW = "\033[43m"
     BG_BLUE = "\033[44m"
 
-    @classmethod
-    def disable(cls) -> None:
-        """Disable all colors."""
-        for attr in dir(cls):
+    @staticmethod
+    def disable():
+        """Disable all colors (for non-terminal output)."""
+        for attr in dir(Colors):
             if attr.isupper() and not attr.startswith("_"):
-                setattr(cls, attr, "")
+                setattr(Colors, attr, "")
 
 
-def colorize(text: str, color: str, bold: bool = False) -> str:
-    """Apply ANSI color to text.
-
-    Args:
-        text: Text to colorize.
-        color: ANSI color code (from Colors class).
-        bold: Whether to make text bold.
-
-    Returns:
-        Colorized text string.
-    """
-    prefix = Colors.BOLD if bold else ""
-    return f"{prefix}{color}{text}{Colors.RESET}"
+def colorize(text: str, color: str) -> str:
+    """Wrap text in ANSI color codes."""
+    return f"{color}{text}{Colors.RESET}"
 
 
-def print_colored(text: str, color: str, bold: bool = False, file=None) -> None:
-    """Print colorized text to a file (default stderr)."""
-    print(colorize(text, color, bold), file=file or sys.stderr)
+def generate_id() -> str:
+    """Generate a short unique ID."""
+    return uuid.uuid4().hex[:12]
 
 
-def format_tool_call(name: str, arguments: dict[str, Any], color: bool = True) -> str:
-    """Format a tool call for display.
-
-    Args:
-        name: Tool name.
-        arguments: Tool arguments.
-        color: Whether to use ANSI colors.
-
-    Returns:
-        Formatted string.
-    """
-    args_str = json.dumps(arguments, indent=2)
-    if color:
-        return (
-            f"  {Colors.CYAN}⚡ {name}{Colors.RESET}\n"
-            f"  {Colors.DIM}{args_str}{Colors.RESET}"
-        )
-    return f"  ⚡ {name}\n  {args_str}"
+def timestamp() -> str:
+    """Current timestamp in ISO format."""
+    return datetime.now().isoformat()
 
 
-def format_tool_result(result: str, color: bool = True) -> str:
-    """Format a tool result for display.
-
-    Args:
-        result: Tool result string.
-        color: Whether to use ANSI colors.
-
-    Returns:
-        Formatted string.
-    """
-    # Truncate very long results
-    display = result[:2000]
-    if len(result) > 2000:
-        display += f"\n... ({len(result) - 2000} chars truncated)"
-
-    if color:
-        return f"  {Colors.GREEN}📋 Result:{Colors.RESET}\n  {display}"
-    return f"  📋 Result:\n  {display}"
+def truncate(text: str, max_len: int = 100) -> str:
+    """Truncate text with ellipsis."""
+    if len(text) <= max_len:
+        return text
+    return text[: max_len - 3] + "..."
 
 
-def format_token_usage(usage: dict[str, int], color: bool = True) -> str:
-    """Format token usage for display.
+def safe_json(obj: Any) -> str:
+    """Safely serialize to JSON."""
+    try:
+        return json.dumps(obj, indent=2, ensure_ascii=False, default=str)
+    except Exception:
+        return str(obj)
 
-    Args:
-        usage: Token usage dict.
-        color: Whether to use ANSI colors.
 
-    Returns:
-        Formatted string.
-    """
+def format_tokens(usage: dict) -> str:
+    """Format token usage info."""
     prompt = usage.get("prompt_tokens", 0)
     completion = usage.get("completion_tokens", 0)
     total = usage.get("total_tokens", prompt + completion)
-
-    text = f"tokens: {total} (prompt: {prompt}, completion: {completion})"
-    if color:
-        return f"  {Colors.DIM}📊 {text}{Colors.RESET}"
-    return f"  📊 {text}"
+    return f"[{prompt} in / {completion} out / {total} total]"
 
 
-def generate_id(prefix: str = "conv") -> str:
-    """Generate a unique ID with prefix.
-
-    Args:
-        prefix: ID prefix string.
-
-    Returns:
-        Unique identifier string.
-    """
-    return f"{prefix}_{int(time.time() * 1000)}"
-
-
-def truncate_text(text: str, max_length: int = 100) -> str:
-    """Truncate text to a maximum length.
-
-    Args:
-        text: Text to truncate.
-        max_length: Maximum length.
-
-    Returns:
-        Truncated text.
-    """
-    if len(text) <= max_length:
-        return text
-    return text[: max_length - 3] + "..."
+def format_duration(seconds: float) -> str:
+    """Format duration in human-readable form."""
+    if seconds < 1:
+        return f"{seconds*1000:.0f}ms"
+    elif seconds < 60:
+        return f"{seconds:.1f}s"
+    else:
+        mins = int(seconds // 60)
+        secs = seconds % 60
+        return f"{mins}m {secs:.0f}s"
 
 
-def safe_json_parse(text: str) -> dict[str, Any] | None:
-    """Safely parse JSON, returning None on failure.
-
-    Args:
-        text: JSON string to parse.
-
-    Returns:
-        Parsed dict or None.
-    """
+def get_terminal_width() -> int:
+    """Get terminal width, default 80."""
     try:
-        return json.loads(text)
-    except (json.JSONDecodeError, TypeError):
-        return None
+        return os.get_terminal_size().columns
+    except Exception:
+        return 80
 
 
-def estimate_tokens(text: str) -> int:
-    """Rough token count estimate.
+def print_banner():
+    """Print the Exort welcome banner."""
+    banner = f"""
+{Colors.CYAN}{Colors.BOLD}
+  ███████╗██╗  ██╗ ██████╗ ██████╗ ████████╗
+  ██╔════╝╚██╗██╔╝██╔═══██╗██╔══██╗╚══██╔══╝
+  █████╗   ╚███╔╝ ██║   ██║██████╔╝   ██║
+  ██╔══╝   ██╔██╗ ██║   ██║██╔══██╗   ██║
+  ███████╗██╔╝ ██╗╚██████╔╝██║  ██║   ██║
+  ╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝
+{Colors.RESET}{Colors.DIM}  AI Agent for Everyone — v1.0.0{Colors.RESET}
+"""
+    print(banner)
 
-    Uses a simple heuristic of ~4 characters per token.
 
-    Args:
-        text: Text to estimate.
-
-    Returns:
-        Estimated token count.
-    """
-    return len(text) // 4
+def confirm(message: str, default: bool = False) -> bool:
+    """Ask for user confirmation."""
+    suffix = " [Y/n] " if default else " [y/N] "
+    try:
+        response = input(f"{message}{suffix}").strip().lower()
+        if not response:
+            return default
+        return response in ("y", "yes", "true", "1")
+    except (EOFError, KeyboardInterrupt):
+        return False

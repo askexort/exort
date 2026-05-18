@@ -1,267 +1,201 @@
 """
-Configuration management for Exort.
+Configuration management for Exort Agent.
 
-Loads configuration from YAML files and environment variables.
-Supports layered configuration with sensible defaults.
+Supports:
+  - YAML config at ~/.exort/config.yaml
+  - Environment variables via .env
+  - Multiple profiles
+  - Runtime overrides
 """
 
-from __future__ import annotations
-
 import os
+import shutil
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
-# Default configuration
-DEFAULTS: dict[str, Any] = {
+import yaml
+
+
+def get_exort_home() -> Path:
+    """Get the Exort home directory. Respects EXORT_HOME env var."""
+    home = os.environ.get("EXORT_HOME")
+    if home:
+        return Path(home)
+    return Path.home() / ".exort"
+
+
+DEFAULTS = {
     "provider": "groq",
-    "model": None,  # Use provider default
-    "temperature": 0.7,
-    "max_tokens": 4096,
-    "max_iterations": 10,
+    "model": "llama-3.3-70b-versatile",
+    "providers": {
+        "groq": {
+            "api_key_env": "GROQ_API_KEY",
+            "base_url": "https://api.groq.com/openai/v1",
+            "default_model": "llama-3.3-70b-versatile",
+        },
+        "openai": {
+            "api_key_env": "OPENAI_API_KEY",
+            "base_url": "https://api.openai.com/v1",
+            "default_model": "gpt-4o-mini",
+        },
+        "ollama": {
+            "api_key_env": None,
+            "base_url": "http://localhost:11434/v1",
+            "default_model": "llama3.1",
+        },
+        "anthropic": {
+            "api_key_env": "ANTHROPIC_API_KEY",
+            "base_url": "https://api.anthropic.com/v1",
+            "default_model": "claude-sonnet-4-20250514",
+        },
+    },
+    "agent": {
+        "max_iterations": 25,
+        "max_tokens": 4096,
+        "temperature": 0.7,
+        "system_prompt": None,  # Uses built-in default
+    },
     "memory": {
         "enabled": True,
-        "db_path": None,  # Use default ~/.Exort/memory.db
+        "max_history": 50,
+    },
+    "skills": {
+        "enabled": True,
+        "auto_load": [],
     },
     "tools": {
         "enabled": True,
-        "auto_discover": True,
+        "allow_dangerous": False,
     },
-    "ui": {
-        "stream": True,
-        "show_tool_calls": True,
+    "display": {
         "show_token_usage": True,
+        "show_tool_calls": True,
         "color": True,
+        "streaming": True,
+    },
+    "telegram": {
+        "token_env": "TELEGRAM_BOT_TOKEN",
+        "max_tokens": 2048,
+        "allowed_users": [],  # Empty = allow all
+        "rate_limit_per_min": 10,
     },
 }
 
 
 class Config:
-    """Layered configuration manager.
+    """
+    Exort configuration manager.
 
-    Configuration is loaded from (in order of priority):
-
-    1. Constructor arguments
-    2. Environment variables (``Exort_*``)
-    3. Config file (``~/.Exort/config.yaml``)
-    4. Built-in defaults
-
-    Args:
-        config_path: Path to YAML config file.
-            Defaults to ``~/.Exort/config.yaml``.
-        overrides: Dict of override values.
-
-    Example::
-
-        config = Config()
-        print(config["provider"])  # "groq"
-
-        config = Config(overrides={"provider": "openai", "model": "gpt-4o"})
-        print(config["provider"])  # "openai"
+    Usage:
+        cfg = Config()
+        model = cfg.get("model")
+        cfg.set("provider", "openai")
+        cfg.save()
     """
 
-    def __init__(
-        self,
-        config_path: str | None = None,
-        overrides: dict[str, Any] | None = None,
-    ) -> None:
-        self._data: dict[str, Any] = {}
-        self._config_path = config_path
+    def __init__(self, path: Optional[str] = None, profile: Optional[str] = None):
+        self._home = get_exort_home()
+        self._profile = profile or os.environ.get("EXORT_PROFILE", "default")
+        self._path = Path(path) if path else self._home / "config.yaml"
+        self._data: dict = {}
+        self._load()
+        self._load_env()
 
-        # Layer 1: Defaults
-        self._data = _deep_copy(DEFAULTS)
+    def _load(self):
+        """Load config from YAML, merging with defaults."""
+        merged = self._deep_copy(DEFAULTS)
+        if self._path.exists():
+            with open(self._path, "r", encoding="utf-8") as f:
+                user_cfg = yaml.safe_load(f) or {}
+            merged = self._deep_merge(merged, user_cfg)
+        self._data = merged
 
-        # Layer 2: Config file
-        file_config = self._load_yaml_config(config_path)
-        if file_config:
-            _deep_merge(self._data, file_config)
-
-        # Layer 3: Environment variables
-        env_config = self._load_env_config()
-        if env_config:
-            _deep_merge(self._data, env_config)
-
-        # Layer 4: Explicit overrides
-        if overrides:
-            _deep_merge(self._data, overrides)
-
-    @property
-    def config_path(self) -> Path:
-        """Return the resolved config file path."""
-        if self._config_path:
-            return Path(self._config_path)
-        return Path.home() / ".Exort" / "config.yaml"
-
-    def _load_yaml_config(self, path: str | None = None) -> dict[str, Any]:
-        """Load config from YAML file."""
-        config_file = Path(path) if path else self.config_path
-        if not config_file.exists():
-            return {}
-
-        try:
-            import yaml
-        except ImportError:
-            # PyYAML not installed — try basic parsing
-            return self._parse_simple_yaml(config_file)
-
-        try:
-            with open(config_file, encoding="utf-8") as f:
-                data = yaml.safe_load(f)
-            return data if isinstance(data, dict) else {}
-        except Exception:
-            return {}
-
-    def _parse_simple_yaml(self, path: Path) -> dict[str, Any]:
-        """Minimal YAML parser for flat key-value configs."""
-        config: dict[str, Any] = {}
-        try:
-            for line in path.read_text(encoding="utf-8").splitlines():
-                line = line.strip()
-                if not line or line.startswith("#"):
-                    continue
-                if ":" in line:
-                    key, _, value = line.partition(":")
-                    key = key.strip()
-                    value = value.strip().strip('"').strip("'")
-                    # Type coercion
-                    if value.lower() in ("true", "yes"):
-                        config[key] = True
-                    elif value.lower() in ("false", "no"):
-                        config[key] = False
-                    elif value.isdigit():
-                        config[key] = int(value)
-                    else:
-                        try:
-                            config[key] = float(value)
-                        except ValueError:
-                            config[key] = value
-        except Exception:
-            pass
-        return config
-
-    def _load_env_config(self) -> dict[str, Any]:
-        """Load config from Exort_* environment variables."""
-        config: dict[str, Any] = {}
-        prefix = "Exort_"
-
-        env_map = {
-            f"{prefix}PROVIDER": ("provider", str),
-            f"{prefix}MODEL": ("model", str),
-            f"{prefix}TEMPERATURE": ("temperature", float),
-            f"{prefix}MAX_TOKENS": ("max_tokens", int),
-            f"{prefix}MAX_ITERATIONS": ("max_iterations", int),
-            f"{prefix}MEMORY_DB": (["memory", "db_path"], str),
-        }
-
-        for env_var, (key, cast) in env_map.items():
-            value = os.environ.get(env_var)
-            if value is not None:
-                try:
-                    value = cast(value)
-                except (ValueError, TypeError):
-                    continue
-                if isinstance(key, list):
-                    # Nested key
-                    d = config
-                    for k in key[:-1]:
-                        d = d.setdefault(k, {})
-                    d[key[-1]] = value
-                else:
-                    config[key] = value
-
-        return config
-
-    def save(self, path: str | None = None) -> None:
-        """Save current config to YAML file.
-
-        Args:
-            path: File path. Defaults to ``~/.Exort/config.yaml``.
-        """
-        save_path = Path(path) if path else self.config_path
-        save_path.parent.mkdir(parents=True, exist_ok=True)
-
-        try:
-            import yaml
-            content = yaml.dump(
-                self._data, default_flow_style=False, sort_keys=True
-            )
-        except ImportError:
-            # Fallback: simple key-value format
-            lines = []
-            for key, value in sorted(self._data.items()):
-                if isinstance(value, dict):
-                    lines.append(f"{key}:")
-                    for k, v in sorted(value.items()):
-                        lines.append(f"  {k}: {v}")
-                else:
-                    lines.append(f"{key}: {value}")
-            content = "\n".join(lines) + "\n"
-
-        save_path.write_text(content, encoding="utf-8")
+    def _load_env(self):
+        """Load .env file from exort home directory."""
+        env_path = self._home / ".env"
+        if env_path.exists():
+            with open(env_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        key, _, value = line.partition("=")
+                        key = key.strip()
+                        value = value.strip().strip(""'")
+                        if key and key not in os.environ:
+                            os.environ[key] = value
 
     def get(self, key: str, default: Any = None) -> Any:
-        """Get a config value by dot-separated key.
-
-        Args:
-            key: Config key (e.g. ``"memory.enabled"``).
-            default: Default value if key is not found.
-
-        Returns:
-            The config value.
-        """
+        """Get a config value by dot-notation key. e.g. 'providers.groq.api_key_env'"""
         keys = key.split(".")
-        d = self._data
+        val = self._data
         for k in keys:
-            if isinstance(d, dict) and k in d:
-                d = d[k]
+            if isinstance(val, dict) and k in val:
+                val = val[k]
             else:
                 return default
-        return d
+        return val
 
-    def set(self, key: str, value: Any) -> None:
-        """Set a config value by dot-separated key.
-
-        Args:
-            key: Config key (e.g. ``"provider"``).
-            value: Value to set.
-        """
+    def set(self, key: str, value: Any):
+        """Set a config value by dot-notation key."""
         keys = key.split(".")
         d = self._data
         for k in keys[:-1]:
-            d = d.setdefault(k, {})
+            if k not in d or not isinstance(d[k], dict):
+                d[k] = {}
+            d = d[k]
         d[keys[-1]] = value
 
-    def __getitem__(self, key: str) -> Any:
-        return self._data[key]
+    def save(self):
+        """Save current config to YAML file."""
+        self._home.mkdir(parents=True, exist_ok=True)
+        with open(self._path, "w", encoding="utf-8") as f:
+            yaml.dump(self._data, f, default_flow_style=False, allow_unicode=True)
 
-    def __setitem__(self, key: str, value: Any) -> None:
-        self._data[key] = value
+    def get_api_key(self, provider: Optional[str] = None) -> Optional[str]:
+        """Get API key for a provider from env vars."""
+        provider = provider or self.get("provider", "groq")
+        env_var = self.get(f"providers.{provider}.api_key_env")
+        if env_var:
+            return os.environ.get(env_var)
+        return None
 
-    def __contains__(self, key: str) -> bool:
-        return key in self._data
+    def get_provider_config(self, provider: Optional[str] = None) -> dict:
+        """Get full provider config."""
+        provider = provider or self.get("provider", "groq")
+        return self.get(f"providers.{provider}", {})
 
-    def to_dict(self) -> dict[str, Any]:
-        """Return a copy of the config as a dict."""
-        return _deep_copy(self._data)
+    @property
+    def data(self) -> dict:
+        return self._data
 
-    def __repr__(self) -> str:
-        return f"<Config provider={self._data.get('provider')!r}>"
+    @staticmethod
+    def _deep_merge(base: dict, override: dict) -> dict:
+        result = base.copy()
+        for key, value in override.items():
+            if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+                result[key] = Config._deep_merge(result[key], value)
+            else:
+                result[key] = value
+        return result
+
+    @staticmethod
+    def _deep_copy(d: dict) -> dict:
+        result = {}
+        for k, v in d.items():
+            if isinstance(v, dict):
+                result[k] = Config._deep_copy(v)
+            else:
+                result[k] = v
+        return result
+
+    def __repr__(self):
+        return f"Config(path={self._path}, provider={self.get('provider')}, model={self.get('model')})"
 
 
-def _deep_copy(d: dict[str, Any]) -> dict[str, Any]:
-    """Deep copy a dict (no external deps)."""
-    result: dict[str, Any] = {}
-    for k, v in d.items():
-        if isinstance(v, dict):
-            result[k] = _deep_copy(v)
-        else:
-            result[k] = v
-    return result
-
-
-def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> None:
-    """Merge override into base (mutates base)."""
-    for key, value in override.items():
-        if key in base and isinstance(base[key], dict) and isinstance(value, dict):
-            _deep_merge(base[key], value)
-        else:
-            base[key] = value
+def ensure_exort_home():
+    """Create ~/.exort/ directory structure if it doesn't exist."""
+    home = get_exort_home()
+    home.mkdir(parents=True, exist_ok=True)
+    (home / "skills").mkdir(exist_ok=True)
+    (home / "logs").mkdir(exist_ok=True)
+    return home

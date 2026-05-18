@@ -1,37 +1,27 @@
-version: "3.9"
+version: "3.8"
 
 services:
-  # Exort CLI (interactive)
-  Exort:
+  # Interactive CLI
+  cli:
     build: .
     stdin_open: true
     tty: true
-    env_file: .env
     volumes:
-      - Exort-data:/root/.Exort
-    profiles:
-      - cli
+      - exort-data:/root/.exort
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
 
-  # Telegram Bot
+  # Telegram bot
   bot:
     build: .
-    entrypoint: ["python", "bot/telegram_bot.py"]
-    env_file: .env
+    command: serve
     restart: unless-stopped
     volumes:
-      - Exort-data:/root/.Exort
-    profiles:
-      - bot
-
-  # Landing Page (nginx)
-  landing:
-    image: nginx:alpine
-    ports:
-      - "8080:80"
-    volumes:
-      - ./landing:/usr/share/nginx/html:ro
-    profiles:
-      - web
+      - exort-data:/root/.exort
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - GROQ_API_KEY=${GROQ_API_KEY}
 
 volumes:
-  Exort-data:
+  exort-data:

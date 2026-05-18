@@ -1,53 +1,48 @@
 """
-LLM provider implementations.
+Provider registry — maps provider names to implementations.
 
 Supported providers:
-
-- **openai** - OpenAI API and compatible endpoints
-- **ollama** - Local Ollama server
-- **groq** - Groq cloud (free tier available)
+  - groq: Groq Cloud (free tier available, very fast)
+  - openai: OpenAI / any OpenAI-compatible API
+  - ollama: Local models via Ollama
+  - anthropic: Anthropic Claude models
 """
 
-from Exort.providers.base import BaseProvider, ProviderResponse
-from Exort.providers.groq import GroqProvider
-from Exort.providers.ollama import OllamaProvider
-from Exort.providers.openai import OpenAIProvider
+from typing import Optional
 
-PROVIDERS = {
-    "openai": OpenAIProvider,
-    "ollama": OllamaProvider,
-    "groq": GroqProvider,
-}
+from exort.providers.base import BaseProvider, ProviderResponse
+
+
+_providers = {}
+
+
+def register_provider(name: str, provider_class: type):
+    """Register a provider class."""
+    _providers[name] = provider_class
 
 
 def get_provider(name: str, **kwargs) -> BaseProvider:
-    """Factory function to get a provider by name.
-
-    Args:
-        name: Provider name (openai, ollama, groq).
-        **kwargs: Provider-specific configuration.
-
-    Returns:
-        An initialized BaseProvider instance.
-
-    Raises:
-        ValueError: If the provider name is unknown.
-    """
-    name = name.lower().strip()
-    if name not in PROVIDERS:
-        available = ", ".join(sorted(PROVIDERS.keys()))
-        raise ValueError(
-            f"Unknown provider '{name}'. Available: {available}"
-        )
-    return PROVIDERS[name](**kwargs)
+    """Get a provider instance by name."""
+    if name not in _providers:
+        raise ValueError(f"Unknown provider: {name}. Available: {list(_providers.keys())}")
+    return _providers[name](**kwargs)
 
 
-__all__ = [
-    "BaseProvider",
-    "ProviderResponse",
-    "OpenAIProvider",
-    "OllamaProvider",
-    "GroqProvider",
-    "get_provider",
-    "PROVIDERS",
-]
+def list_providers() -> list[str]:
+    """List available provider names."""
+    return list(_providers.keys())
+
+
+# Auto-register providers
+def _discover():
+    """Import provider modules to trigger registration."""
+    from exort.providers import groq_provider, openai_provider, ollama_provider
+    try:
+        from exort.providers import anthropic_provider
+    except ImportError:
+        pass  # anthropic SDK not installed
+
+
+_discover()
+
+__all__ = ["BaseProvider", "ProviderResponse", "get_provider", "register_provider", "list_providers"]

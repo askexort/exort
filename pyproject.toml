@@ -3,21 +3,20 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "Exort-agent"
-version = "0.1.0"
-description = "Open-source AI Agent Framework with multi-provider support, tool use, and memory"
+name = "exort-agent"
+version = "1.0.0"
+description = "Exort — AI Agent for Everyone. An open-source AI agent with tool use, memory, skills, and multi-provider support."
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.10"
 authors = [
-    {name = "Exort Contributors"},
+    {name = "Exort Team"},
 ]
-keywords = ["ai", "agent", "llm", "openai", "ollama", "groq", "framework"]
+keywords = ["ai", "agent", "llm", "chatbot", "open-source", "tools", "groq", "ollama"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -25,52 +24,44 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
+
 dependencies = [
     "click>=8.0",
     "pyyaml>=6.0",
+    "openai>=1.0",
+    "python-dotenv>=1.0",
 ]
 
 [project.optional-dependencies]
-openai = ["openai>=1.0"]
-groq = ["groq>=0.4"]
-ollama = []  # Uses urllib, no extra deps
-all = ["openai>=1.0", "groq>=0.4"]
+anthropic = ["anthropic>=0.30"]
+telegram = ["python-telegram-bot>=21.0"]
+full = [
+    "anthropic>=0.30",
+    "python-telegram-bot>=21.0",
+]
 dev = [
     "pytest>=7.0",
-    "pytest-cov>=4.0",
-    "ruff>=0.1.0",
-    "mypy>=1.0",
-    "pre-commit>=3.0",
+    "ruff>=0.4",
 ]
 
 [project.scripts]
-Exort = "Exort.cli:main"
+exort = "exort.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/exort-ai/Exort"
-Documentation = "https://exort-ai.readthedocs.io"
-Repository = "https://github.com/exort-ai/Exort"
-Issues = "https://github.com/exort-ai/Exort/issues"
-Changelog = "https://github.com/exort-ai/Exort/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/askexort/exort"
+Documentation = "https://github.com/askexort/exort#readme"
+Repository = "https://github.com/askexort/exort"
+Issues = "https://github.com/askexort/exort/issues"
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["Exort*"]
+include = ["exort*"]
 
 [tool.ruff]
+line-length = 120
 target-version = "py310"
-line-length = 100
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+select = ["E", "F", "W", "I"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-python_files = "test_*.py"
-addopts = "-v --tb=short"
-
-[tool.mypy]
-python_version = "3.10"
-warn_return_any = true
-warn_unused_configs = true
-ignore_missing_imports = true

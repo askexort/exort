@@ -1,9 +1,5 @@
-"""
-Conversation memory system.
+"""Exort memory system — persistent conversation storage."""
 
-Provides SQLite-backed persistent conversation storage.
-"""
-
-from Exort.memory.store import MemoryStore
+from exort.memory.store import MemoryStore
 
 __all__ = ["MemoryStore"]

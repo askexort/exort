@@ -1,26 +1,18 @@
-# ─── Build Stage ───────────────────────────────────────────────
-FROM python:3.11-slim AS builder
-WORKDIR /app
-COPY pyproject.toml setup.py requirements.txt ./
-COPY openmind/ openmind/
-RUN pip install --no-cache-dir --prefix=/install .
+FROM python:3.12-slim
 
-# ─── Runtime Stage ────────────────────────────────────────────
-FROM python:3.11-slim
 WORKDIR /app
 
-COPY --from=builder /install /usr/local
-COPY openmind/ openmind/
-COPY bot/ bot/
-COPY landing/ landing/
+# Install dependencies
+COPY pyproject.toml requirements.txt ./
+RUN pip install --no-cache-dir -e ".[full]"
 
-# Config directory
-RUN mkdir -p /root/.openmind
+# Copy application
+COPY exort/ exort/
+COPY tests/ tests/
 
-# Environment
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH=/app
+# Create exort home
+RUN mkdir -p /root/.exort/skills /root/.exort/logs
 
-# Default: run CLI
-ENTRYPOINT ["openmind"]
-CMD ["chat", "--provider", "groq"]
+# Default: interactive chat
+ENTRYPOINT ["exort"]
+CMD ["chat"]

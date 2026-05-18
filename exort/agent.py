@@ -1,391 +1,374 @@
 """
-Core agent implementation.
+Exort Agent — the core AI agent with tool use, memory, and multi-provider support.
 
-The Agent class implements the agentic loop:
+This is the brain of Exort. It implements a think → act → observe loop
+where the LLM can use tools to accomplish tasks.
 
-    think → act → observe → repeat
+Usage:
+    from exort import Agent
 
-It orchestrates LLM providers, tools, and memory to create
-autonomous AI agents that can reason, use tools, and learn.
+    # Simple usage
+    agent = Agent()
+    print(agent.chat("What is the weather in Tokyo?"))
+
+    # With streaming
+    for chunk in agent.chat("Tell me a story", stream=True):
+        print(chunk, end="", flush=True)
+
+    # With a specific provider
+    agent = Agent(provider="ollama", model="llama3.1")
+    print(agent.chat("Hello!"))
+
+    # Interactive session (auto-saves to memory)
+    agent.start_session("My Project")
+    print(agent.chat("Help me build a web scraper"))
+    print(agent.chat("Now add error handling"))  # Remembers previous context
+    agent.end_session()
 """
 
-from __future__ import annotations
-
 import json
-import logging
-from collections.abc import Callable, Generator
-from typing import Any
+import sys
+import time
+from typing import Generator, Optional
 
-from Exort.config import Config
-from Exort.memory.store import MemoryStore
-from Exort.providers import get_provider
-from Exort.providers.base import BaseProvider
-from Exort.tools.base import ToolRegistry
-from Exort.utils import (
-    generate_id,
-)
+from exort.config import Config
+from exort.memory.store import MemoryStore
+from exort.providers import get_provider
+from exort.providers.base import ProviderResponse
+from exort.tools.registry import ToolRegistry
 
-logger = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = """You are a helpful AI assistant with access to tools. Use them when needed.
+SYSTEM_PROMPT = """You are Exort, an AI assistant that can use tools to help users.
 
-When you need to perform actions or get information, use the available tools.
-Think step by step and explain your reasoning.
-If you don't need tools, just respond directly.
+You have access to the following tools:
+{tool_descriptions}
 
-Be concise but thorough. Always strive for accuracy."""
+IMPORTANT GUIDELINES:
+- Think step by step before answering complex questions
+- Use tools when they can help — don't guess when you can look things up
+- When writing code, test it by running it
+- Be concise but thorough
+- If a tool returns an error, try a different approach
+- Always tell the user what you're doing when using tools
+
+You are helpful, honest, and harmless. If you don't know something, say so."""
 
 
 class Agent:
-    """Exort AI Agent.
+    """
+    The Exort AI Agent.
 
-    Implements the think → act → observe loop for autonomous
-    AI interactions with tool use.
-
-    Args:
-        provider: LLM provider name ("openai", "ollama", "groq") or
-            a BaseProvider instance.
-        model: Model name (uses provider default if not specified).
-        config: Config instance (creates default if not specified).
-        system_prompt: Custom system prompt.
-        tools: ToolRegistry instance (creates default if not specified).
-        memory: MemoryStore instance (creates default if not specified).
-        on_thought: Callback for agent thoughts.
-        on_action: Callback for tool calls.
-        on_observation: Callback for tool results.
-        on_response: Callback for final responses.
-
-    Example::
-
-        agent = Agent(provider="groq")
-        response = agent.chat("What's the weather in Tokyo?")
-
-        # Streaming
-        for chunk in agent.chat_stream("Tell me a story"):
-            print(chunk, end="")
+    Implements the core think → act → observe loop with:
+    - Multi-provider LLM support (Groq, OpenAI, Ollama, Anthropic)
+    - Tool use (web search, file ops, shell, code execution, vision)
+    - Conversation memory (SQLite-backed, persistent)
+    - Streaming responses
+    - Token tracking and cost estimation
     """
 
     def __init__(
         self,
-        provider: str | BaseProvider = "groq",
-        model: str | None = None,
-        config: Config | None = None,
-        system_prompt: str | None = None,
-        tools: ToolRegistry | None = None,
-        memory: MemoryStore | None = None,
-        on_thought: Callable[[str], None] | None = None,
-        on_action: Callable[[str, dict], None] | None = None,
-        on_observation: Callable[[str], None] | None = None,
-        on_response: Callable[[str], None] | None = None,
-    ) -> None:
+        provider: Optional[str] = None,
+        model: Optional[str] = None,
+        config: Optional[Config] = None,
+        memory: Optional[MemoryStore] = None,
+        tools: Optional[ToolRegistry] = None,
+        system_prompt: Optional[str] = None,
+        verbose: bool = False,
+    ):
         self.config = config or Config()
-
-        # Initialize provider
-        if isinstance(provider, str):
-            self.provider = get_provider(
-                provider,
-                model=model,
-            )
-        else:
-            self.provider = provider
-
-        # Initialize tools
+        self.memory = memory or MemoryStore()
         self.tools = tools or ToolRegistry()
-        if self.config.get("tools.auto_discover", True):
-            self.tools.auto_discover()
 
-        # Initialize memory
-        self.memory = memory or MemoryStore(
-            db_path=self.config.get("memory.db_path")
+        # Discover and register tools
+        self.tools.discover()
+
+        # Provider setup
+        self._provider_name = provider or self.config.get("provider", "groq")
+        self._model = model or self.config.get("model")
+        provider_cfg = self.config.get_provider_config(self._provider_name)
+        api_key = self.config.get_api_key(self._provider_name)
+        self.provider = get_provider(
+            self._provider_name,
+            api_key=api_key,
+            base_url=provider_cfg.get("base_url"),
+            default_model=self._model or provider_cfg.get("default_model"),
         )
 
-        self.system_prompt = system_prompt or SYSTEM_PROMPT
-        self.conversation_id: str | None = None
-        self.max_iterations = self.config.get("max_iterations", 10)
+        # Agent settings
+        self._max_iterations = self.config.get("agent.max_iterations", 25)
+        self._max_tokens = self.config.get("agent.max_tokens", 4096)
+        self._temperature = self.config.get("agent.temperature", 0.7)
+        self._streaming = self.config.get("display.streaming", True)
+        self._verbose = verbose
 
-        # Callbacks
-        self._on_thought = on_thought
-        self._on_action = on_action
-        self._on_observation = on_observation
-        self._on_response = on_response
+        # System prompt
+        self._system_prompt = system_prompt or self.config.get("agent.system_prompt") or self._build_system_prompt()
 
-        # State
-        self._total_tokens = 0
-        self._iteration_count = 0
+        # Session state
+        self._conversation_id: Optional[str] = None
+        self._messages: list[dict] = []
+        self._total_usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+        self._total_tool_calls = 0
+        self._turn_count = 0
 
-    def _build_messages(
-        self,
-        user_message: str,
-        conversation_id: str | None = None,
-        include_history: bool = True,
-    ) -> list[dict[str, str]]:
-        """Build the message list for the LLM.
+    def _build_system_prompt(self) -> str:
+        """Build the system prompt with tool descriptions."""
+        tool_descs = []
+        for tool in self.tools._tools.values():
+            params = []
+            props = tool.schema.parameters.get("properties", {})
+            required = tool.schema.parameters.get("required", [])
+            for name, info in props.items():
+                req = " (required)" if name in required else ""
+                params.append(f"    - {name}: {info.get('description', info.get('type', ''))}{req}")
+            param_str = "\n".join(params) if params else "    (no parameters)"
+            tool_descs.append(f"• {tool.schema.name}\n  {tool.schema.description}\n  Parameters:\n{param_str}")
+
+        return SYSTEM_PROMPT.format(tool_descriptions="\n\n".join(tool_descs))
+
+    def start_session(self, title: str = "New Chat") -> str:
+        """Start a new conversation session with memory persistence."""
+        self._conversation_id = self.memory.create_conversation(title)
+        self._messages = []
+        self._total_usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+        self._total_tool_calls = 0
+        self._turn_count = 0
+        if self._verbose:
+            print(f"[Session started: {self._conversation_id}]")
+        return self._conversation_id
+
+    def end_session(self):
+        """End the current session."""
+        if self._conversation_id and self._messages:
+            # Save final state
+            pass
+        self._conversation_id = None
+        self._messages = []
+
+    def load_session(self, conversation_id: str):
+        """Load an existing conversation from memory."""
+        self._conversation_id = conversation_id
+        self._messages = self.memory.get_history(conversation_id)
+
+    def chat(self, user_input: str, stream: bool = False) -> str | Generator[str, None, None]:
+        """
+        Send a message to the agent and get a response.
+
+        This is the main entry point. The agent will:
+        1. Add your message to the conversation
+        2. Send everything to the LLM
+        3. If the LLM wants to use tools, execute them and loop
+        4. Return the final response
 
         Args:
-            user_message: The user's message.
-            conversation_id: Conversation ID for history retrieval.
-            include_history: Whether to include past messages.
+            user_input: The user's message
+            stream: If True, yields response chunks
 
         Returns:
-            List of message dicts in OpenAI format.
+            The agent's response string, or a generator if streaming
         """
-        messages: list[dict[str, str]] = [
-            {"role": "system", "content": self.system_prompt}
-        ]
+        # Auto-start session if needed
+        if not self._conversation_id:
+            self.start_session(title=user_input[:50])
 
-        # Add conversation history
-        if include_history and conversation_id:
-            history = self.memory.get_history(conversation_id)
-            # Exclude system messages (we already added ours)
-            history = [m for m in history if m["role"] != "system"]
-            messages.extend(history)
+        # Add user message
+        self._messages.append({"role": "user", "content": user_input})
+        if self._conversation_id:
+            self.memory.add_message(self._conversation_id, "user", user_input)
 
-        # Add current user message
-        messages.append({"role": "user", "content": user_message})
+        # Prepare messages for API
+        api_messages = [{"role": "system", "content": self._system_prompt}] + self._messages
 
-        return messages
+        # Get tool schemas
+        tool_schemas = self.tools.get_schemas() if self.config.get("tools.enabled", True) else None
 
-    def _handle_tool_calls(
-        self,
-        tool_calls: list[dict[str, Any]],
-        messages: list[dict[str, str]],
-    ) -> list[dict[str, str]]:
-        """Execute tool calls and add results to messages.
-
-        Args:
-            tool_calls: List of tool call dicts from the LLM.
-            messages: Message list to append results to.
-
-        Returns:
-            Updated message list with tool results.
-        """
-        for tc in tool_calls:
-            func = tc.get("function", {})
-            name = func.get("name", "")
-            args_str = func.get("arguments", "{}")
-
-            # Parse arguments
-            try:
-                arguments = json.loads(args_str) if isinstance(args_str, str) else args_str
-            except json.JSONDecodeError:
-                arguments = {}
-
-            # Callbacks
-            if self._on_action:
-                self._on_action(name, arguments)
-
-            logger.debug("Executing tool: %s(%s)", name, arguments)
-
-            # Execute the tool
-            result = self.tools.execute(name, arguments)
-
-            # Callback
-            if self._on_observation:
-                self._on_observation(result)
-
-            logger.debug("Tool result: %s", result[:200])
-
-            # Add assistant tool call message
-            messages.append({
-                "role": "assistant",
-                "content": None,
-                "tool_calls": [tc],
-            })
-
-            # Add tool result message
-            messages.append({
-                "role": "tool",
-                "tool_call_id": tc.get("id", ""),
-                "content": result,
-            })
-
-        return messages
-
-    def chat(
-        self,
-        message: str,
-        conversation_id: str | None = None,
-        stream: bool | None = None,
-        temperature: float | None = None,
-        max_tokens: int | None = None,
-    ) -> str:
-        """Send a message and get a response.
-
-        Implements the full agentic loop: think → act → observe → repeat.
-
-        Args:
-            message: User message text.
-            conversation_id: Conversation ID (auto-generated if not provided).
-            stream: Whether to stream the response.
-            temperature: Override temperature.
-            max_tokens: Override max tokens.
-
-        Returns:
-            The assistant's response text.
-        """
-        if conversation_id is None:
-            if self.conversation_id is None:
-                self.conversation_id = generate_id()
-                self.memory.create_conversation(
-                    self.conversation_id,
-                    provider=self.provider.name,
-                    model=self.provider.model,
-                )
-            conversation_id = self.conversation_id
-
-        # Save user message to memory
-        self.memory.add_message(conversation_id, "user", message)
-
-        # Build messages
-        messages = self._build_messages(message, conversation_id)
-
-        # Get tool definitions
-        tool_defs = self.tools.get_tool_definitions() if self.tools else None
-
-        temp = temperature or self.config.get("temperature", 0.7)
-        tokens = max_tokens or self.config.get("max_tokens", 4096)
-
-        # Agentic loop
-        final_content = ""
-        for iteration in range(self.max_iterations):
-            self._iteration_count += 1
-
-            response = self.provider.generate(
-                messages=messages,
-                tools=tool_defs if tool_defs else None,
-                temperature=temp,
-                max_tokens=tokens,
-            )
-
-            # Track tokens
-            if response.usage:
-                self._total_tokens += response.usage.get("total_tokens", 0)
-
-            # If there are tool calls, handle them
-            if response.tool_calls:
-                # Callback
-                if self._on_thought:
-                    self._on_thought(
-                        f"Iteration {iteration + 1}: Using tools..."
-                    )
-
-                messages = self._handle_tool_calls(response.tool_calls, messages)
-                continue  # Loop back for the next LLM call
-
-            # No tool calls — we have a final response
-            final_content = response.content
-            break
+        # Agent loop: think → act → observe
+        if stream:
+            return self._stream_loop(api_messages, tool_schemas)
         else:
-            final_content = (
-                "I've reached the maximum number of tool use iterations. "
-                "Here's what I have so far:\n\n" + (response.content if response else "")
-            )
+            return self._sync_loop(api_messages, tool_schemas)
 
-        # Save assistant response to memory
-        self.memory.add_message(
-            conversation_id,
-            "assistant",
-            final_content,
-            token_count=response.usage.get("completion_tokens", 0) if response else 0,
-        )
+    def _sync_loop(self, api_messages: list[dict], tool_schemas: list[dict]) -> str:
+        """Synchronous agent loop."""
+        iterations = 0
+        start_time = time.time()
 
-        # Callback
-        if self._on_response:
-            self._on_response(final_content)
-
-        return final_content
-
-    def chat_stream(
-        self,
-        message: str,
-        conversation_id: str | None = None,
-        temperature: float | None = None,
-        max_tokens: int | None = None,
-    ) -> Generator[str, None, None]:
-        """Stream a chat response token by token.
-
-        Args:
-            message: User message text.
-            conversation_id: Conversation ID.
-            temperature: Override temperature.
-            max_tokens: Override max tokens.
-
-        Yields:
-            Partial response text chunks.
-        """
-        if conversation_id is None:
-            if self.conversation_id is None:
-                self.conversation_id = generate_id()
-                self.memory.create_conversation(
-                    self.conversation_id,
-                    provider=self.provider.name,
-                    model=self.provider.model,
+        while iterations < self._max_iterations:
+            iterations += 1
+            try:
+                response = self.provider.chat(
+                    messages=api_messages,
+                    model=self._model,
+                    tools=tool_schemas,
+                    temperature=self._temperature,
+                    max_tokens=self._max_tokens,
+                    stream=False,
                 )
-            conversation_id = self.conversation_id
+            except Exception as e:
+                error_msg = f"API error: {e}"
+                return error_msg
 
-        self.memory.add_message(conversation_id, "user", message)
-        messages = self._build_messages(message, conversation_id)
-        tool_defs = self.tools.get_tool_definitions() if self.tools else None
+            # Track usage
+            self._track_usage(response.usage)
 
-        temp = temperature or self.config.get("temperature", 0.7)
-        tokens = max_tokens or self.config.get("max_tokens", 4096)
+            # If no tool calls, we're done
+            if not response.tool_calls:
+                final_response = response.content
+                self._messages.append({"role": "assistant", "content": final_response})
+                if self._conversation_id:
+                    self.memory.add_message(
+                        self._conversation_id, "assistant", final_response,
+                        token_count=response.usage.get("completion_tokens", 0),
+                    )
+                self._turn_count += 1
+                return final_response
 
-        # For streaming, we handle tool calls non-streaming
-        for _iteration in range(self.max_iterations):
-            last_response = None
-            for chunk in self.provider.generate_stream(
-                messages=messages,
-                tools=tool_defs if tool_defs else None,
-                temperature=temp,
-                max_tokens=tokens,
-            ):
-                last_response = chunk
-                if chunk.content and not chunk.tool_calls:
-                    yield chunk.content
+            # Execute tool calls
+            assistant_msg = {"role": "assistant", "content": response.content or "", "tool_calls": []}
+            api_messages.append(assistant_msg)
 
-            if last_response is None:
-                break
+            for tc in response.tool_calls:
+                tool_name = tc["name"]
+                tool_args = tc["arguments"]
+                tool_id = tc["id"]
 
-            if last_response.tool_calls:
-                messages = self._handle_tool_calls(last_response.tool_calls, messages)
-                continue
+                if self._verbose or self.config.get("display.show_tool_calls"):
+                    print(f"  ⚡ {tool_name}({json.dumps(tool_args, default=str)[:100]})")
 
-            # Save final response
-            self.memory.add_message(
-                conversation_id,
-                "assistant",
-                last_response.content,
-                token_count=(
-                    last_response.usage.get("completion_tokens", 0)
-                    if last_response.usage else 0
-                ),
-            )
-            break
+                # Execute tool
+                result = self.tools.call(tool_name, tool_args)
+                result_str = json.dumps(result, default=str) if not isinstance(result, str) else result
 
-    def reset(self) -> None:
-        """Reset agent state for a new conversation."""
-        self.conversation_id = None
-        self._total_tokens = 0
-        self._iteration_count = 0
+                if len(result_str) > 8000:
+                    result_str = result_str[:8000] + "\n...[truncated]"
 
-    def get_stats(self) -> dict[str, Any]:
-        """Get agent usage statistics.
+                # Add tool result to messages
+                assistant_msg["tool_calls"].append({
+                    "id": tool_id,
+                    "type": "function",
+                    "function": {"name": tool_name, "arguments": json.dumps(tool_args, default=str)},
+                })
+                api_messages.append({
+                    "role": "tool",
+                    "tool_call_id": tool_id,
+                    "content": result_str,
+                })
 
-        Returns:
-            Dict with token usage, iteration count, etc.
-        """
+                self._total_tool_calls += 1
+
+        return "Max iterations reached. Please try a more specific request."
+
+    def _stream_loop(self, api_messages: list[dict], tool_schemas: list[dict]):
+        """Streaming agent loop — yields text chunks."""
+        iterations = 0
+
+        while iterations < self._max_iterations:
+            iterations += 1
+
+            # Check if there were tool calls in the last iteration
+            # We need to make a non-streaming call if tools might be used
+            # For simplicity, do a non-streaming call first, then stream if no tools
+            try:
+                response = self.provider.chat(
+                    messages=api_messages,
+                    model=self._model,
+                    tools=tool_schemas,
+                    temperature=self._temperature,
+                    max_tokens=self._max_tokens,
+                    stream=False,
+                )
+            except Exception as e:
+                yield f"\n[Error: {e}]"
+                return
+
+            self._track_usage(response.usage)
+
+            if not response.tool_calls:
+                # Stream the final response
+                final = response.content
+                self._messages.append({"role": "assistant", "content": final})
+                if self._conversation_id:
+                    self.memory.add_message(
+                        self._conversation_id, "assistant", final,
+                        token_count=response.usage.get("completion_tokens", 0),
+                    )
+                self._turn_count += 1
+                # Yield in chunks for streaming effect
+                chunk_size = 4
+                for i in range(0, len(final), chunk_size):
+                    yield final[i:i+chunk_size]
+                    time.sleep(0.01)
+                return
+
+            # Execute tools
+            assistant_msg = {"role": "assistant", "content": response.content or "", "tool_calls": []}
+            api_messages.append(assistant_msg)
+
+            for tc in response.tool_calls:
+                tool_name = tc["name"]
+                tool_args = tc["arguments"]
+                tool_id = tc["id"]
+
+                yield f"\n⚡ {tool_name}...\n"
+
+                result = self.tools.call(tool_name, tool_args)
+                result_str = json.dumps(result, default=str) if not isinstance(result, str) else result
+                if len(result_str) > 8000:
+                    result_str = result_str[:8000] + "\n...[truncated]"
+
+                assistant_msg["tool_calls"].append({
+                    "id": tool_id,
+                    "type": "function",
+                    "function": {"name": tool_name, "arguments": json.dumps(tool_args, default=str)},
+                })
+                api_messages.append({
+                    "role": "tool",
+                    "tool_call_id": tool_id,
+                    "content": result_str,
+                })
+                self._total_tool_calls += 1
+
+        yield "\n[Max iterations reached]"
+
+    def _track_usage(self, usage: dict):
+        """Track token usage across turns."""
+        if usage:
+            self._total_usage["prompt_tokens"] += usage.get("prompt_tokens", 0)
+            self._total_usage["completion_tokens"] += usage.get("completion_tokens", 0)
+            self._total_usage["total_tokens"] += usage.get("total_tokens", 0)
+
+    @property
+    def usage(self) -> dict:
+        """Get cumulative token usage."""
+        return self._total_usage.copy()
+
+    @property
+    def turn_count(self) -> int:
+        return self._turn_count
+
+    @property
+    def tool_call_count(self) -> int:
+        return self._total_tool_calls
+
+    def get_status(self) -> dict:
+        """Get current agent status."""
         return {
-            "total_tokens": self._total_tokens,
-            "iteration_count": self._iteration_count,
-            "conversation_id": self.conversation_id,
-            "provider": self.provider.name,
-            "model": self.provider.model,
-            "tools_registered": len(self.tools),
+            "provider": self._provider_name,
+            "model": self._model or self.provider.default_model,
+            "conversation_id": self._conversation_id,
+            "turns": self._turn_count,
+            "tool_calls": self._total_tool_calls,
+            "usage": self._total_usage,
+            "tools_available": len(self.tools),
         }
 
-    def __repr__(self) -> str:
-        return (
-            f"<Agent provider={self.provider.name!r} "
-            f"model={self.provider.model!r} "
-            f"tools={len(self.tools)}>"
-        )
+    def reset(self):
+        """Reset conversation state (keeps session)."""
+        self._messages = []
+        self._total_usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+        self._total_tool_calls = 0
+        self._turn_count = 0
+
+    def __repr__(self):
+        return f"Agent(provider={self._provider_name}, model={self._model}, tools={len(self.tools)})"

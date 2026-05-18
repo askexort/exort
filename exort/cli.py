@@ -1,389 +1,453 @@
 """
-Command-line interface for Exort.
+Exort CLI — interactive command-line interface for the AI agent.
 
-Provides commands for chatting, managing configuration,
-and running the agent.
+Commands:
+    exort chat              # Start interactive REPL
+    exort chat "question"   # Ask a single question
+    exort config show       # Show configuration
+    exort config set KEY VALUE  # Set config value
+    exort serve             # Start Telegram bot
+    exort history           # Show conversation history
+    exort providers         # List available providers
+    exort tools             # List available tools
 """
 
-from __future__ import annotations
-
+import json
+import os
 import sys
+import time
 
-try:
-    import click
-except ImportError:
-    print("Error: 'click' is required for the CLI. Install with: pip install click")
-    sys.exit(1)
+import click
 
-from Exort import __version__
-from Exort.config import Config
-from Exort.utils import Colors, colorize
+from exort.config import Config, ensure_exort_home
+from exort.utils import (
+    Colors, print_banner, colorize, format_tokens, format_duration,
+    get_terminal_width, truncate,
+)
 
-BANNER = r"""
-   ____                    __  __           _ __
-  / __ \____  ___  ____   / / / /___  _____(_) /____
- / / / / __ \/ _ \/ __ \ / /_/ / __ \/ ___/ / __/ _ \
-/ /_/ / /_/ /  __/ / / / / __/ / /_/ / /  / / /_/  __/
-\____/ .___/\___/_/ /_/_/ /_/\____/_/  /_/\__/\___/
-    /_/
+
+def _create_agent(config: Config, provider: str = None, model: str = None, verbose: bool = False):
+    """Create an Agent instance from config."""
+    from exort.agent import Agent
+    return Agent(
+        provider=provider,
+        model=model,
+        config=config,
+        verbose=verbose,
+    )
+
+
+def _print_help():
+    """Print REPL help."""
+    help_text = f"""
+{Colors.BOLD}Exort CLI Commands:{Colors.RESET}
+  /help           Show this help
+  /new            Start a new conversation
+  /history        Show recent conversations
+  /sessions       List saved sessions
+  /load <id>      Load a conversation by ID
+  /status         Show agent status (provider, model, usage)
+  /model <name>   Switch model
+  /provider <name> Switch provider
+  /tools          List available tools
+  /providers      List available providers
+  /clear          Clear screen
+  /save           Save current conversation
+  /quit, /exit    Exit
+
+{Colors.DIM}Type your message and press Enter to chat.
+The agent can use tools to search the web, run code, manage files, and more.{Colors.RESET}
 """
+    print(help_text)
+
+
+class ExortREPL:
+    """Interactive Read-Eval-Print Loop for Exort Agent."""
+
+    def __init__(self, agent, config: Config):
+        self.agent = agent
+        self.config = config
+        self.running = True
+
+    def run(self):
+        """Main REPL loop."""
+        print_banner()
+        status = self.agent.get_status()
+        provider = status["provider"]
+        model = status["model"]
+        tools_count = status["tools_available"]
+
+        print(f"  {Colors.DIM}Provider: {provider} | Model: {model} | Tools: {tools_count}{Colors.RESET}")
+        print(f"  {Colors.DIM}Type /help for commands, /quit to exit{Colors.RESET}")
+        print()
+
+        while self.running:
+            try:
+                user_input = self._get_input()
+                if not user_input:
+                    continue
+                self._handle_input(user_input)
+            except KeyboardInterrupt:
+                print("\n")
+                continue
+            except EOFError:
+                print("\nGoodbye!")
+                break
+
+    def _get_input(self) -> str:
+        """Get user input with a prompt."""
+        try:
+            return input(f"{Colors.CYAN}You>{Colors.RESET} ").strip()
+        except (EOFError, KeyboardInterrupt):
+            raise
+
+    def _handle_input(self, user_input: str):
+        """Handle user input — commands or chat."""
+        if user_input.startswith("/"):
+            self._handle_command(user_input)
+        else:
+            self._handle_chat(user_input)
+
+    def _handle_command(self, cmd: str):
+        """Handle slash commands."""
+        parts = cmd.split(maxsplit=1)
+        command = parts[0].lower()
+        args = parts[1] if len(parts) > 1 else ""
+
+        if command in ("/quit", "/exit", "/q"):
+            print("Goodbye!")
+            self.running = False
+
+        elif command == "/help":
+            _print_help()
+
+        elif command == "/new":
+            self.agent.start_session("New Chat")
+            print(f"{Colors.GREEN}New conversation started.{Colors.RESET}")
+
+        elif command == "/status":
+            status = self.agent.get_status()
+            print(f"\n{Colors.BOLD}Agent Status:{Colors.RESET}")
+            print(f"  Provider:    {status['provider']}")
+            print(f"  Model:       {status['model']}")
+            print(f"  Conversation: {status['conversation_id'] or 'none'}")
+            print(f"  Turns:       {status['turns']}")
+            print(f"  Tool calls:  {status['tool_calls']}")
+            usage = status['usage']
+            print(f"  Tokens:      {usage['prompt_tokens']} in / {usage['completion_tokens']} out / {usage['total_tokens']} total")
+            print(f"  Tools:       {status['tools_available']} available")
+            print()
+
+        elif command == "/tools":
+            tools = self.agent.tools.get_tool_names()
+            print(f"\n{Colors.BOLD}Available Tools ({len(tools)}):{Colors.RESET}")
+            for t in tools:
+                tool_obj = self.agent.tools._tools.get(t)
+                desc = tool_obj.schema.description[:80] if tool_obj else ""
+                danger = " ⚠️" if (tool_obj and tool_obj.dangerous) else ""
+                print(f"  {Colors.CYAN}{t}{Colors.RESET}{danger} — {Colors.DIM}{desc}{Colors.RESET}")
+            print()
+
+        elif command == "/providers":
+            from exort.providers import list_providers
+            providers = list_providers()
+            print(f"\n{Colors.BOLD}Available Providers:{Colors.RESET}")
+            for p in providers:
+                current = " ← current" if p == self.agent._provider_name else ""
+                print(f"  {Colors.CYAN}{p}{Colors.RESET}{current}")
+            print()
+
+        elif command == "/model":
+            if not args:
+                print(f"Current model: {self.agent._model or 'default'}")
+                print(f"Usage: /model <model_name>")
+            else:
+                self.agent._model = args.strip()
+                print(f"Model changed to: {args.strip()}")
+
+        elif command == "/provider":
+            if not args:
+                print(f"Current provider: {self.agent._provider_name}")
+                print(f"Usage: /provider <provider_name>")
+            else:
+                try:
+                    self.agent = _create_agent(self.config, provider=args.strip())
+                    print(f"Provider changed to: {args.strip()}")
+                except Exception as e:
+                    print(f"{Colors.RED}Error: {e}{Colors.RESET}")
+
+        elif command == "/history":
+            if self.agent._conversation_id:
+                messages = self.agent._messages
+                print(f"\n{Colors.BOLD}Conversation ({len(messages)} messages):{Colors.RESET}")
+                for msg in messages[-20:]:
+                    role = msg["role"]
+                    content = msg["content"][:100] + "..." if len(msg.get("content", "")) > 100 else msg.get("content", "")
+                    if role == "user":
+                        print(f"  {Colors.CYAN}You:{Colors.RESET} {content}")
+                    elif role == "assistant":
+                        print(f"  {Colors.GREEN}Exort:{Colors.RESET} {content}")
+                    elif role == "tool":
+                        print(f"  {Colors.YELLOW}[tool result]{Colors.RESET} {content[:60]}...")
+                print()
+            else:
+                print("No active conversation. Start chatting to begin.")
+
+        elif command == "/sessions":
+            sessions = self.agent.memory.get_recent_conversations(10)
+            if sessions:
+                print(f"\n{Colors.BOLD}Recent Sessions:{Colors.RESET}")
+                for s in sessions:
+                    print(f"  {Colors.CYAN}{s['id']}{Colors.RESET} — {s['title']} ({s['updated_at'][:10]})")
+                print()
+            else:
+                print("No saved sessions.")
+
+        elif command == "/load":
+            if not args:
+                print("Usage: /load <conversation_id>")
+            else:
+                try:
+                    self.agent.load_session(args.strip())
+                    title = self.agent.memory.get_conversation_title(args.strip())
+                    print(f"Loaded: {title}")
+                except Exception as e:
+                    print(f"{Colors.RED}Error loading session: {e}{Colors.RESET}")
+
+        elif command == "/clear":
+            os.system("cls" if os.name == "nt" else "clear")
+
+        elif command == "/save":
+            if self.agent._conversation_id:
+                print(f"Conversation saved: {self.agent._conversation_id}")
+            else:
+                print("No active conversation to save.")
+
+        else:
+            print(f"{Colors.YELLOW}Unknown command: {command}. Type /help for commands.{Colors.RESET}")
+
+    def _handle_chat(self, user_input: str):
+        """Handle chat message — send to agent and display response."""
+        start_time = time.time()
+        print(f"\n{Colors.GREEN}Exort>{Colors.RESET} ", end="", flush=True)
+
+        try:
+            # Use streaming
+            full_response = ""
+            for chunk in self.agent.chat(user_input, stream=True):
+                print(chunk, end="", flush=True)
+                full_response += chunk
+            print()
+
+            # Show stats
+            elapsed = time.time() - start_time
+            usage = self.agent.usage
+            if self.config.get("display.show_token_usage"):
+                stats = f"{Colors.DIM}[{format_duration(elapsed)}"
+                if usage.get("total_tokens"):
+                    stats += f" | {format_tokens(usage)}"
+                stats += f" | {self.agent.tool_call_count} tools]{Colors.RESET}"
+                print(stats)
+
+        except KeyboardInterrupt:
+            print(f"\n{Colors.YELLOW}[Interrupted]{Colors.RESET}")
+        except Exception as e:
+            print(f"\n{Colors.RED}Error: {e}{Colors.RESET}")
+
+        print()
 
 
 @click.group()
-@click.version_option(version=__version__, prog_name="Exort")
-@click.option("--config", "-c", "config_path", default=None, help="Path to config file.")
-@click.pass_context
-def cli(ctx: click.Context, config_path: str | None = None) -> None:
-    """Exort — Open-source AI Agent Framework.
+@click.version_option(version="1.0.0", prog_name="exort")
+def cli():
+    """Exort — AI Agent for Everyone.
 
-    Create autonomous AI agents with tool use, memory, and
-    multi-provider support.
+    An open-source AI agent with tool use, memory, and multi-provider support.
     """
-    ctx.ensure_object(dict)
-    ctx.obj["config_path"] = config_path
-    ctx.obj["config"] = Config(config_path=config_path)
+    ensure_exort_home()
 
 
 @cli.command()
-@click.option("--provider", "-p", default=None, help="LLM provider (openai, ollama, groq).")
-@click.option("--model", "-m", default=None, help="Model name.")
-@click.option("--stream/--no-stream", default=True, help="Enable/disable streaming.")
-@click.option("--system", "-s", default=None, help="Custom system prompt.")
-@click.option("--conversation", "-conv", default=None, help="Resume a conversation ID.")
-@click.option("--temperature", "-t", default=None, type=float, help="Temperature (0.0-2.0).")
-@click.pass_context
-def chat(
-    ctx: click.Context,
-    provider: str | None,
-    model: str | None,
-    stream: bool,
-    system: str | None,
-    conversation: str | None,
-    temperature: float | None,
-) -> None:
-    """Start an interactive chat session.
+@click.argument("question", required=False)
+@click.option("--provider", "-p", help="LLM provider (groq, openai, ollama, anthropic)")
+@click.option("--model", "-m", help="Model name to use")
+@click.option("--verbose", "-v", is_flag=True, help="Verbose output (show tool calls)")
+@click.option("--no-stream", is_flag=True, help="Disable streaming")
+def chat(question, provider, model, verbose, no_stream):
+    """Chat with the AI agent. Start interactive REPL or ask a single question.
 
-    Chat with an AI agent that can use tools, search the web,
-    read files, and execute code.
-
+    \b
     Examples:
-
-        Exort chat
-
-        Exort chat --provider groq --model llama-3.1-8b-instant
-
-        Exort chat --provider ollama --model llama3.1
+        exort chat                        # Interactive REPL
+        exort chat "What is Python?"      # Single question
+        exort chat -p ollama -m llama3.1  # Use local Ollama
     """
-    config = ctx.obj["config"]
+    config = Config()
+    agent = _create_agent(config, provider=provider, model=model, verbose=verbose)
 
-    # Apply CLI overrides
-    if provider:
-        config.set("provider", provider)
-    if model:
-        config.set("model", model)
-    if stream is not None:
-        config.set("ui.stream", stream)
-    if temperature is not None:
-        config.set("temperature", temperature)
-
-    provider_name = config.get("provider", "groq")
-    model_name = config.get("model")
-
-    # Print banner
-    if config.get("ui.color", True):
-        click.echo(colorize(BANNER, Colors.CYAN, bold=True))
-        click.echo(
-            colorize(
-                f"  Provider: {provider_name} | Model: {model_name or 'default'}",
-                Colors.DIM,
-            )
-        )
-        click.echo(
-            colorize(
-                "  Type 'exit' or 'quit' to end. '/help' for commands.",
-                Colors.DIM,
-            )
-        )
-        click.echo()
+    if question:
+        # Single question mode
+        if no_stream:
+            response = agent.chat(question, stream=False)
+            print(response)
+        else:
+            for chunk in agent.chat(question, stream=True):
+                print(chunk, end="", flush=True)
+            print()
     else:
-        click.echo(BANNER)
-        click.echo(f"  Provider: {provider_name} | Model: {model_name or 'default'}")
-        click.echo("  Type 'exit' or 'quit' to end. '/help' for commands.")
-        click.echo()
-
-    # Initialize agent
-    try:
-        from Exort.agent import Agent
-        agent = Agent(
-            provider=provider_name,
-            model=model_name,
-            config=config,
-            system_prompt=system,
-            on_thought=lambda t: click.echo(
-                colorize(f"  💭 {t}", Colors.YELLOW)
-                if config.get("ui.color") else f"  💭 {t}"
-            ),
-            on_action=lambda n, a: click.echo(
-                f"  ⚡ Using tool: {n}" +
-                (colorize(f"({a})", Colors.DIM) if config.get("ui.color") else f"({a})")
-            ),
-            on_observation=lambda r: None,  # Don't echo full results
-        )
-    except ImportError as exc:
-        click.echo(f"Error initializing agent: {exc}")
-        click.echo("Make sure provider packages are installed.")
-        sys.exit(1)
-
-    if conversation:
-        agent.conversation_id = conversation
-
-    # Main chat loop
-    while True:
-        try:
-            user_input = click.prompt(
-                colorize("You", Colors.GREEN, bold=True)
-                if config.get("ui.color")
-                else "You",
-                prompt_suffix=" > ",
-            )
-        except (EOFError, KeyboardInterrupt):
-            click.echo("\nGoodbye! 👋")
-            break
-
-        if not user_input.strip():
-            continue
-
-        # Handle special commands
-        if user_input.strip().lower() in ("exit", "quit", "/exit", "/quit"):
-            click.echo("Goodbye! 👋")
-            break
-
-        if user_input.strip() == "/help":
-            _show_help()
-            continue
-
-        if user_input.strip() == "/stats":
-            stats = agent.get_stats()
-            click.echo("\n📊 Agent Statistics:")
-            for key, value in stats.items():
-                click.echo(f"  {key}: {value}")
-            click.echo()
-            continue
-
-        if user_input.strip() == "/reset":
-            agent.reset()
-            click.echo("🔄 Conversation reset.\n")
-            continue
-
-        if user_input.strip() == "/tools":
-            click.echo("\n🔧 Registered Tools:")
-            for tool_name in agent.tools.list_tools():
-                t = agent.tools.get(tool_name)
-                click.echo(f"  • {tool_name}: {t.description if t else ''}")
-            click.echo()
-            continue
-
-        # Generate response
-        try:
-            if stream and config.get("ui.stream", True):
-                click.echo(
-                    colorize("\nAssistant", Colors.BLUE, bold=True)
-                    if config.get("ui.color")
-                    else "\nAssistant",
-                    nl=False,
-                )
-                click.echo(" > ", nl=False)
-                for chunk in agent.chat_stream(user_input):
-                    click.echo(chunk, nl=False)
-                click.echo("\n")
-            else:
-                response = agent.chat(user_input)
-                click.echo()
-                if config.get("ui.color"):
-                    click.echo(colorize("Assistant", Colors.BLUE, bold=True), nl=False)
-                else:
-                    click.echo("Assistant", nl=False)
-                click.echo(f" > {response}\n")
-
-        except KeyboardInterrupt:
-            click.echo("\n⚠️  Response interrupted.\n")
-        except Exception as exc:
-            click.echo(f"\n❌ Error: {exc}\n")
-
-    # Show session stats
-    stats = agent.get_stats()
-    if stats.get("total_tokens", 0) > 0:
-        click.echo(
-            colorize(
-                f"\n📊 Session: {stats['total_tokens']} tokens used, "
-                f"{stats['iteration_count']} iterations",
-                Colors.DIM,
-            )
-        )
+        # Interactive REPL
+        repl = ExortREPL(agent, config)
+        repl.run()
 
 
 @cli.command()
-@click.option("--key", "-k", default=None, help="Config key to get/set.")
-@click.option("--value", "-v", default=None, help="Value to set.")
-@click.option("--list", "-l", "list_config", is_flag=True, help="Show all config.")
-@click.option("--init", is_flag=True, help="Create default config file.")
-@click.pass_context
-def config(
-    ctx: click.Context,
-    key: str | None,
-    value: str | None,
-    list_config: bool,
-    init: bool,
-) -> None:
+@click.argument("action", required=False)
+@click.argument("key", required=False)
+@click.argument("value", required=False)
+def config(action, key, value):
     """Manage Exort configuration.
 
+    \b
     Examples:
-
-        Exort config --list
-
-        Exort config --key provider --value groq
-
-        Exort config --init
+        exort config show                           # Show all config
+        exort config set provider openai            # Change provider
+        exort config set model gpt-4o               # Change model
+        exort config set agent.temperature 0.5      # Change temperature
     """
-    cfg = ctx.obj["config"]
+    cfg = Config()
 
-    if init:
+    if action == "show" or action is None:
+        print(f"\n{Colors.BOLD}Exort Configuration:{Colors.RESET}")
+        print(f"  Config file: {cfg._path}")
+        print(f"  Home dir:    {cfg._home}")
+        print()
+        print(yaml.dump(cfg.data, default_flow_style=False))
+
+    elif action == "set":
+        if not key or not value:
+            print("Usage: exort config set <key> <value>")
+            return
+        # Try to parse as JSON for nested values
+        try:
+            parsed = json.loads(value)
+        except (json.JSONDecodeError, ValueError):
+            parsed = value
+        cfg.set(key, parsed)
         cfg.save()
-        click.echo(f"✅ Config file created at: {cfg.config_path}")
-        click.echo("Edit it to customize your settings.")
-        return
+        print(f"{Colors.GREEN}Set {key} = {value}{Colors.RESET}")
 
-    if list_config:
-        click.echo(f"\n📋 Configuration ({cfg.config_path}):\n")
-        _print_dict(cfg.to_dict())
-        click.echo()
-        return
+    elif action == "get":
+        if not key:
+            print("Usage: exort config get <key>")
+            return
+        val = cfg.get(key)
+        print(f"{key} = {val}")
 
-    if key:
-        if value:
-            cfg.set(key, value)
-            cfg.save()
-            click.echo(f"✅ Set {key} = {value}")
-        else:
-            val = cfg.get(key)
-            if val is not None:
-                click.echo(f"{key}: {val}")
-            else:
-                click.echo(f"Key '{key}' not found.")
-        return
-
-    # Default: show all config
-    click.echo(f"\n📋 Configuration ({cfg.config_path}):\n")
-    _print_dict(cfg.to_dict())
-    click.echo()
+    else:
+        print(f"Unknown config action: {action}. Use: show, set, get")
 
 
 @cli.command()
-@click.option("--host", "-h", default="127.0.0.1", help="Host to bind to.")
-@click.option("--port", "-p", default=8000, type=int, help="Port to bind to.")
-@click.pass_context
-def serve(ctx: click.Context, host: str, port: int) -> None:
-    """Start the Exort API server (coming soon).
-
-    Will expose a REST API for programmatic agent access.
-    """
-    click.echo("🚧 API server is coming soon!")
-    click.echo(f"   Planned: http://{host}:{port}")
-    click.echo()
-    click.echo("For now, use the Python API directly:")
-    click.echo()
-    click.echo("  from Exort import Agent")
-    click.echo('  agent = Agent(provider="groq")')
-    click.echo('  response = agent.chat("Hello!")')
-    click.echo()
+def providers():
+    """List available LLM providers."""
+    from exort.providers import list_providers
+    available = list_providers()
+    print(f"\n{Colors.BOLD}Available Providers:{Colors.RESET}")
+    for p in available:
+        print(f"  • {p}")
+    print(f"\n{Colors.DIM}Use: exort chat -p <provider> to switch{Colors.RESET}")
 
 
 @cli.command()
-@click.option("--provider", "-p", default=None, help="Provider to test.")
-@click.option("--query", "-q", default="Say hello in one sentence.", help="Test query.")
-@click.pass_context
-def test(ctx: click.Context, provider: str | None, query: str) -> None:
-    """Test a provider with a simple query.
+def tools():
+    """List available tools."""
+    from exort.tools.registry import ToolRegistry
+    registry = ToolRegistry()
+    registry.discover()
+    names = registry.get_tool_names()
+    print(f"\n{Colors.BOLD}Available Tools ({len(names)}):{Colors.RESET}")
+    for name in names:
+        tool = registry._tools[name]
+        danger = " ⚠️ dangerous" if tool.dangerous else ""
+        print(f"  • {Colors.CYAN}{name}{Colors.RESET}{danger}")
+        print(f"    {tool.schema.description[:100]}")
+    print()
 
-    Examples:
 
-        Exort test --provider groq
+@cli.command()
+def serve():
+    """Start the Telegram bot server."""
+    from exort.config import Config
+    cfg = Config()
+    token = os.environ.get(cfg.get("telegram.token_env", "TELEGRAM_BOT_TOKEN"))
+    if not token:
+        print(f"{Colors.RED}Error: TELEGRAM_BOT_TOKEN not set.{Colors.RESET}")
+        print("Set it in ~/.exort/.env or as an environment variable.")
+        print("Get a token from @BotFather on Telegram.")
+        return
 
-        Exort test --provider ollama --query "What is 2+2?"
-    """
-    config = ctx.obj["config"]
-    provider_name = provider or config.get("provider", "groq")
+    from exort.bot.telegram_bot import run_bot
+    run_bot(token, cfg)
 
-    click.echo(f"🧪 Testing provider: {provider_name}")
-    click.echo(f"   Query: {query}")
-    click.echo()
+
+@cli.command()
+def setup():
+    """Interactive setup wizard for first-time configuration."""
+    print_banner()
+    print(f"{Colors.BOLD}Exort Setup Wizard{Colors.RESET}\n")
+
+    cfg = Config()
+    home = ensure_exort_home()
+
+    print(f"Exort home: {home}")
+    print()
+
+    # Provider selection
+    print("Which LLM provider do you want to use?")
+    print("  1. Groq (FREE, fast, recommended for getting started)")
+    print("  2. OpenAI (GPT-4, requires API key)")
+    print("  3. Ollama (100% local, no API key needed)")
+    print("  4. Anthropic (Claude, requires API key)")
 
     try:
-        from Exort.agent import Agent
-        agent = Agent(provider=provider_name, config=config)
-        response = agent.chat(query)
-        click.echo(f"✅ Response: {response}")
-        stats = agent.get_stats()
-        click.echo(f"   Tokens: {stats['total_tokens']}")
-    except Exception as exc:
-        click.echo(f"❌ Error: {exc}")
+        choice = input("\nEnter choice [1]: ").strip() or "1"
+    except (EOFError, KeyboardInterrupt):
+        return
+
+    provider_map = {"1": "groq", "2": "openai", "3": "ollama", "4": "anthropic"}
+    provider = provider_map.get(choice, "groq")
+    cfg.set("provider", provider)
+
+    # API key setup
+    api_key_env = cfg.get(f"providers.{provider}.api_key_env")
+    if api_key_env:
+        print(f"\nTo use {provider}, set {api_key_env} in {home / '.env'}")
+        print(f"Example: echo '{api_key_env}=your-key-here' > {home / '.env'}")
+
+        try:
+            key = input(f"Enter your {api_key_env} (or press Enter to skip): ").strip()
+        except (EOFError, KeyboardInterrupt):
+            return
+
+        if key:
+            env_path = home / ".env"
+            with open(env_path, "a") as f:
+                f.write(f"\n{api_key_env}={key}\n")
+            os.environ[api_key_env] = key
+            print(f"{Colors.GREEN}API key saved!{Colors.RESET}")
+
+    cfg.save()
+    print(f"\n{Colors.GREEN}Setup complete! Run 'exort chat' to start.{Colors.RESET}")
 
 
-@cli.command()
-def providers() -> None:
-    """List available LLM providers."""
-    from Exort.providers import PROVIDERS
-
-    click.echo("\n📡 Available Providers:\n")
-    for name, cls in PROVIDERS.items():
-        doc = cls.__doc__.strip().splitlines()[0] if cls.__doc__ else "LLM provider"
-        click.echo(f"  • {name:12s} - {doc}")
-    click.echo()
+# Need to import yaml for config command
+try:
+    import yaml
+except ImportError:
+    yaml = None
 
 
-@cli.command()
-def tools() -> None:
-    """List available tools."""
-    from Exort.tools.base import ToolRegistry
-
-    registry = ToolRegistry()
-    registry.auto_discover()
-
-    click.echo("\n🔧 Available Tools:\n")
-    for name in registry.list_tools():
-        t = registry.get(name)
-        desc = t.description if t else ""
-        click.echo(f"  • {name:20s} - {desc}")
-    click.echo()
-
-
-def _show_help() -> None:
-    """Show in-chat help."""
-    click.echo("""
-╔══════════════════════════════════════════╗
-║          Exort Chat Commands          ║
-╠══════════════════════════════════════════╣
-║  /help     - Show this help message      ║
-║  /stats    - Show session statistics     ║
-║  /reset    - Reset conversation           ║
-║  /tools    - List available tools        ║
-║  exit      - Exit chat session           ║
-╚══════════════════════════════════════════╝
-""")
-
-
-def _print_dict(d: dict, indent: int = 0) -> None:
-    """Pretty-print a nested dict."""
-    for key, value in sorted(d.items()):
-        prefix = "  " * indent
-        if isinstance(value, dict):
-            click.echo(f"{prefix}{key}:")
-            _print_dict(value, indent + 1)
-        else:
-            click.echo(f"{prefix}{key}: {value}")
-
-
-def main() -> None:
+def main():
     """Entry point for the CLI."""
     cli()
 

@@ -1,43 +1,26 @@
-.PHONY: install install-dev test lint format clean help
+.PHONY: install test lint format clean build publish
 
-help: ## Show this help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
-		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
+install:
+	pip install -e ".[full,dev]"
 
-install: ## Install the package
+install-minimal:
 	pip install -e .
 
-install-dev: ## Install with development dependencies
-	pip install -e ".[dev,all]"
+test:
+	pytest tests/ -v
 
-install-all: ## Install with all providers
-	pip install -e ".[all]"
+lint:
+	ruff check exort/
 
-test: ## Run tests
-	pytest tests/ -v --tb=short
+format:
+	ruff format exort/
 
-test-cov: ## Run tests with coverage
-	pytest tests/ -v --cov=openmind --cov-report=term-missing
-
-lint: ## Run linter
-	ruff check openmind/ tests/
-
-format: ## Format code
-	ruff format openmind/ tests/
-
-typecheck: ## Run type checker
-	mypy openmind/
-
-clean: ## Clean build artifacts
-	rm -rf build/ dist/ *.egg-info .pytest_cache .mypy_cache
+clean:
+	rm -rf dist/ build/ *.egg-info
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
-	find . -type f -name "*.pyc" -delete 2>/dev/null || true
 
-build: clean ## Build distribution
+build: clean
 	python -m build
 
-publish: build ## Publish to PyPI
+publish: build
 	twine upload dist/*
-
-demo: ## Run a quick demo
-	openmind test --provider groq --query "What is the capital of France?"

@@ -1,28 +1,28 @@
 """
-Exort - Open-source AI Agent Framework
-==========================================
+Exort — AI Agent for Everyone
 
-A modular, extensible AI agent framework with multi-provider support,
-tool execution, and conversation memory.
+An open-source AI agent framework with tool use, memory, skills,
+and multi-provider support. Built for developers and non-developers alike.
 
-Usage::
+Quick Start:
+    from exort import Agent
+    agent = Agent()
+    response = agent.chat("Hello, what can you do?")
+    print(response)
 
-    from Exort import Agent
-    agent = Agent(provider="groq")
-    agent.chat("Hello, world!")
-
-Or via CLI::
-
-    Exort chat --provider groq
+CLI:
+    exort chat              # Interactive REPL
+    exort chat "question"   # Single question
+    exort serve             # Telegram bot
+    exort config show       # Show configuration
 """
 
-__version__ = "0.1.0"
-__author__ = "Exort Contributors"
-__license__ = "MIT"
+__version__ = "1.0.0"
+__author__ = "Exort"
 
-from Exort.agent import Agent
-from Exort.config import Config
-from Exort.memory.store import MemoryStore
-from Exort.tools.base import ToolRegistry
+from exort.agent import Agent
+from exort.config import Config
+from exort.memory.store import MemoryStore
+from exort.tools.registry import ToolRegistry
 
-__all__ = ["Agent", "Config", "MemoryStore", "ToolRegistry", "__version__"]
+__all__ = ["Agent", "Config", "MemoryStore", "ToolRegistry"]
