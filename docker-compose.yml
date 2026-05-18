@@ -1,14 +1,14 @@
 version: "3.9"
 
 services:
-  # OpenMind CLI (interactive)
-  openmind:
+  # Exort CLI (interactive)
+  Exort:
     build: .
     stdin_open: true
     tty: true
     env_file: .env
     volumes:
-      - openmind-data:/root/.openmind
+      - Exort-data:/root/.Exort
     profiles:
       - cli
 
@@ -19,7 +19,7 @@ services:
     env_file: .env
     restart: unless-stopped
     volumes:
-      - openmind-data:/root/.openmind
+      - Exort-data:/root/.Exort
     profiles:
       - bot
 
@@ -34,4 +34,4 @@ services:
       - web
 
 volumes:
-  openmind-data:
+  Exort-data:

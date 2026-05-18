@@ -1,4 +1,4 @@
-# OpenMind — Full Setup Guide
+# Exort — Full Setup Guide
 
 Everything you need to go from zero to launched. Follow in order.
 
@@ -8,14 +8,14 @@ Everything you need to go from zero to launched. Follow in order.
 
 ### Create Account
 1. Go to https://github.com/signup
-2. Username: `openmind-ai` (or `openmindai` if taken)
+2. Username: `Exort-ai` (or `Exortai` if taken)
 3. Email: your email
 4. Password: strong password
 5. Verify email
 
 ### Create Repository
 1. Click "+" > "New repository"
-2. Name: `openmind`
+2. Name: `Exort`
 3. Description: "🧠 Free, open-source AI agent framework — AI for everyone"
 4. Public
 5. Do NOT initialize with README (we have one)
@@ -23,12 +23,12 @@ Everything you need to go from zero to launched. Follow in order.
 
 ### Push Code
 ```bash
-cd C:/Users/D/openmind
+cd C:/Users/D/Exort
 git init
 git add .
-git commit -m "🧠 Initial commit: OpenMind AI framework"
+git commit -m "🧠 Initial commit: Exort AI framework"
 git branch -M main
-git remote add origin https://github.com/openmind-ai/openmind.git
+git remote add origin https://github.com/Exort-ai/Exort.git
 git push -u origin main
 ```
 
@@ -49,25 +49,25 @@ git push -u origin main
 ### Create Bot
 1. Open Telegram, search for `@BotFather`
 2. Send `/newbot`
-3. Name: `OpenMind AI`
-4. Username: `openmindai_bot` (must end in `bot`)
+3. Name: `Exort AI`
+4. Username: `Exortai_bot` (must end in `bot`)
 5. Copy the bot token (looks like `123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11`)
 6. Send `/setdescription` to set:
    "🧠 Free AI assistant — powered by open-source models. Chat for free!"
 7. Send `/setabouttext`:
-   "OpenMind AI | Free & Open Source"
+   "Exort AI | Free & Open Source"
 8. Send `/setuserpic` — upload a logo if you have one
 
 ### Create Group
-1. Create new Telegram group: "OpenMind Community"
+1. Create new Telegram group: "Exort Community"
 2. Add your bot to the group
 3. Make bot admin (needed to read messages)
-4. Set group username: `openmindai`
-5. Set group description: "🧠 OpenMind AI Community — Free AI for everyone"
+4. Set group username: `Exortai`
+5. Set group description: "🧠 Exort AI Community — Free AI for everyone"
 
 ### Create Channel (Optional)
-1. Create new channel: "OpenMind Announcements"
-2. Username: `openmindann`
+1. Create new channel: "Exort Announcements"
+2. Username: `Exortann`
 3. Use for project updates
 
 ### Configure Bot
@@ -86,21 +86,21 @@ python bot/telegram_bot.py
 
 ### Create Account
 1. Go to https://x.com/i/flow/signup
-2. Name: "OpenMind AI"
-3. Username: `@openmind_ai` (or `@openmindAI` if taken)
+2. Name: "Exort AI"
+3. Username: `@Exort_ai` (or `@ExortAI` if taken)
 4. Use a dedicated email if possible
 
 ### Profile Setup
 1. Profile picture: Logo (AI-themed, dark background)
 2. Header image: "Free AI for Everyone" banner
 3. Bio: "🧠 Free, open-source AI agent framework | AI for everyone | $MIND token coming soon | Built by the community 🌍"
-4. Link: https://openmind-ai.github.io/openmind
+4. Link: https://Exort-ai.github.io/Exort
 5. Location: "Decentralized"
 
 ### First Tweets
 Pin this tweet:
 ```
-🧠 OpenMind is live!
+🧠 Exort is live!
 
 Free AI for everyone. Open source. No paywalls.
 
@@ -109,7 +109,7 @@ Free AI for everyone. Open source. No paywalls.
 ✅ $MIND Token (coming soon)
 ✅ 100% Open Source (MIT)
 
-Star us: github.com/openmind-ai/openmind
+Star us: github.com/Exort-ai/Exort
 
 #AI #OpenSource #Crypto #BaseChain #DeFi
 ```
@@ -126,7 +126,7 @@ Daily content ideas:
 ## Step 4: Create Discord Server (Optional but Recommended)
 
 1. Open Discord, click "+" to create server
-2. Name: "OpenMind AI"
+2. Name: "Exort AI"
 3. Channels:
    - #announcements
    - #general
@@ -166,7 +166,7 @@ ollama pull llama3.1:8b
 
 ### Prerequisites
 ```bash
-cd C:/Users/D/openmind/contracts
+cd C:/Users/D/Exort/contracts
 npm install
 ```
 
@@ -265,7 +265,7 @@ npx hardhat verify --network base CONTRACT_ADDRESS
 - [ ] Telegram group engagement
 - [ ] Airdrop announcement (tasks: follow, join, star repo)
 - [ ] Reach out to crypto influencers
-- [ ] Blog post: "Why we built OpenMind"
+- [ ] Blog post: "Why we built Exort"
 
 ### Week 3-4: Expand
 - [ ] First airdrop distribution
@@ -291,10 +291,10 @@ npx hardhat verify --network base CONTRACT_ADDRESS
 
 | Thing | URL |
 |-------|-----|
-| GitHub | github.com/openmind-ai/openmind |
-| Website | openmind-ai.github.io/openmind |
-| Telegram | t.me/openmindai |
-| X | x.com/openmind_ai |
+| GitHub | github.com/Exort-ai/Exort |
+| Website | Exort-ai.github.io/Exort |
+| Telegram | t.me/Exortai |
+| X | x.com/Exort_ai |
 | Groq Console | console.groq.com |
 | Base Chain | base.org |
 | Uniswap | app.uniswap.org |

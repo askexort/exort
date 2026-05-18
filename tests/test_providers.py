@@ -2,8 +2,8 @@
 
 import pytest
 
-from openmind.providers.base import BaseProvider, ProviderResponse
-from openmind.providers import get_provider, PROVIDERS
+from Exort.providers.base import BaseProvider, ProviderResponse
+from Exort.providers import get_provider, PROVIDERS
 
 
 class TestBaseProvider:
@@ -47,19 +47,19 @@ class TestProviderClasses:
     """Tests for provider class attributes."""
 
     def test_openai_provider_class(self):
-        from openmind.providers.openai import OpenAIProvider
+        from Exort.providers.openai import OpenAIProvider
         assert OpenAIProvider.name == "openai"
         p = OpenAIProvider()
         assert p.default_model == "gpt-4o-mini"
 
     def test_ollama_provider_class(self):
-        from openmind.providers.ollama import OllamaProvider
+        from Exort.providers.ollama import OllamaProvider
         assert OllamaProvider.name == "ollama"
         p = OllamaProvider()
         assert p.default_model == "llama3.1"
 
     def test_groq_provider_class(self):
-        from openmind.providers.groq import GroqProvider
+        from Exort.providers.groq import GroqProvider
         assert GroqProvider.name == "groq"
         p = GroqProvider()
         assert p.default_model == "llama-3.1-8b-instant"

@@ -1,9 +1,9 @@
-# 🧠 OpenMind
+# 🧠 Exort
 
-[![PyPI version](https://img.shields.io/pypi/v/openmind-agent.svg)](https://pypi.org/project/openmind-agent/)
+[![PyPI version](https://img.shields.io/pypi/v/Exort-agent.svg)](https://pypi.org/project/Exort-agent/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Stars](https://img.shields.io/github/stars/openmind-ai/openmind?style=social)](https://github.com/openmind-ai/openmind)
+[![Stars](https://img.shields.io/github/stars/exort-ai/Exort?style=social)](https://github.com/exort-ai/Exort)
 
 **Open-source AI Agent Framework** — Build autonomous agents with tool use, memory, and multi-provider support.
 
@@ -31,14 +31,14 @@
 
 ```bash
 # Basic install
-pip install openmind-agent
+pip install Exort-agent
 
 # With all providers
-pip install openmind-agent[all]
+pip install Exort-agent[all]
 
 # Development
-git clone https://github.com/openmind-ai/openmind.git
-cd openmind
+git clone https://github.com/exort-ai/exort.git
+cd Exort
 pip install -e ".[dev,all]"
 ```
 
@@ -46,7 +46,7 @@ pip install -e ".[dev,all]"
 
 ```bash
 # Set up config file
-openmind config --init
+Exort config --init
 
 # Set your Groq API key (free at https://console.groq.com)
 export GROQ_API_KEY="your-key-here"
@@ -59,18 +59,18 @@ export OPENAI_API_KEY="your-key-here"
 
 ```bash
 # Start chatting (uses Groq free tier by default)
-openmind chat
+Exort chat
 
 # Use a specific provider
-openmind chat --provider groq
-openmind chat --provider openai --model gpt-4o
-openmind chat --provider ollama --model llama3.1
+Exort chat --provider groq
+Exort chat --provider openai --model gpt-4o
+Exort chat --provider ollama --model llama3.1
 ```
 
 ### Python API
 
 ```python
-from openmind import Agent
+from Exort import Agent
 
 # Quick start
 agent = Agent(provider="groq")
@@ -97,8 +97,8 @@ print(agent.get_stats())
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                      OpenMind CLI                        │
-│                   (openmind chat)                        │
+│                      Exort CLI                        │
+│                   (Exort chat)                        │
 ├─────────────────────────────────────────────────────────┤
 │                                                         │
 │  ┌─────────────────────────────────────────────────┐   │
@@ -143,14 +143,14 @@ print(agent.get_stats())
 export GROQ_API_KEY="gsk_..."
 
 # 3. Chat
-openmind chat --provider groq
+Exort chat --provider groq
 ```
 
 ### OpenAI
 
 ```bash
 export OPENAI_API_KEY="sk-..."
-openmind chat --provider openai --model gpt-4o-mini
+Exort chat --provider openai --model gpt-4o-mini
 ```
 
 ### Ollama (100% Local)
@@ -161,7 +161,7 @@ openmind chat --provider openai --model gpt-4o-mini
 ollama pull llama3.1
 
 # 3. Chat
-openmind chat --provider ollama
+Exort chat --provider ollama
 ```
 
 ---
@@ -171,7 +171,7 @@ openmind chat --provider ollama
 ### Using the Decorator
 
 ```python
-from openmind.tools.base import tool
+from Exort.tools.base import tool
 
 @tool(
     name="my_tool",
@@ -195,7 +195,7 @@ def my_tool(query: str, max_results: int = 5) -> str:
 ### Using a Class
 
 ```python
-from openmind.tools.base import BaseTool
+from Exort.tools.base import BaseTool
 
 class MySearchTool(BaseTool):
     name = "advanced_search"
@@ -232,7 +232,7 @@ class MySearchTool(BaseTool):
 
 ## ⚙️ Configuration
 
-### Config File (`~/.openmind/config.yaml`)
+### Config File (`~/.Exort/config.yaml`)
 
 ```yaml
 provider: groq
@@ -258,9 +258,9 @@ ui:
 
 | Variable | Description |
 |----------|-------------|
-| `OPENMIND_PROVIDER` | Default provider |
-| `OPENMIND_MODEL` | Default model |
-| `OPENMIND_TEMPERATURE` | Default temperature |
+| `Exort_PROVIDER` | Default provider |
+| `Exort_MODEL` | Default model |
+| `Exort_TEMPERATURE` | Default temperature |
 | `GROQ_API_KEY` | Groq API key |
 | `OPENAI_API_KEY` | OpenAI API key |
 | `OLLAMA_HOST` | Ollama server URL |
@@ -268,15 +268,15 @@ ui:
 ### CLI Commands
 
 ```bash
-openmind chat                     # Start chat
-openmind chat --provider groq     # Use Groq
-openmind chat --provider ollama   # Use local Ollama
-openmind config --list            # Show config
-openmind config --init            # Create config file
-openmind config -k provider -v groq  # Set config value
-openmind test --provider groq     # Test a provider
-openmind providers                # List providers
-openmind tools                    # List tools
+Exort chat                     # Start chat
+Exort chat --provider groq     # Use Groq
+Exort chat --provider ollama   # Use local Ollama
+Exort config --list            # Show config
+Exort config --init            # Create config file
+Exort config -k provider -v groq  # Set config value
+Exort test --provider groq     # Test a provider
+Exort providers                # List providers
+Exort tools                    # List tools
 ```
 
 ### In-Chat Commands
@@ -294,8 +294,8 @@ exit     - Exit chat
 ## 📦 Project Structure
 
 ```
-openmind/
-├── openmind/
+Exort/
+├── Exort/
 │   ├── __init__.py          # Package entry point
 │   ├── agent.py             # Core agentic loop
 │   ├── cli.py               # CLI commands
@@ -330,8 +330,8 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ```bash
 # Clone the repo
-git clone https://github.com/openmind-ai/openmind.git
-cd openmind
+git clone https://github.com/exort-ai/exort.git
+cd Exort
 
 # Install dev dependencies
 pip install -e ".[dev,all]"
@@ -355,7 +355,7 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 > *Coming Soon*
 
-The $MIND token will power the OpenMind ecosystem:
+The $MIND token will power the Exort ecosystem:
 
 - 🔹 **Governance** — Vote on framework features and priorities
 - 🔹 **Staking** — Earn rewards for contributing tools and providers
@@ -379,6 +379,6 @@ Special thanks to:
 ---
 
 <p align="center">
-  <b>🧠 OpenMind — Think. Act. Observe. Repeat.</b><br>
+  <b>🧠 Exort — Think. Act. Observe. Repeat.</b><br>
   <sub>Open-source AI agent framework for everyone.</sub>
 </p>

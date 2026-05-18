@@ -10,7 +10,7 @@ import logging
 import time
 from pathlib import Path
 
-logger = logging.getLogger("openmind-tracker")
+logger = logging.getLogger("Exort-tracker")
 
 DATA_DIR = Path(__file__).parent / "data"
 STORE_FILE = DATA_DIR / "tracked_tokens.json"

@@ -8,10 +8,10 @@ Supported providers:
 - **groq** - Groq cloud (free tier available)
 """
 
-from openmind.providers.base import BaseProvider, ProviderResponse
-from openmind.providers.groq import GroqProvider
-from openmind.providers.ollama import OllamaProvider
-from openmind.providers.openai import OpenAIProvider
+from Exort.providers.base import BaseProvider, ProviderResponse
+from Exort.providers.groq import GroqProvider
+from Exort.providers.ollama import OllamaProvider
+from Exort.providers.openai import OpenAIProvider
 
 PROVIDERS = {
     "openai": OpenAIProvider,

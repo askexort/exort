@@ -2,7 +2,7 @@
 
 ## Overview
 
-$MIND is the governance and utility token of the OpenMind ecosystem,
+$MIND is the governance and utility token of the Exort ecosystem,
 deployed on **Base** (Ethereum L2) for low gas fees and fast transactions.
 
 ## Token Details

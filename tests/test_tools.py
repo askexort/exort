@@ -6,7 +6,7 @@ import tempfile
 
 import pytest
 
-from openmind.tools.base import BaseTool, ToolRegistry, tool
+from Exort.tools.base import BaseTool, ToolRegistry, tool
 
 
 class TestToolRegistry:
@@ -43,8 +43,8 @@ class TestToolRegistry:
             """Add two numbers."""
             return str(a + b)
 
-        assert hasattr(calc, "_openmind_tool")
-        t = calc._openmind_tool
+        assert hasattr(calc, "_Exort_tool")
+        t = calc._Exort_tool
         assert t.name == "calc"
         assert t.execute(a=2, b=3) == "5"
 
@@ -102,7 +102,7 @@ class TestBuiltinTools:
     """Tests for built-in tools."""
 
     def test_read_file(self):
-        from openmind.tools.file import read_file
+        from Exort.tools.file import read_file
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
             f.write("Hello, World!")
@@ -113,7 +113,7 @@ class TestBuiltinTools:
         os.unlink(f.name)
 
     def test_write_file(self):
-        from openmind.tools.file import write_file
+        from Exort.tools.file import write_file
 
         with tempfile.TemporaryDirectory() as tmpdir:
             path = os.path.join(tmpdir, "test.txt")
@@ -122,7 +122,7 @@ class TestBuiltinTools:
             assert parsed["success"] is True
 
     def test_list_directory(self):
-        from openmind.tools.file import list_directory
+        from Exort.tools.file import list_directory
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create some files
@@ -133,7 +133,7 @@ class TestBuiltinTools:
             assert len(parsed["entries"]) == 2
 
     def test_execute_python(self):
-        from openmind.tools.code import execute_python
+        from Exort.tools.code import execute_python
 
         result = execute_python("result = 2 + 2")
         parsed = json.loads(result)
@@ -141,7 +141,7 @@ class TestBuiltinTools:
         assert "4" in parsed.get("result", "")
 
     def test_execute_python_with_output(self):
-        from openmind.tools.code import execute_python
+        from Exort.tools.code import execute_python
 
         result = execute_python("print('hello')")
         parsed = json.loads(result)

@@ -11,7 +11,7 @@ import urllib.parse
 import urllib.request
 from dataclasses import dataclass
 
-logger = logging.getLogger("openmind-scanner")
+logger = logging.getLogger("Exort-scanner")
 
 # ─── Chain Config ─────────────────────────────────────────────────────────────
 
@@ -110,7 +110,7 @@ class TradeEvent:
 
 def _http_get(url: str, headers: dict | None = None, timeout: int = 10) -> dict | None:
     """Make an HTTP GET request and return parsed JSON."""
-    hdrs = {"User-Agent": "OpenMind-Bot/0.1.0"}
+    hdrs = {"User-Agent": "Exort-Bot/0.1.0"}
     if headers:
         hdrs.update(headers)
     req = urllib.request.Request(url, headers=hdrs)
@@ -127,7 +127,7 @@ def _http_post(url: str, data: dict, timeout: int = 10) -> dict | None:
     payload = json.dumps(data).encode()
     headers = {
         "Content-Type": "application/json",
-        "User-Agent": "OpenMind-Bot/0.1.0",
+        "User-Agent": "Exort-Bot/0.1.0",
     }
     req = urllib.request.Request(url, data=payload, headers=headers)
     try:

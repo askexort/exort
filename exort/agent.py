@@ -16,12 +16,12 @@ import logging
 from collections.abc import Callable, Generator
 from typing import Any
 
-from openmind.config import Config
-from openmind.memory.store import MemoryStore
-from openmind.providers import get_provider
-from openmind.providers.base import BaseProvider
-from openmind.tools.base import ToolRegistry
-from openmind.utils import (
+from Exort.config import Config
+from Exort.memory.store import MemoryStore
+from Exort.providers import get_provider
+from Exort.providers.base import BaseProvider
+from Exort.tools.base import ToolRegistry
+from Exort.utils import (
     generate_id,
 )
 
@@ -37,7 +37,7 @@ Be concise but thorough. Always strive for accuracy."""
 
 
 class Agent:
-    """OpenMind AI Agent.
+    """Exort AI Agent.
 
     Implements the think → act → observe loop for autonomous
     AI interactions with tool use.

@@ -1,5 +1,5 @@
 """
-OpenMind Telegram Bot — Free AI for Everyone + Token Tracker
+Exort Telegram Bot — Free AI for Everyone + Token Tracker
 Uses Groq (free tier) as default provider.
 Tracks token buy/sell events across multiple chains.
 """
@@ -47,7 +47,7 @@ SCAN_INTERVAL = int(os.getenv("SCAN_INTERVAL", "60"))  # seconds
 # ─── Logging ──────────────────────────────────────────────────────────────────
 
 logging.basicConfig(format="%(asctime)s [%(levelname)s] %(name)s: %(message)s", level=logging.INFO)
-logger = logging.getLogger("openmind-bot")
+logger = logging.getLogger("Exort-bot")
 
 # ─── Rate Limiter ─────────────────────────────────────────────────────────────
 
@@ -97,8 +97,8 @@ AVAILABLE_MODELS = {
 }
 
 SYSTEM_PROMPT = (
-    "You are OpenMind AI — a free, open-source AI assistant "
-    "created by the OpenMind community. "
+    "You are Exort AI — a free, open-source AI assistant "
+    "created by the Exort community. "
     "You are helpful, harmless, and honest. Be concise but thorough. "
     "You can help with coding, analysis, writing, math, and general questions. "
     "If you don't know something, say so honestly. "
@@ -125,7 +125,7 @@ async def chat_with_groq(message: str, model: str = None) -> str:
     headers = {
         "Authorization": f"Bearer {GROQ_API_KEY}",
         "Content-Type": "application/json",
-        "User-Agent": "OpenMind-Bot/0.1.0",
+        "User-Agent": "Exort-Bot/0.1.0",
     }
 
     req = urllib.request.Request(GROQ_URL, data=payload, headers=headers)
@@ -159,14 +159,14 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             InlineKeyboardButton("📈 Tracker", callback_data="help_tracker"),
         ],
         [
-            InlineKeyboardButton("🌐 Website", url="https://openmind-ai.github.io/openmind"),
-            InlineKeyboardButton("📦 GitHub", url="https://github.com/openmind-ai/openmind"),
+            InlineKeyboardButton("🌐 Website", url="https://Exort-ai.github.io/Exort"),
+            InlineKeyboardButton("📦 GitHub", url="https://github.com/Exort-ai/Exort"),
         ],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     welcome = (
-        "🧠 **Welcome to OpenMind AI!**\n\n"
+        "🧠 **Welcome to Exort AI!**\n\n"
         "I'm a free, open-source AI assistant powered by cutting-edge models.\n\n"
         "**Quick Start:**\n"
         "• Just send me any message to chat\n"
@@ -175,7 +175,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• `/tracked` — Your tracked tokens\n"
         "• `/help` — All commands\n\n"
         "🆓 **100% Free** • 🔓 **Open Source** • 🌍 **For Everyone**\n\n"
-        "_Built by the OpenMind community_"
+        "_Built by the Exort community_"
     )
 
     await update.message.reply_text(
@@ -186,7 +186,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """List all commands."""
     help_text = (
-        "📖 **OpenMind Bot Commands**\n\n"
+        "📖 **Exort Bot Commands**\n\n"
         "**Chat:**\n"
         "• Send any message — I'll respond!\n"
         "• `/chat <message>` — Explicit chat\n\n"
@@ -201,7 +201,7 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• `/model <name>` — Set model directly\n\n"
         "**Info:**\n"
         "• `/stats` — Usage statistics\n"
-        "• `/about` — About OpenMind\n"
+        "• `/about` — About Exort\n"
         "• `/token` — $MIND token info\n"
         "• `/help` — This message\n\n"
         f"**Rate Limit:** {RATE_LIMIT} messages/min\n"
@@ -510,7 +510,7 @@ async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     unique_chats = len(set(t["chat_id"] for t in all_tracked))
 
     text = (
-        "📊 **OpenMind Bot Stats**\n\n"
+        "📊 **Exort Bot Stats**\n\n"
         f"👥 Total Users: `{len(stats['total_users'])}`\n"
         f"💬 Total Messages: `{stats['total_messages']}`\n"
         f"⏱ Uptime: `{hours}h {minutes}m`\n"
@@ -525,10 +525,10 @@ async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def cmd_about(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """About OpenMind."""
+    """About Exort."""
     text = (
-        "🧠 **About OpenMind**\n\n"
-        "OpenMind is a free, open-source AI agent framework + "
+        "🧠 **About Exort**\n\n"
+        "Exort is a free, open-source AI agent framework + "
         "decentralized AI platform.\n\n"
         "**Our Mission:** Make AI accessible to everyone, everywhere.\n\n"
         "**Features:**\n"
@@ -538,9 +538,9 @@ async def cmd_about(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• Multi-provider support\n"
         "• Community governed via $MIND token\n\n"
         "**Links:**\n"
-        "• [GitHub](https://github.com/openmind-ai/openmind)\n"
-        "• [Website](https://openmind-ai.github.io/openmind)\n"
-        "• [Telegram](https://t.me/openmindai)\n"
+        "• [GitHub](https://github.com/Exort-ai/Exort)\n"
+        "• [Website](https://Exort-ai.github.io/Exort)\n"
+        "• [Telegram](https://t.me/Exortai)\n"
     )
 
     await update.message.reply_text(
@@ -905,7 +905,7 @@ def main():
         print("   Get a free key at: https://console.groq.com")
         print("   Set it: export GROQ_API_KEY=your_key_here")
 
-    print("🧠 OpenMind Telegram Bot starting...")
+    print("🧠 Exort Telegram Bot starting...")
     print(f"   Model: {DEFAULT_MODEL}")
     print(f"   Rate limit: {RATE_LIMIT}/min")
     print(f"   Scan interval: {SCAN_INTERVAL}s")

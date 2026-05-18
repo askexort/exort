@@ -1,1 +1,1 @@
-"""OpenMind test suite."""
+"""Exort test suite."""

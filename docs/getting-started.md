@@ -1,4 +1,4 @@
-# Getting Started with OpenMind
+# Getting Started with Exort
 
 ## Prerequisites
 
@@ -12,27 +12,27 @@
 
 ```bash
 # Clone the repo
-git clone https://github.com/openmind-ai/openmind.git
-cd openmind
+git clone https://github.com/Exort-ai/Exort.git
+cd Exort
 
 # Install in editable mode
 pip install -e ".[all]"
 
 # Verify installation
-openmind --help
+Exort --help
 ```
 
 ### From PyPI (Coming Soon)
 
 ```bash
-pip install openmind
+pip install Exort
 ```
 
 ### Docker
 
 ```bash
-docker build -t openmind .
-docker run -it --env-file .env openmind
+docker build -t Exort .
+docker run -it --env-file .env Exort
 ```
 
 ## Configuration
@@ -41,14 +41,14 @@ docker run -it --env-file .env openmind
 
 ```bash
 # Set up with Groq (free, no credit card)
-openmind config set provider groq
-openmind config set groq.api_key YOUR_KEY_HERE
-openmind config set model llama-3.3-70b-versatile
+Exort config set provider groq
+Exort config set groq.api_key YOUR_KEY_HERE
+Exort config set model llama-3.3-70b-versatile
 ```
 
 ### Config File
 
-OpenMind uses `~/.openmind/config.yaml`:
+Exort uses `~/.Exort/config.yaml`:
 
 ```yaml
 provider: groq
@@ -66,22 +66,22 @@ providers:
 ### Environment Variables
 
 ```bash
-export OPENMIND_PROVIDER=groq
+export Exort_PROVIDER=groq
 export GROQ_API_KEY=gsk_...
-export OPENMIND_MODEL=llama-3.3-70b-versatile
+export Exort_MODEL=llama-3.3-70b-versatile
 ```
 
 ## Your First Chat
 
 ```bash
 # Start chatting with Groq (free)
-openmind chat --provider groq
+Exort chat --provider groq
 
 # Use a specific model
-openmind chat --provider groq --model mixtral-8x7b
+Exort chat --provider groq --model mixtral-8x7b
 
 # Chat with local Ollama
-openmind chat --provider ollama
+Exort chat --provider ollama
 ```
 
 ## Free Providers (No Credit Card)

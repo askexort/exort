@@ -116,8 +116,8 @@ def tool(
         tool_desc = description or (func.__doc__ or "").strip().split("\n")[0]
         wrapper = ToolDecoratorTool(func, tool_name, tool_desc)
         # Attach metadata so the registry can discover it
-        wrapper._is_openmind_tool = True  # type: ignore[attr-defined]
-        func._openmind_tool = wrapper  # type: ignore[attr-defined]
+        wrapper._is_Exort_tool = True  # type: ignore[attr-defined]
+        func._Exort_tool = wrapper  # type: ignore[attr-defined]
         return func
 
     return decorator
@@ -166,11 +166,11 @@ class ToolRegistry:
         # This scans tool modules for decorated functions
         for module_name in ("web", "file", "shell", "code"):
             try:
-                mod = __import__(f"openmind.tools.{module_name}", fromlist=[module_name])
+                mod = __import__(f"Exort.tools.{module_name}", fromlist=[module_name])
                 for attr_name in dir(mod):
                     attr = getattr(mod, attr_name)
-                    if callable(attr) and hasattr(attr, "_openmind_tool"):
-                        t = attr._openmind_tool
+                    if callable(attr) and hasattr(attr, "_Exort_tool"):
+                        t = attr._Exort_tool
                         if t.name not in self._tools:
                             self._tools[t.name] = t
             except ImportError:

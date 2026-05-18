@@ -1,6 +1,6 @@
 # 📋 Changelog
 
-All notable changes to OpenMind will be documented in this file.
+All notable changes to Exort will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -41,15 +41,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Conversation history management
   - Token usage tracking
 - 🎨 **CLI**:
-  - `openmind chat` — Interactive chat sessions
-  - `openmind config` — Configuration management
-  - `openmind test` — Provider testing
-  - `openmind providers` — List providers
-  - `openmind tools` — List tools
-  - `openmind serve` — API server (coming soon)
+  - `Exort chat` — Interactive chat sessions
+  - `Exort config` — Configuration management
+  - `Exort test` — Provider testing
+  - `Exort providers` — List providers
+  - `Exort tools` — List tools
+  - `Exort serve` — API server (coming soon)
 - ⚡ **Streaming** — Real-time token streaming for all providers
 - 📄 **Configuration**:
-  - YAML config file (`~/.openmind/config.yaml`)
+  - YAML config file (`~/.Exort/config.yaml`)
   - Environment variable overrides
   - CLI overrides
 - 📚 **Documentation**:
@@ -82,7 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### v0.1.0 — Initial Release
 
-This is the first public release of OpenMind! 🎉
+This is the first public release of Exort! 🎉
 
 **Highlights:**
 - Full agentic loop implementation
@@ -94,9 +94,9 @@ This is the first public release of OpenMind! 🎉
 
 **Getting Started:**
 ```bash
-pip install openmind-agent
+pip install Exort-agent
 export GROQ_API_KEY="your-key"
-openmind chat
+Exort chat
 ```
 
 **What's Next:**

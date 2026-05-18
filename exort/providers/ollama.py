@@ -11,7 +11,7 @@ import json
 import os
 from typing import Any
 
-from openmind.providers.base import BaseProvider, ProviderResponse
+from Exort.providers.base import BaseProvider, ProviderResponse
 
 
 class OllamaProvider(BaseProvider):

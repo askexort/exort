@@ -1,5 +1,5 @@
 """
-Configuration management for OpenMind.
+Configuration management for Exort.
 
 Loads configuration from YAML files and environment variables.
 Supports layered configuration with sensible defaults.
@@ -20,7 +20,7 @@ DEFAULTS: dict[str, Any] = {
     "max_iterations": 10,
     "memory": {
         "enabled": True,
-        "db_path": None,  # Use default ~/.openmind/memory.db
+        "db_path": None,  # Use default ~/.Exort/memory.db
     },
     "tools": {
         "enabled": True,
@@ -41,13 +41,13 @@ class Config:
     Configuration is loaded from (in order of priority):
 
     1. Constructor arguments
-    2. Environment variables (``OPENMIND_*``)
-    3. Config file (``~/.openmind/config.yaml``)
+    2. Environment variables (``Exort_*``)
+    3. Config file (``~/.Exort/config.yaml``)
     4. Built-in defaults
 
     Args:
         config_path: Path to YAML config file.
-            Defaults to ``~/.openmind/config.yaml``.
+            Defaults to ``~/.Exort/config.yaml``.
         overrides: Dict of override values.
 
     Example::
@@ -89,7 +89,7 @@ class Config:
         """Return the resolved config file path."""
         if self._config_path:
             return Path(self._config_path)
-        return Path.home() / ".openmind" / "config.yaml"
+        return Path.home() / ".Exort" / "config.yaml"
 
     def _load_yaml_config(self, path: str | None = None) -> dict[str, Any]:
         """Load config from YAML file."""
@@ -139,9 +139,9 @@ class Config:
         return config
 
     def _load_env_config(self) -> dict[str, Any]:
-        """Load config from OPENMIND_* environment variables."""
+        """Load config from Exort_* environment variables."""
         config: dict[str, Any] = {}
-        prefix = "OPENMIND_"
+        prefix = "Exort_"
 
         env_map = {
             f"{prefix}PROVIDER": ("provider", str),
@@ -174,7 +174,7 @@ class Config:
         """Save current config to YAML file.
 
         Args:
-            path: File path. Defaults to ``~/.openmind/config.yaml``.
+            path: File path. Defaults to ``~/.Exort/config.yaml``.
         """
         save_path = Path(path) if path else self.config_path
         save_path.parent.mkdir(parents=True, exist_ok=True)

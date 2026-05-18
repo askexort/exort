@@ -10,7 +10,7 @@ import json
 import urllib.parse
 import urllib.request
 
-from openmind.tools.base import tool
+from Exort.tools.base import tool
 
 
 @tool(
@@ -111,7 +111,7 @@ def fetch_url(url: str, max_chars: int = 10000) -> str:
         req = urllib.request.Request(
             url,
             headers={
-                "User-Agent": "OpenMind/0.1 (AI Agent Framework)",
+                "User-Agent": "Exort/0.1 (AI Agent Framework)",
             },
         )
         with urllib.request.urlopen(req, timeout=15) as resp:

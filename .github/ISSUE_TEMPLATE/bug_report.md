@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Report a bug in OpenMind
+about: Report a bug in Exort
 title: "[BUG] "
 labels: bug
 ---
@@ -18,7 +18,7 @@ What you expected to happen.
 **Environment:**
 - OS: [e.g. Windows 11, Ubuntu 22.04]
 - Python: [e.g. 3.11.5]
-- OpenMind version: [e.g. 0.1.0]
+- Exort version: [e.g. 0.1.0]
 
 **Additional context**
 Any other info, logs, screenshots.

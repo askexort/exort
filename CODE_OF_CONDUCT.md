@@ -60,7 +60,7 @@ representative at an online or offline event.
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to the community leaders responsible for enforcement at
-**conduct@openmind-ai.org**.
+**conduct@Exort-ai.org**.
 
 All complaints will be reviewed and investigated promptly and fairly.
 
@@ -136,4 +136,4 @@ We are committed to providing a welcoming and inspiring community for all. We
 believe that diversity of perspectives and experiences leads to better software
 and a better community for everyone.
 
-Thank you for helping make OpenMind a positive and inclusive place for all contributors! 🙏
+Thank you for helping make Exort a positive and inclusive place for all contributors! 🙏

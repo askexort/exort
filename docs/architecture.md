@@ -1,10 +1,10 @@
-# OpenMind Architecture
+# Exort Architecture
 
 ## System Overview
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    OpenMind Framework                     │
+│                    Exort Framework                     │
 ├─────────────┬─────────────┬──────────────┬───────────────┤
 │    CLI      │   Agent     │    Tools     │    Memory     │
 │  (click)    │  (loop)     │  (plugins)   │   (sqlite)    │
@@ -17,7 +17,7 @@
 
 ## Agent Loop
 
-The core of OpenMind is the agentic loop:
+The core of Exort is the agentic loop:
 
 ```
 User Input
@@ -57,7 +57,7 @@ class BaseProvider(ABC):
 ```
 
 Adding a new provider:
-1. Create `openmind/providers/yourprovider.py`
+1. Create `Exort/providers/yourprovider.py`
 2. Implement `BaseProvider`
 3. Register with `@ProviderRegistry.register("name")`
 
@@ -66,7 +66,7 @@ Adding a new provider:
 Tools are Python functions decorated with `@tool`:
 
 ```python
-from openmind.tools.base import tool
+from Exort.tools.base import tool
 
 @tool(
     name="web_search",
@@ -80,7 +80,7 @@ async def web_search(query: str) -> str:
     return results
 ```
 
-Tools are auto-discovered from `openmind/tools/` on import.
+Tools are auto-discovered from `Exort/tools/` on import.
 
 ## Memory System
 
@@ -93,8 +93,8 @@ SQLite-backed conversation store:
 ## File Structure
 
 ```
-openmind/
-├── openmind/              # Core package
+Exort/
+├── Exort/              # Core package
 │   ├── __init__.py        # Public API
 │   ├── agent.py           # Agent loop
 │   ├── cli.py             # CLI commands

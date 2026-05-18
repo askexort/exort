@@ -4,9 +4,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from openmind.agent import Agent
-from openmind.config import Config
-from openmind.providers.base import BaseProvider, ProviderResponse
+from Exort.agent import Agent
+from Exort.config import Config
+from Exort.providers.base import BaseProvider, ProviderResponse
 
 
 class MockProvider(BaseProvider):
@@ -104,7 +104,7 @@ class TestAgent:
 
     def test_agent_tool_loop(self):
         """Test the agentic loop with tool calls."""
-        from openmind.tools.base import ToolRegistry, tool
+        from Exort.tools.base import ToolRegistry, tool
 
         registry = ToolRegistry()
 
@@ -112,7 +112,7 @@ class TestAgent:
         def test_tool(query: str) -> str:
             return f"Result for {query}"
 
-        registry.register(test_tool._openmind_tool)
+        registry.register(test_tool._Exort_tool)
 
         agent = Agent(provider=MockToolProvider(), tools=registry)
         response = agent.chat("Use the tool")

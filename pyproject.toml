@@ -3,14 +3,14 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "openmind-agent"
+name = "Exort-agent"
 version = "0.1.0"
 description = "Open-source AI Agent Framework with multi-provider support, tool use, and memory"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.10"
 authors = [
-    {name = "OpenMind Contributors"},
+    {name = "Exort Contributors"},
 ]
 keywords = ["ai", "agent", "llm", "openai", "ollama", "groq", "framework"]
 classifiers = [
@@ -44,18 +44,18 @@ dev = [
 ]
 
 [project.scripts]
-openmind = "openmind.cli:main"
+Exort = "Exort.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/openmind-ai/openmind"
-Documentation = "https://openmind-ai.readthedocs.io"
-Repository = "https://github.com/openmind-ai/openmind"
-Issues = "https://github.com/openmind-ai/openmind/issues"
-Changelog = "https://github.com/openmind-ai/openmind/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/exort-ai/Exort"
+Documentation = "https://exort-ai.readthedocs.io"
+Repository = "https://github.com/exort-ai/Exort"
+Issues = "https://github.com/exort-ai/Exort/issues"
+Changelog = "https://github.com/exort-ai/Exort/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["openmind*"]
+include = ["Exort*"]
 
 [tool.ruff]
 target-version = "py310"

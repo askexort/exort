@@ -1,7 +1,7 @@
 {
-  "name": "openmind-mindtoken",
+  "name": "Exort-mindtoken",
   "version": "1.0.0",
-  "description": "MindToken (MIND) - ERC-20 token for the OpenMind ecosystem on Base",
+  "description": "MindToken (MIND) - ERC-20 token for the Exort ecosystem on Base",
   "scripts": {
     "compile": "npx hardhat compile",
     "test": "npx hardhat test",

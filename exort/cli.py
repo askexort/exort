@@ -1,5 +1,5 @@
 """
-Command-line interface for OpenMind.
+Command-line interface for Exort.
 
 Provides commands for chatting, managing configuration,
 and running the agent.
@@ -15,9 +15,9 @@ except ImportError:
     print("Error: 'click' is required for the CLI. Install with: pip install click")
     sys.exit(1)
 
-from openmind import __version__
-from openmind.config import Config
-from openmind.utils import Colors, colorize
+from Exort import __version__
+from Exort.config import Config
+from Exort.utils import Colors, colorize
 
 BANNER = r"""
    ____                    __  __           _ __
@@ -30,11 +30,11 @@ BANNER = r"""
 
 
 @click.group()
-@click.version_option(version=__version__, prog_name="openmind")
+@click.version_option(version=__version__, prog_name="Exort")
 @click.option("--config", "-c", "config_path", default=None, help="Path to config file.")
 @click.pass_context
 def cli(ctx: click.Context, config_path: str | None = None) -> None:
-    """OpenMind — Open-source AI Agent Framework.
+    """Exort — Open-source AI Agent Framework.
 
     Create autonomous AI agents with tool use, memory, and
     multi-provider support.
@@ -68,11 +68,11 @@ def chat(
 
     Examples:
 
-        openmind chat
+        Exort chat
 
-        openmind chat --provider groq --model llama-3.1-8b-instant
+        Exort chat --provider groq --model llama-3.1-8b-instant
 
-        openmind chat --provider ollama --model llama3.1
+        Exort chat --provider ollama --model llama3.1
     """
     config = ctx.obj["config"]
 
@@ -113,7 +113,7 @@ def chat(
 
     # Initialize agent
     try:
-        from openmind.agent import Agent
+        from Exort.agent import Agent
         agent = Agent(
             provider=provider_name,
             model=model_name,
@@ -235,15 +235,15 @@ def config(
     list_config: bool,
     init: bool,
 ) -> None:
-    """Manage OpenMind configuration.
+    """Manage Exort configuration.
 
     Examples:
 
-        openmind config --list
+        Exort config --list
 
-        openmind config --key provider --value groq
+        Exort config --key provider --value groq
 
-        openmind config --init
+        Exort config --init
     """
     cfg = ctx.obj["config"]
 
@@ -283,7 +283,7 @@ def config(
 @click.option("--port", "-p", default=8000, type=int, help="Port to bind to.")
 @click.pass_context
 def serve(ctx: click.Context, host: str, port: int) -> None:
-    """Start the OpenMind API server (coming soon).
+    """Start the Exort API server (coming soon).
 
     Will expose a REST API for programmatic agent access.
     """
@@ -292,7 +292,7 @@ def serve(ctx: click.Context, host: str, port: int) -> None:
     click.echo()
     click.echo("For now, use the Python API directly:")
     click.echo()
-    click.echo("  from openmind import Agent")
+    click.echo("  from Exort import Agent")
     click.echo('  agent = Agent(provider="groq")')
     click.echo('  response = agent.chat("Hello!")')
     click.echo()
@@ -307,9 +307,9 @@ def test(ctx: click.Context, provider: str | None, query: str) -> None:
 
     Examples:
 
-        openmind test --provider groq
+        Exort test --provider groq
 
-        openmind test --provider ollama --query "What is 2+2?"
+        Exort test --provider ollama --query "What is 2+2?"
     """
     config = ctx.obj["config"]
     provider_name = provider or config.get("provider", "groq")
@@ -319,7 +319,7 @@ def test(ctx: click.Context, provider: str | None, query: str) -> None:
     click.echo()
 
     try:
-        from openmind.agent import Agent
+        from Exort.agent import Agent
         agent = Agent(provider=provider_name, config=config)
         response = agent.chat(query)
         click.echo(f"✅ Response: {response}")
@@ -332,7 +332,7 @@ def test(ctx: click.Context, provider: str | None, query: str) -> None:
 @cli.command()
 def providers() -> None:
     """List available LLM providers."""
-    from openmind.providers import PROVIDERS
+    from Exort.providers import PROVIDERS
 
     click.echo("\n📡 Available Providers:\n")
     for name, cls in PROVIDERS.items():
@@ -344,7 +344,7 @@ def providers() -> None:
 @cli.command()
 def tools() -> None:
     """List available tools."""
-    from openmind.tools.base import ToolRegistry
+    from Exort.tools.base import ToolRegistry
 
     registry = ToolRegistry()
     registry.auto_discover()
@@ -361,7 +361,7 @@ def _show_help() -> None:
     """Show in-chat help."""
     click.echo("""
 ╔══════════════════════════════════════════╗
-║          OpenMind Chat Commands          ║
+║          Exort Chat Commands          ║
 ╠══════════════════════════════════════════╣
 ║  /help     - Show this help message      ║
 ║  /stats    - Show session statistics     ║

@@ -22,7 +22,7 @@ class MemoryStore:
 
     Args:
         db_path: Path to the SQLite database file.
-            Defaults to ``~/.openmind/memory.db``.
+            Defaults to ``~/.Exort/memory.db``.
 
     Example::
 
@@ -34,7 +34,7 @@ class MemoryStore:
 
     def __init__(self, db_path: str | None = None) -> None:
         if db_path is None:
-            config_dir = Path.home() / ".openmind"
+            config_dir = Path.home() / ".Exort"
             config_dir.mkdir(parents=True, exist_ok=True)
             db_path = str(config_dir / "memory.db")
 

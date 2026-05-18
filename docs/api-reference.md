@@ -2,12 +2,12 @@
 
 ## CLI Commands
 
-### `openmind chat`
+### `Exort chat`
 
 Start an interactive chat session.
 
 ```bash
-openmind chat [OPTIONS]
+Exort chat [OPTIONS]
 
 Options:
   --provider TEXT    LLM provider (openai, groq, ollama)
@@ -18,41 +18,41 @@ Options:
   --stream           Enable streaming (default: true)
 ```
 
-### `openmind config`
+### `Exort config`
 
 Manage configuration.
 
 ```bash
-openmind config show              # Show current config
-openmind config set KEY VALUE     # Set a config value
-openmind config path              # Show config file path
-openmind config reset             # Reset to defaults
+Exort config show              # Show current config
+Exort config set KEY VALUE     # Set a config value
+Exort config path              # Show config file path
+Exort config reset             # Reset to defaults
 ```
 
-### `openmind providers`
+### `Exort providers`
 
 List available providers and their status.
 
 ```bash
-openmind providers                # List all providers
-openmind providers test           # Test connectivity
+Exort providers                # List all providers
+Exort providers test           # Test connectivity
 ```
 
-### `openmind tools`
+### `Exort tools`
 
 List available tools.
 
 ```bash
-openmind tools                    # List all tools
-openmind tools test TOOL_NAME     # Test a specific tool
+Exort tools                    # List all tools
+Exort tools test TOOL_NAME     # Test a specific tool
 ```
 
-### `openmind serve`
+### `Exort serve`
 
 Start a local API server (coming soon).
 
 ```bash
-openmind serve [--port 8080] [--host 0.0.0.0]
+Exort serve [--port 8080] [--host 0.0.0.0]
 ```
 
 ## Python API
@@ -60,7 +60,7 @@ openmind serve [--port 8080] [--host 0.0.0.0]
 ### Agent
 
 ```python
-from openmind import Agent, Config
+from Exort import Agent, Config
 
 config = Config()
 agent = Agent(config)
@@ -81,7 +81,7 @@ async for chunk in agent.stream("Tell me a story"):
 ### Config
 
 ```python
-from openmind import Config
+from Exort import Config
 
 config = Config()
 
@@ -90,7 +90,7 @@ config.get("provider")           # "groq"
 config.set("model", "llama-3.3-70b-versatile")
 
 # Load from file
-config = Config.from_file("~/.openmind/config.yaml")
+config = Config.from_file("~/.Exort/config.yaml")
 
 # Override with env vars
 config = Config.from_env()
@@ -99,7 +99,7 @@ config = Config.from_env()
 ### Providers
 
 ```python
-from openmind.providers.groq import GroqProvider
+from Exort.providers.groq import GroqProvider
 
 provider = GroqProvider(api_key="gsk_...")
 
@@ -118,7 +118,7 @@ async for chunk in provider.stream(messages=[...], model="..."):
 ### Tools
 
 ```python
-from openmind.tools.base import tool, ToolRegistry
+from Exort.tools.base import tool, ToolRegistry
 
 # Register a custom tool
 @tool(
@@ -133,14 +133,14 @@ async def my_tool(input: str) -> str:
 
 # Use the registry
 registry = ToolRegistry()
-registry.discover()  # Auto-discover from openmind.tools
+registry.discover()  # Auto-discover from Exort.tools
 result = await registry.execute("web_search", query="hello")
 ```
 
 ### Memory
 
 ```python
-from openmind.memory.store import MemoryStore
+from Exort.memory.store import MemoryStore
 
 store = MemoryStore()
 

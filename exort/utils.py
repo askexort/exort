@@ -1,5 +1,5 @@
 """
-Utility functions for OpenMind.
+Utility functions for Exort.
 
 Contains helpers for formatting, logging, and common operations.
 """

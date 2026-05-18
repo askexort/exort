@@ -10,8 +10,8 @@
 ## 1. Clone & Install
 
 ```bash
-git clone https://github.com/openmind-ai/openmind.git
-cd openmind
+git clone https://github.com/Exort-ai/Exort.git
+cd Exort
 pip install -e ".[all]"
 ```
 
@@ -28,7 +28,7 @@ cp env.example .env
 ## 3. Run the CLI
 
 ```bash
-openmind chat --provider groq
+Exort chat --provider groq
 ```
 
 ## 4. Deploy Telegram Bot
@@ -49,18 +49,18 @@ docker compose --profile bot up -d
 
 ### Option C: systemd (Linux)
 
-Create `/etc/systemd/system/openmind-bot.service`:
+Create `/etc/systemd/system/Exort-bot.service`:
 
 ```ini
 [Unit]
-Description=OpenMind Telegram Bot
+Description=Exort Telegram Bot
 After=network.target
 
 [Service]
 Type=simple
-User=openmind
-WorkingDirectory=/opt/openmind
-EnvironmentFile=/opt/openmind/.env
+User=Exort
+WorkingDirectory=/opt/Exort
+EnvironmentFile=/opt/Exort/.env
 ExecStart=/usr/bin/python3 bot/telegram_bot.py
 Restart=always
 RestartSec=5
@@ -70,8 +70,8 @@ WantedBy=multi-user.target
 ```
 
 ```bash
-sudo systemctl enable openmind-bot
-sudo systemctl start openmind-bot
+sudo systemctl enable Exort-bot
+sudo systemctl start Exort-bot
 ```
 
 ## 5. Deploy Landing Page

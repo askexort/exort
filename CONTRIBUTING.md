@@ -1,6 +1,6 @@
-# 🤝 Contributing to OpenMind
+# 🤝 Contributing to Exort
 
-Thank you for your interest in contributing to OpenMind! This document provides guidelines and information for contributors.
+Thank you for your interest in contributing to Exort! This document provides guidelines and information for contributors.
 
 ## 🚀 Getting Started
 
@@ -16,8 +16,8 @@ Thank you for your interest in contributing to OpenMind! This document provides 
 # 1. Fork the repository on GitHub
 
 # 2. Clone your fork
-git clone https://github.com/YOUR_USERNAME/openmind.git
-cd openmind
+git clone https://github.com/YOUR_USERNAME/Exort.git
+cd Exort
 
 # 3. Create a virtual environment
 python -m venv .venv
@@ -118,8 +118,8 @@ pytest tests/test_agent.py::TestAgent::test_agent_chat -v
 
 ```python
 import pytest
-from openmind.agent import Agent
-from openmind.providers.base import BaseProvider, ProviderResponse
+from Exort.agent import Agent
+from Exort.providers.base import BaseProvider, ProviderResponse
 
 class MockProvider(BaseProvider):
     name = "mock"
@@ -181,10 +181,10 @@ def my_function(param1: str, param2: int = 10) -> bool:
 
 ## 🛠️ Adding a New Provider
 
-1. Create `openmind/providers/my_provider.py`:
+1. Create `Exort/providers/my_provider.py`:
 
 ```python
-from openmind.providers.base import BaseProvider, ProviderResponse
+from Exort.providers.base import BaseProvider, ProviderResponse
 
 class MyProvider(BaseProvider):
     name = "my_provider"
@@ -202,10 +202,10 @@ class MyProvider(BaseProvider):
         yield ProviderResponse(content="chunk")
 ```
 
-2. Register in `openmind/providers/__init__.py`:
+2. Register in `Exort/providers/__init__.py`:
 
 ```python
-from openmind.providers.my_provider import MyProvider
+from Exort.providers.my_provider import MyProvider
 
 PROVIDERS["my_provider"] = MyProvider
 ```
@@ -216,10 +216,10 @@ PROVIDERS["my_provider"] = MyProvider
 
 ## 🔧 Adding a New Tool
 
-1. Create or edit a file in `openmind/tools/`:
+1. Create or edit a file in `Exort/tools/`:
 
 ```python
-from openmind.tools.base import tool
+from Exort.tools.base import tool
 
 @tool(
     name="my_tool",
@@ -230,7 +230,7 @@ def my_tool(param: str) -> str:
     return "result"
 ```
 
-2. Import in `openmind/tools/__init__.py`.
+2. Import in `Exort/tools/__init__.py`.
 
 3. Write tests in `tests/test_tools.py`.
 
@@ -266,4 +266,4 @@ By contributing, you agree that your contributions will be licensed under the MI
 
 ## 🙏 Thank You!
 
-Your contributions make OpenMind better for everyone. We appreciate your time and effort!
+Your contributions make Exort better for everyone. We appreciate your time and effort!
