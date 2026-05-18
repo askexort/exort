@@ -1238,8 +1238,12 @@
         .faq-answer code { background: rgba(99,102,241,0.1); padding: 2px 8px; border-radius: 6px; font-size: 13px; color: var(--primary-light); }
 
         @media (max-width: 768px) {
-            .steps-grid, .providers-grid, .usecases-grid { grid-template-columns: 1fr; }
+            .steps-grid, .usecases-grid { grid-template-columns: 1fr; }
+            .providers-grid { grid-template-columns: repeat(2, 1fr); }
             .step-connector { display: none; }
+        }
+        @media (max-width: 480px) {
+            .providers-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -1389,7 +1393,7 @@
                 <div class="feature-card">
                     <div class="feature-icon">&#x1F50C;</div>
                     <h3>Multi-Provider</h3>
-                    <p>OpenAI, Ollama (local), Groq (free tier) out of the box. Switch providers with a single flag.</p>
+                    <p>9 providers including Google AI Studio, Groq, Cerebras, OpenRouter, SambaNova, HuggingFace, OpenAI, Anthropic, and Ollama. Switch providers with a single flag.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">&#x1F6E0;&#xFE0F;</div>
@@ -1545,39 +1549,105 @@ response = agent.<span class="function">chat</span>(<span class="string">"Hello!
             <div class="section-header">
                 <span class="section-tag"><i class="fas fa-server"></i> Multi-Provider</span>
                 <h2 class="section-title">Choose Your <span class="gradient-text">Provider</span></h2>
-                <p class="section-subtitle">Exort works with multiple AI providers. Pick the one that fits your needs.</p>
+                <p class="section-subtitle">9 providers. 6 completely free. Switch with a single flag.</p>
             </div>
             <div class="providers-grid">
                 <div class="provider-card">
                     <span class="provider-badge badge-free">Free</span>
-                    <h3>Groq</h3>
-                    <div class="provider-model">llama-3.3-70b-versatile</div>
+                    <h3>Google AI Studio</h3>
+                    <div class="provider-model">Gemini 2.5 Flash</div>
                     <ul>
-                        <li><i class="fas fa-check"></i> Lightning fast inference</li>
-                        <li><i class="fas fa-check"></i> Free tier available</li>
+                        <li><i class="fas fa-check"></i> 1500 requests/day</li>
+                        <li><i class="fas fa-check"></i> 1M token context window</li>
+                        <li><i class="fas fa-check"></i> Vision capabilities</li>
                         <li><i class="fas fa-check"></i> No credit card required</li>
-                        <li><i class="fas fa-check"></i> Great for getting started</li>
+                    </ul>
+                </div>
+                <div class="provider-card">
+                    <span class="provider-badge badge-free">Free</span>
+                    <h3>Groq</h3>
+                    <div class="provider-model">Llama 3.3 70B</div>
+                    <ul>
+                        <li><i class="fas fa-check"></i> 315 tokens/sec</li>
+                        <li><i class="fas fa-check"></i> ~1000 requests/day</li>
+                        <li><i class="fas fa-check"></i> OpenAI-compatible API</li>
+                        <li><i class="fas fa-check"></i> No credit card required</li>
+                    </ul>
+                </div>
+                <div class="provider-card">
+                    <span class="provider-badge badge-free">Free</span>
+                    <h3>Cerebras</h3>
+                    <div class="provider-model">Llama 3.3 70B</div>
+                    <ul>
+                        <li><i class="fas fa-check"></i> ~1000 tokens/sec</li>
+                        <li><i class="fas fa-check"></i> ~1700 requests/day</li>
+                        <li><i class="fas fa-check"></i> Fastest inference available</li>
+                        <li><i class="fas fa-check"></i> Free tier included</li>
+                    </ul>
+                </div>
+                <div class="provider-card">
+                    <span class="provider-badge badge-free">Free</span>
+                    <h3>OpenRouter</h3>
+                    <div class="provider-model">11+ free models</div>
+                    <ul>
+                        <li><i class="fas fa-check"></i> 200 requests/day</li>
+                        <li><i class="fas fa-check"></i> One API key for all models</li>
+                        <li><i class="fas fa-check"></i> Mix &amp; match providers</li>
+                        <li><i class="fas fa-check"></i> No credit card required</li>
+                    </ul>
+                </div>
+                <div class="provider-card">
+                    <span class="provider-badge badge-free">Free</span>
+                    <h3>SambaNova</h3>
+                    <div class="provider-model">Llama 3.3 70B</div>
+                    <ul>
+                        <li><i class="fas fa-check"></i> 294 tokens/sec</li>
+                        <li><i class="fas fa-check"></i> Free tier available</li>
+                        <li><i class="fas fa-check"></i> OpenAI-compatible API</li>
+                        <li><i class="fas fa-check"></i> No credit card required</li>
+                    </ul>
+                </div>
+                <div class="provider-card">
+                    <span class="provider-badge badge-free">Free</span>
+                    <h3>HuggingFace</h3>
+                    <div class="provider-model">1000s of models</div>
+                    <ul>
+                        <li><i class="fas fa-check"></i> Inference API</li>
+                        <li><i class="fas fa-check"></i> Huge model selection</li>
+                        <li><i class="fas fa-check"></i> Community &amp; research models</li>
+                        <li><i class="fas fa-check"></i> Free tier available</li>
                     </ul>
                 </div>
                 <div class="provider-card">
                     <span class="provider-badge badge-paid">Premium</span>
                     <h3>OpenAI</h3>
-                    <div class="provider-model">gpt-4o / gpt-4o-mini</div>
+                    <div class="provider-model">GPT-4o</div>
                     <ul>
                         <li><i class="fas fa-check"></i> Best reasoning quality</li>
-                        <li><i class="fas fa-check"></i> Tool use support</li>
                         <li><i class="fas fa-check"></i> Vision capabilities</li>
+                        <li><i class="fas fa-check"></i> Function calling</li>
+                        <li><i class="fas fa-check"></i> Production ready</li>
+                    </ul>
+                </div>
+                <div class="provider-card">
+                    <span class="provider-badge badge-paid">Premium</span>
+                    <h3>Anthropic</h3>
+                    <div class="provider-model">Claude Sonnet 4</div>
+                    <ul>
+                        <li><i class="fas fa-check"></i> 200K context window</li>
+                        <li><i class="fas fa-check"></i> Best for coding tasks</li>
+                        <li><i class="fas fa-check"></i> Tool use support</li>
                         <li><i class="fas fa-check"></i> Production ready</li>
                     </ul>
                 </div>
                 <div class="provider-card">
                     <span class="provider-badge badge-local">Local</span>
                     <h3>Ollama</h3>
-                    <div class="provider-model">llama3 / mistral / codellama</div>
+                    <div class="provider-model">50+ models</div>
                     <ul>
                         <li><i class="fas fa-check"></i> 100% private &amp; local</li>
-                        <li><i class="fas fa-check"></i> No API key needed</li>
                         <li><i class="fas fa-check"></i> Offline capable</li>
+                        <li><i class="fas fa-check"></i> No API key needed</li>
                         <li><i class="fas fa-check"></i> Full control</li>
                     </ul>
                 </div>
