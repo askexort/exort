@@ -348,6 +348,7 @@ async def handle_group_message(update: Update, context: ContextTypes.DEFAULT_TYP
 
 async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle inline keyboard callbacks."""
+    global DEFAULT_MODEL
     query = update.callback_query
     await query.answer()
 
@@ -370,7 +371,6 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "🤖 Select a model:", reply_markup=InlineKeyboardMarkup(keyboard)
         )
     elif query.data.startswith("setmodel:"):
-        global DEFAULT_MODEL
         model_id = query.data.split(":", 1)[1]
         DEFAULT_MODEL = model_id
         await query.edit_message_text(f"✅ Model set to `{model_id}`", parse_mode=ParseMode.MARKDOWN)
