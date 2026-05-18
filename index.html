@@ -12,11 +12,11 @@
             --primary-light: #818cf8;
             --secondary: #a855f7;
             --accent: #ec4899;
-            --bg-dark: #030014;
-            --bg-card: rgba(255, 255, 255, 0.03);
-            --text-primary: #ffffff;
-            --text-secondary: #94a3b8;
-            --border: rgba(255, 255, 255, 0.06);
+            --bg-dark: #000000;
+            --bg-card: rgba(255, 255, 255, 0.02);
+            --text-primary: #e2e8f0;
+            --text-secondary: #64748b;
+            --border: rgba(255, 255, 255, 0.04);
             --gold: #fbbf24;
             --gold-dark: #d97706;
         }
@@ -39,47 +39,43 @@
             line-height: 1.6;
         }
 
-        /* Animated Background */
-        .bg-animation {
+        /* 3D Grid Background */
+        .bg-3d-grid {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1;
-            overflow: hidden;
+            z-index: -2;
+            background:
+                linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            transform: perspective(500px) rotateX(60deg);
+            transform-origin: center top;
         }
 
-        .bg-animation::before {
+        .bg-3d-grid::after {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at 30% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
-                        radial-gradient(circle at 70% 50%, rgba(168, 85, 247, 0.06) 0%, transparent 50%),
-                        radial-gradient(circle at 50% 80%, rgba(236, 72, 153, 0.04) 0%, transparent 50%);
-            animation: bgPulse 15s ease-in-out infinite;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60%;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
         }
 
-        @keyframes bgPulse {
-            0%, 100% { transform: scale(1) rotate(0deg); }
-            50% { transform: scale(1.1) rotate(5deg); }
-        }
-
-        /* Grid Pattern */
-        .grid-pattern {
+        /* Deep Dark Ambient */
+        .bg-ambient {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: 
-                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-            background-size: 50px 50px;
-            z-index: -1;
+            z-index: -3;
+            background: radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.06) 0%, transparent 50%),
+                        radial-gradient(ellipse at 80% 80%, rgba(168, 85, 247, 0.04) 0%, transparent 50%),
+                        radial-gradient(ellipse at 50% 50%, rgba(236, 72, 153, 0.03) 0%, transparent 60%);
         }
 
         /* Floating Particles */
@@ -127,13 +123,13 @@
             padding: 20px 0;
             transition: all 0.3s ease;
             backdrop-filter: blur(20px);
-            background: rgba(3, 0, 20, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             border-bottom: 1px solid var(--border);
         }
 
         header.scrolled {
             padding: 15px 0;
-            background: rgba(3, 0, 20, 0.95);
+            background: rgba(0, 0, 0, 0.95);
         }
 
         nav {
@@ -271,18 +267,6 @@
             border-color: var(--primary);
         }
 
-        .btn-gold {
-            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-            color: #000;
-            border: none;
-            box-shadow: 0 4px 20px rgba(251, 191, 36, 0.3);
-        }
-
-        .btn-gold:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(251, 191, 36, 0.4);
-        }
-
         /* Mobile Menu */
         .mobile-menu {
             display: none;
@@ -291,7 +275,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(3, 0, 20, 0.98);
+            background: rgba(0, 0, 0, 0.98);
             z-index: 999;
             justify-content: center;
             align-items: center;
@@ -368,30 +352,13 @@
             z-index: 2;
         }
 
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(99, 102, 241, 0.1);
-            border: 1px solid rgba(99, 102, 241, 0.2);
-            padding: 8px 16px;
-            border-radius: 100px;
-            font-size: 14px;
-            color: var(--primary-light);
-            margin-bottom: 30px;
-            backdrop-filter: blur(10px);
-        }
-
-        .hero-badge i {
-            font-size: 12px;
-        }
-
         h1 {
             font-size: 72px;
             font-weight: 900;
             line-height: 1.1;
             margin-bottom: 24px;
             letter-spacing: -2px;
+            color: #ffffff;
         }
 
         h1 .gradient-text {
@@ -577,6 +544,7 @@
             font-weight: 800;
             letter-spacing: -1.5px;
             margin-bottom: 20px;
+            color: #ffffff;
         }
 
         .section-subtitle {
@@ -618,7 +586,7 @@
         .feature-card:hover {
             transform: translateY(-10px) scale(1.02);
             border-color: rgba(99, 102, 241, 0.3);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8),
                         0 0 40px rgba(99, 102, 241, 0.1);
         }
 
@@ -659,6 +627,7 @@
             font-weight: 700;
             margin-bottom: 12px;
             letter-spacing: -0.5px;
+            color: #ffffff;
         }
 
         .feature-card p {
@@ -685,6 +654,7 @@
             font-weight: 800;
             margin-bottom: 20px;
             letter-spacing: -1px;
+            color: #ffffff;
         }
 
         .code-info p {
@@ -714,7 +684,7 @@
         }
 
         .code-block {
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.6);
             border: 1px solid var(--border);
             border-radius: 20px;
             overflow: hidden;
@@ -750,176 +720,12 @@
             gap: 20px;
         }
 
-        .code-tab {
-            color: var(--text-secondary);
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            padding: 4px 0;
-            border-bottom: 2px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .code-tab.active {
-            color: var(--text-primary);
-            border-bottom-color: var(--primary);
-        }
-
-        .code-body {
-            padding: 30px;
-            font-family: 'Fira Code', 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 2;
-            overflow-x: auto;
-        }
-
-        .code-body pre {
-            margin: 0;
-        }
-
         .code-body .comment { color: #6b7280; }
         .code-body .keyword { color: #c084fc; }
         .code-body .string { color: #34d399; }
         .code-body .function { color: #60a5fa; }
         .code-body .variable { color: #f472b6; }
         .code-body .operator { color: #94a3b8; }
-
-        /* Token Section */
-        .token-section {
-            padding: 150px 0;
-            position: relative;
-        }
-
-        .token-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 80px;
-            align-items: center;
-        }
-
-        .token-card {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
-            border: 1px solid rgba(99, 102, 241, 0.2);
-            border-radius: 32px;
-            padding: 60px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .token-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at center, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
-            animation: tokenGlow 10s ease-in-out infinite;
-        }
-
-        @keyframes tokenGlow {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(10%, 10%); }
-        }
-
-        .token-symbol {
-            font-size: 64px;
-            font-weight: 900;
-            background: linear-gradient(135deg, var(--secondary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .token-network {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(99, 102, 241, 0.2);
-            padding: 8px 16px;
-            border-radius: 100px;
-            font-size: 14px;
-            color: var(--primary-light);
-            margin-bottom: 30px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .token-stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .token-stat {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 24px;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-        }
-
-        .token-stat-label {
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .token-stat-value {
-            font-size: 24px;
-            font-weight: 700;
-        }
-
-        .token-info h2 {
-            font-size: 40px;
-            font-weight: 800;
-            margin-bottom: 20px;
-            letter-spacing: -1px;
-        }
-
-        .token-info p {
-            color: var(--text-secondary);
-            font-size: 17px;
-            margin-bottom: 30px;
-            line-height: 1.8;
-        }
-
-        .token-benefits {
-            list-style: none;
-        }
-
-        .token-benefits li {
-            display: flex;
-            align-items: flex-start;
-            gap: 16px;
-            padding: 16px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .token-benefits li:last-child {
-            border-bottom: none;
-        }
-
-        .token-benefits i {
-            color: var(--primary);
-            font-size: 20px;
-            margin-top: 2px;
-        }
-
-        .token-benefits strong {
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .token-benefits span {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
 
         /* CTA Section */
         .cta-section {
@@ -929,8 +735,8 @@
         }
 
         .cta-card {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15));
-            border: 1px solid rgba(99, 102, 241, 0.2);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+            border: 1px solid rgba(99, 102, 241, 0.15);
             border-radius: 40px;
             padding: 80px;
             position: relative;
@@ -944,7 +750,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.3) 0%, transparent 60%);
+            background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.2) 0%, transparent 60%);
         }
 
         .cta-card h2 {
@@ -953,6 +759,7 @@
             margin-bottom: 20px;
             position: relative;
             z-index: 1;
+            color: #ffffff;
         }
 
         .cta-card p {
@@ -974,89 +781,37 @@
             z-index: 1;
         }
 
-        /* Token Launch Section (Hidden at bottom) */
-        .token-launch-section {
-            padding: 80px 0;
-            background: linear-gradient(135deg, rgba(251, 191, 36, 0.05), rgba(217, 119, 6, 0.05));
-            border-top: 1px solid rgba(251, 191, 36, 0.1);
+        /* Donate Section */
+        .donate-section {
+            padding: 80px 0 60px;
+            position: relative;
         }
 
-        .token-launch-content {
-            text-align: center;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .token-launch-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(251, 191, 36, 0.1);
-            border: 1px solid rgba(251, 191, 36, 0.2);
-            padding: 8px 16px;
-            border-radius: 100px;
-            font-size: 14px;
-            color: var(--gold);
-            margin-bottom: 20px;
-        }
-
-        .token-launch-title {
-            font-size: 32px;
-            font-weight: 800;
-            margin-bottom: 16px;
-            color: var(--gold);
-        }
-
-        .token-launch-desc {
-            color: var(--text-secondary);
-            font-size: 16px;
-            margin-bottom: 30px;
-            line-height: 1.8;
-        }
-
-        .token-launch-details {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .token-launch-stat {
-            background: rgba(255, 255, 255, 0.03);
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-        }
-
-        .token-launch-stat-label {
-            font-size: 12px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
-        .token-launch-stat-value {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--gold);
-        }
-
-        /* Donation Section */
-        .donation-section {
-            padding: 80px 0;
+        .donate-card {
             background: linear-gradient(135deg, rgba(236, 72, 153, 0.05), rgba(168, 85, 247, 0.05));
-            border-top: 1px solid rgba(236, 72, 153, 0.1);
-        }
-
-        .donation-content {
+            border: 1px solid rgba(236, 72, 153, 0.08);
+            border-radius: 32px;
+            padding: 60px;
             text-align: center;
-            max-width: 800px;
+            max-width: 700px;
             margin: 0 auto;
+            position: relative;
+            overflow: hidden;
         }
 
-        .donation-icon {
-            font-size: 48px;
+        .donate-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), var(--secondary), transparent);
+            opacity: 0.5;
+        }
+
+        .donate-icon {
+            font-size: 40px;
             margin-bottom: 20px;
             animation: heartbeat 1.5s ease-in-out infinite;
         }
@@ -1066,156 +821,211 @@
             50% { transform: scale(1.1); }
         }
 
-        .donation-title {
-            font-size: 32px;
+        .donate-title {
+            font-size: 28px;
             font-weight: 800;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             background: linear-gradient(135deg, var(--accent), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .donation-desc {
+        .donate-desc {
             color: var(--text-secondary);
             font-size: 16px;
             margin-bottom: 30px;
             line-height: 1.8;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        .donation-rewards {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-
-        .donation-reward {
-            background: rgba(255, 255, 255, 0.03);
-            padding: 24px;
-            border-radius: 16px;
-            border: 1px solid var(--border);
+        .donate-btn {
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            color: white;
+            border: none;
+            padding: 14px 36px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(236, 72, 153, 0.3);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .donation-reward:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent);
-            box-shadow: 0 10px 30px rgba(236, 72, 153, 0.2);
+        .donate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(236, 72, 153, 0.4);
         }
 
-        .donation-reward-icon {
-            font-size: 32px;
+        .wallet-address-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .wallet-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
             margin-bottom: 12px;
         }
 
-        .donation-reward-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 8px;
+        .wallet-address-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
         }
 
-        .donation-reward-desc {
+        .wallet-address {
+            font-family: 'Fira Code', 'Courier New', monospace;
             font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        .donation-addresses {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 16px;
-            padding: 30px;
-            margin-top: 30px;
-        }
-
-        .donation-addresses h4 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: var(--text-primary);
-        }
-
-        .address-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-        }
-
-        .address-item {
-            background: rgba(255, 255, 255, 0.03);
-            padding: 16px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            text-align: left;
-        }
-
-        .address-label {
-            font-size: 12px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
-        .address-value {
-            font-family: 'Fira Code', monospace;
-            font-size: 12px;
             color: var(--primary-light);
+            background: rgba(99, 102, 241, 0.1);
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: 1px solid rgba(99, 102, 241, 0.15);
             word-break: break-all;
+            user-select: all;
         }
 
-        /* Flower Words */
-        .flower-words {
-            padding: 60px 0;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
+        .wallet-copy-btn {
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: var(--primary-light);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
         }
 
-        .flower-words::before,
-        .flower-words::after {
-            content: '🌸';
-            position: absolute;
-            font-size: 100px;
-            opacity: 0.1;
-            animation: floatFlower 20s linear infinite;
+        .wallet-copy-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.1);
         }
 
-        .flower-words::before {
-            left: 10%;
-            top: 50%;
-            animation-delay: 0s;
+        .wallet-copy-btn.copied {
+            background: #28ca42;
+            color: white;
+            border-color: #28ca42;
         }
 
-        .flower-words::after {
-            right: 10%;
-            top: 50%;
-            animation-delay: 10s;
-        }
-
-        @keyframes floatFlower {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            25% { transform: translateY(-20px) rotate(5deg); }
-            50% { transform: translateY(0) rotate(0deg); }
-            75% { transform: translateY(20px) rotate(-5deg); }
-        }
-
-        .flower-text {
-            font-size: 18px;
-            color: var(--text-secondary);
-            font-style: italic;
+        .code-body {
+            display: none;
+            padding: 30px;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 14px;
             line-height: 2;
-            max-width: 600px;
-            margin: 0 auto;
+            overflow-x: auto;
         }
 
-        .flower-text span {
-            color: var(--accent);
-            font-weight: 600;
+        .code-body.active {
+            display: block;
+        }
+
+        .code-body pre {
+            margin: 0;
+        }
+
+        .code-tab {
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 4px 10px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .code-tab.active {
+            color: var(--text-primary);
+            background: rgba(99, 102, 241, 0.15);
+        }
+
+        /* Floating 3D Cube */
+        .floating-cube {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            transform-style: preserve-3d;
+            animation: cubeRotate 12s linear infinite, cubeFloat 6s ease-in-out infinite;
+            top: 10%;
+            right: -30px;
+        }
+
+        .floating-cube .cube-face {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            background: rgba(99, 102, 241, 0.05);
+            backdrop-filter: blur(4px);
+        }
+
+        .floating-cube .front  { transform: translateZ(30px); }
+        .floating-cube .back   { transform: rotateY(180deg) translateZ(30px); }
+        .floating-cube .right  { transform: rotateY(90deg) translateZ(30px); }
+        .floating-cube .left   { transform: rotateY(-90deg) translateZ(30px); }
+        .floating-cube .top    { transform: rotateX(90deg) translateZ(30px); }
+        .floating-cube .bottom { transform: rotateX(-90deg) translateZ(30px); }
+
+        .floating-cube-2 {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            transform-style: preserve-3d;
+            animation: cubeRotate 8s linear infinite reverse, cubeFloat 8s ease-in-out infinite 2s;
+            bottom: 15%;
+            left: -20px;
+        }
+
+        .floating-cube-2 .cube-face {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            background: rgba(168, 85, 247, 0.05);
+            backdrop-filter: blur(4px);
+        }
+
+        .floating-cube-2 .front  { transform: translateZ(20px); }
+        .floating-cube-2 .back   { transform: rotateY(180deg) translateZ(20px); }
+        .floating-cube-2 .right  { transform: rotateY(90deg) translateZ(20px); }
+        .floating-cube-2 .left   { transform: rotateY(-90deg) translateZ(20px); }
+        .floating-cube-2 .top    { transform: rotateX(90deg) translateZ(20px); }
+        .floating-cube-2 .bottom { transform: rotateX(-90deg) translateZ(20px); }
+
+        @keyframes cubeRotate {
+            0% { transform: rotateX(0deg) rotateY(0deg); }
+            100% { transform: rotateX(360deg) rotateY(360deg); }
+        }
+
+        @keyframes cubeFloat {
+            0%, 100% { transform: rotateX(0deg) rotateY(0deg) translateY(0); }
+            50% { transform: rotateX(180deg) rotateY(180deg) translateY(-20px); }
         }
 
         /* Footer */
         footer {
             padding: 80px 0 40px;
             border-top: 1px solid var(--border);
+            background: rgba(0, 0, 0, 0.3);
         }
 
         .footer-content {
@@ -1266,6 +1076,7 @@
             font-size: 16px;
             font-weight: 600;
             margin-bottom: 24px;
+            color: #ffffff;
         }
 
         .footer-column ul {
@@ -1303,8 +1114,7 @@
         /* Responsive */
         @media (max-width: 1200px) {
             .hero-content,
-            .code-content,
-            .token-content {
+            .code-content {
                 grid-template-columns: 1fr;
                 gap: 60px;
             }
@@ -1314,11 +1124,6 @@
             }
 
             .features-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .token-launch-details,
-            .donation-rewards {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
@@ -1379,26 +1184,13 @@
                 flex-direction: column;
                 align-items: center;
             }
-
-            .token-stats {
-                grid-template-columns: 1fr;
-            }
-
-            .token-launch-details,
-            .donation-rewards {
-                grid-template-columns: 1fr;
-            }
-
-            .address-grid {
-                grid-template-columns: 1fr;
-            }
         }
     </style>
 </head>
 <body>
     <!-- Background Effects -->
-    <div class="bg-animation"></div>
-    <div class="grid-pattern"></div>
+    <div class="bg-ambient"></div>
+    <div class="bg-3d-grid"></div>
     <div class="particles" id="particles"></div>
 
     <!-- Mobile Menu -->
@@ -1416,7 +1208,6 @@
             <ul class="mobile-menu-links">
                 <li><a href="#features" onclick="closeMobileMenu()">Features</a></li>
                 <li><a href="#code" onclick="closeMobileMenu()">Code</a></li>
-                <li><a href="#token" onclick="closeMobileMenu()">Token</a></li>
                 <li><a href="https://github.com/askexort/exort" onclick="closeMobileMenu()">GitHub</a></li>
                 <li><a href="https://t.me/askexort_bot" class="btn btn-primary" onclick="closeMobileMenu()">
                     <i class="fab fa-telegram"></i> Try Bot
@@ -1437,7 +1228,6 @@
             <ul class="nav-links">
                 <li><a href="#features">Features</a></li>
                 <li><a href="#code">Code</a></li>
-                <li><a href="#token">Token</a></li>
                 <li><a href="https://github.com/askexort/exort">GitHub</a></li>
                 <li><a href="https://t.me/askexort_bot" class="btn btn-primary"><i class="fab fa-telegram"></i> Try Bot</a></li>
             </ul>
@@ -1452,10 +1242,6 @@
         <div class="container">
             <div class="hero-content">
                 <div class="hero-text">
-                    <div class="hero-badge">
-                        <i class="fas fa-bolt"></i>
-                        <span>Open Source & Free Forever</span>
-                    </div>
                     <h1>
                         Build AI<br>
                         <span class="gradient-text">Agents</span><br>
@@ -1483,13 +1269,29 @@
                             <div class="stat-label">AI Providers</div>
                         </div>
                         <div class="stat">
-                            <div class="stat-number">∞</div>
+                            <div class="stat-number">&infin;</div>
                             <div class="stat-label">Possibilities</div>
                         </div>
                     </div>
                 </div>
                 <div class="hero-visual">
                     <div class="glow-effect"></div>
+                    <div class="floating-cube">
+                        <div class="cube-face front"></div>
+                        <div class="cube-face back"></div>
+                        <div class="cube-face right"></div>
+                        <div class="cube-face left"></div>
+                        <div class="cube-face top"></div>
+                        <div class="cube-face bottom"></div>
+                    </div>
+                    <div class="floating-cube-2">
+                        <div class="cube-face front"></div>
+                        <div class="cube-face back"></div>
+                        <div class="cube-face right"></div>
+                        <div class="cube-face left"></div>
+                        <div class="cube-face top"></div>
+                        <div class="cube-face bottom"></div>
+                    </div>
                     <div class="logo-3d-container">
                         <div class="orbit-ring orbit-ring-1">
                             <div class="orbit-dot"></div>
@@ -1522,34 +1324,29 @@
             </div>
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="feature-icon">🤖</div>
+                    <div class="feature-icon">&#x1F916;</div>
                     <h3>Agentic Loop</h3>
-                    <p>Think → Act → Observe architecture for autonomous reasoning and intelligent decision making.</p>
+                    <p>Think &#x2192; Act &#x2192; Observe architecture for autonomous reasoning and intelligent decision making.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">🔌</div>
+                    <div class="feature-icon">&#x1F50C;</div>
                     <h3>Multi-Provider</h3>
                     <p>OpenAI, Ollama (local), Groq (free tier) out of the box. Switch providers with a single flag.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">🛠️</div>
+                    <div class="feature-icon">&#x1F6E0;&#xFE0F;</div>
                     <h3>Plugin Tools</h3>
                     <p>Decorator-based tool registration system. Easy to extend with custom capabilities.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">💾</div>
+                    <div class="feature-icon">&#x1F4BE;</div>
                     <h3>Conversation Memory</h3>
                     <p>SQLite-backed persistent conversations. Remember context across sessions.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
+                    <div class="feature-icon">&#x26A1;</div>
                     <h3>Streaming</h3>
                     <p>Real-time token streaming for all providers. See responses as they're generated.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <h3>Token Tracker</h3>
-                    <p>Track token buy/sell events across multiple chains. Real-time alerts and analytics.</p>
                 </div>
             </div>
         </div>
@@ -1577,7 +1374,7 @@
                         </li>
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>Python & CLI interface</span>
+                            <span>Python &amp; CLI interface</span>
                         </li>
                         <li>
                             <i class="fas fa-check-circle"></i>
@@ -1596,91 +1393,41 @@
                             <div class="code-dot"></div>
                         </div>
                         <div class="code-tabs">
-                            <span class="code-tab active">Terminal</span>
-                            <span class="code-tab">Python</span>
+                            <span class="code-tab active" data-tab="terminal">Terminal</span>
+                            <span class="code-tab" data-tab="python">Python</span>
                         </div>
                     </div>
-                    <div class="code-body">
+                    <div class="code-body active" id="code-terminal">
 <pre><span class="comment"># Install Exort</span>
 <span class="keyword">pip</span> install exort-agent
 
 <span class="comment"># Set up config</span>
 <span class="keyword">exort</span> config --init
 
-<span class="comment"># Start chatting</span>
-<span class="keyword">exort</span> chat
+<span class="comment"># Start chatting with Groq (free)</span>
+<span class="keyword">exort</span> chat --provider groq
 
-<span class="comment"># Python API</span>
+<span class="comment"># Use OpenAI</span>
+<span class="keyword">exort</span> chat --provider openai --model gpt-4o</pre>
+                    </div>
+                    <div class="code-body" id="code-python">
+<pre><span class="comment"># Import Exort</span>
 <span class="keyword">from</span> exort <span class="keyword">import</span> Agent
 
+<span class="comment"># Create an agent</span>
 agent = <span class="function">Agent</span>(provider=<span class="string">"groq"</span>)
-response = agent.<span class="function">chat</span>(<span class="string">"Hello!"</span>)
-<span class="function">print</span>(response)</pre>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- Token Section -->
-    <section class="token-section" id="token">
-        <div class="container">
-            <div class="token-content">
-                <div class="token-card">
-                    <div class="token-symbol">$MIND</div>
-                    <div class="token-network">
-                        <i class="fas fa-circle" style="color: #0052ff; font-size: 8px;"></i>
-                        Base Network
+<span class="comment"># Chat with the agent</span>
+response = agent.<span class="function">chat</span>(<span class="string">"Hello!"</span>)
+<span class="function">print</span>(response)
+
+<span class="comment"># Stream responses</span>
+<span class="keyword">for</span> chunk <span class="keyword">in</span> agent.<span class="function">chat_stream</span>(<span class="string">"Tell me a joke"</span>):
+    <span class="function">print</span>(chunk, end=<span class="string">""</span>)
+
+<span class="comment"># Check stats</span>
+<span class="function">print</span>(agent.<span class="function">get_stats</span>())</pre>
                     </div>
-                    <div class="token-stats">
-                        <div class="token-stat">
-                            <div class="token-stat-label">Network</div>
-                            <div class="token-stat-value">Base</div>
-                        </div>
-                        <div class="token-stat">
-                            <div class="token-stat-label">Type</div>
-                            <div class="token-stat-value">ERC-20</div>
-                        </div>
-                        <div class="token-stat">
-                            <div class="token-stat-label">Supply</div>
-                            <div class="token-stat-value">1B</div>
-                        </div>
-                        <div class="token-stat">
-                            <div class="token-stat-label">Utility</div>
-                            <div class="token-stat-value">Governance</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="token-info">
-                    <div class="section-label">
-                        <i class="fas fa-coins"></i>
-                        <span>Token</span>
-                    </div>
-                    <h2>$MIND Token</h2>
-                    <p>The governance token powering the Exort ecosystem. Built on Base for fast, low-cost transactions.</p>
-                    <ul class="token-benefits">
-                        <li>
-                            <i class="fas fa-shield-alt"></i>
-                            <div>
-                                <strong>Governance Rights</strong>
-                                <span>Vote on protocol upgrades and feature proposals</span>
-                            </div>
-                        </li>
-                        <li>
-                            <i class="fas fa-bolt"></i>
-                            <div>
-                                <strong>Fast & Cheap</strong>
-                                <span>Built on Base for instant transactions with minimal fees</span>
-                            </div>
-                        </li>
-                        <li>
-                            <i class="fas fa-lock"></i>
-                            <div>
-                                <strong>Staking Rewards</strong>
-                                <span>Earn passive income by staking your tokens</span>
-                            </div>
-                        </li>
-                    </ul>
                 </div>
             </div>
         </div>
@@ -1691,7 +1438,7 @@ response = agent.<span class="function">chat</span>(<span class="string">"Hello!
         <div class="container">
             <div class="cta-card">
                 <h2>Ready to Build?</h2>
-                <p>Join thousands of developers using Exort to build the next generation of AI applications.</p>
+                <p>Join the developers using Exort to build the next generation of AI applications.</p>
                 <div class="cta-buttons">
                     <a href="https://github.com/askexort/exort" class="btn btn-primary btn-lg">
                         <i class="fab fa-github"></i> Star on GitHub
@@ -1704,18 +1451,29 @@ response = agent.<span class="function">chat</span>(<span class="string">"Hello!
         </div>
     </section>
 
-    <!-- Donation Section -->
-    <section class="donation-section">
+    <!-- Donate & Get Rewarded -->
+    <section class="donate-section">
         <div class="container">
-            <div class="donation-content">
-                <p style="text-align: center; color: var(--text-secondary); font-size: 14px; padding: 20px 0;">
-                    💝 Donate to get rewarded — <a href="https://github.com/sponsors/askexort" style="color: var(--primary); text-decoration: none;">Support Exort</a>
+            <div class="donate-card">
+                <div class="donate-icon">&#x1F49C;</div>
+                <div class="donate-title">Donate &amp; Get Rewarded</div>
+                <p class="donate-desc">
+                    Support the Exort project. Those who contribute will be remembered.
                 </p>
+                <div class="wallet-address-box">
+                    <div class="wallet-label">Wallet Address</div>
+                    <div class="wallet-address-row">
+                        <span class="wallet-address">0x9637EDad27c93F40b505F6478445530f58fF1501</span>
+                        <button class="wallet-copy-btn" onclick="copyWallet(this)" title="Copy address">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-<!-- Footer -->
+    <!-- Footer -->
     <footer>
         <div class="container">
             <div class="footer-content">
@@ -1731,40 +1489,42 @@ response = agent.<span class="function">chat</span>(<span class="string">"Hello!
                         <a href="https://github.com/askexort/exort"><i class="fab fa-github"></i></a>
                         <a href="https://t.me/askexort_bot"><i class="fab fa-telegram"></i></a>
                         <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-discord"></i></a>
                     </div>
                 </div>
                 <div class="footer-column">
                     <h4>Product</h4>
                     <ul>
                         <li><a href="#features">Features</a></li>
-                        <li><a href="#code">Documentation</a></li>
-                        <li><a href="#token">Token</a></li>
-                        <li><a href="#">Roadmap</a></li>
+                        <li><a href="#code">Quick Start</a></li>
+                        <li><a href="https://github.com/askexort/exort">Documentation</a></li>
+                        <li><a href="https://github.com/askexort/exort/releases">Changelog</a></li>
+                        <li><a href="https://github.com/askexort/exort/blob/main/LICENSE">License (MIT)</a></li>
                     </ul>
                 </div>
                 <div class="footer-column">
                     <h4>Resources</h4>
                     <ul>
-                        <li><a href="#">API Reference</a></li>
-                        <li><a href="#">Tutorials</a></li>
-                        <li><a href="#">Examples</a></li>
-                        <li><a href="#">Blog</a></li>
+                        <li><a href="https://github.com/askexort/exort">Source Code</a></li>
+                        <li><a href="https://github.com/askexort/exort/issues">Bug Reports</a></li>
+                        <li><a href="https://github.com/askexort/exort/pulls">Pull Requests</a></li>
+                        <li><a href="https://pypi.org/project/exort-agent/">PyPI Package</a></li>
+                        <li><a href="https://github.com/askexort/exort/wiki">Wiki</a></li>
                     </ul>
                 </div>
                 <div class="footer-column">
                     <h4>Community</h4>
                     <ul>
                         <li><a href="https://github.com/askexort/exort">GitHub</a></li>
-                        <li><a href="https://t.me/askexort_bot">Telegram</a></li>
-                        <li><a href="#">Discord</a></li>
-                        <li><a href="#">Contributing</a></li>
+                        <li><a href="https://t.me/askexort_bot">Telegram Bot</a></li>
+                        <li><a href="https://github.com/askexort/exort/graphs/contributors">Contributors</a></li>
+                        <li><a href="https://github.com/askexort/exort/discussions">Discussions</a></li>
+                        <li><a href="https://github.com/askexort/exort/blob/main/CONTRIBUTING.md">Contributing</a></li>
                     </ul>
                 </div>
             </div>
             <div class="footer-bottom">
                 <p>&copy; 2026 Exort. Open source under MIT License.</p>
-                <p>Built with ❤️ by the community</p>
+                <p>Built with &#x2764;&#xFE0F; by the community</p>
             </div>
         </div>
     </footer>
@@ -1858,19 +1618,27 @@ response = agent.<span class="function">chat</span>(<span class="string">"Hello!
             observer.observe(card);
         });
 
-        // Copy address to clipboard
-        document.querySelectorAll('.address-value').forEach(el => {
-            el.style.cursor = 'pointer';
-            el.title = 'Click to copy';
-            el.addEventListener('click', () => {
-                navigator.clipboard.writeText(el.textContent);
-                const original = el.textContent;
-                el.textContent = 'Copied!';
-                el.style.color = '#34d399';
+        // Copy wallet address
+        function copyWallet(btn) {
+            const address = '0x9637EDad27c93F40b505F6478445530f58fF1501';
+            navigator.clipboard.writeText(address).then(() => {
+                btn.classList.add('copied');
+                btn.innerHTML = '<i class="fas fa-check"></i>';
                 setTimeout(() => {
-                    el.textContent = original;
-                    el.style.color = '';
+                    btn.classList.remove('copied');
+                    btn.innerHTML = '<i class="fas fa-copy"></i>';
                 }, 2000);
+            });
+        }
+
+        // Code tab switching
+        document.querySelectorAll('.code-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const target = tab.getAttribute('data-tab');
+                document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.code-body').forEach(b => b.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('code-' + target).classList.add('active');
             });
         });
     </script>

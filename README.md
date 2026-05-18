@@ -351,20 +351,6 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
-## 🪙 $MIND Token
-
-> *Coming Soon*
-
-The $MIND token will power the Exort ecosystem:
-
-- 🔹 **Governance** — Vote on framework features and priorities
-- 🔹 **Staking** — Earn rewards for contributing tools and providers
-- 🔹 **Payments** — Pay for premium API access and compute
-- 🔹 **Incentives** — Reward developers for high-quality contributions
-
-*Stay tuned for the tokenomics paper and launch details.*
-
----
 
 ## 🙏 Acknowledgments
 

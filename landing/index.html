@@ -666,14 +666,22 @@
             font-size: 13px;
             font-weight: 500;
             cursor: pointer;
-            padding: 4px 0;
-            border-bottom: 2px solid transparent;
+            padding: 6px 14px;
+            border-radius: 6px;
             transition: all 0.3s ease;
         }
 
         .code-tab.active {
-            color: var(--text-primary);
-            border-bottom-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        .code-body {
+            display: none;
+        }
+
+        .code-body.active {
+            display: block;
         }
 
         .code-body {
@@ -749,120 +757,43 @@
             z-index: 1;
         }
 
-        /* Secret Menu Section */
-        .secret-section {
-            padding: 60px 0 40px;
-            position: relative;
-            text-align: center;
-        }
-
-        .secret-divider {
-            width: 60px;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--primary), transparent);
-            margin: 0 auto 40px;
-            opacity: 0.3;
-        }
-
-        .secret-icon {
-            font-size: 28px;
-            margin-bottom: 20px;
-            opacity: 0.6;
-            cursor: pointer;
-            transition: all 0.5s ease;
-            user-select: none;
-        }
-
-        .secret-icon:hover {
-            opacity: 1;
-            transform: scale(1.2) rotate(10deg);
-            filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.5));
-        }
-
-        .secret-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text-secondary);
-            margin-bottom: 24px;
-            letter-spacing: 6px;
-            text-transform: uppercase;
-            opacity: 0.5;
-            transition: opacity 0.3s ease;
-        }
-
-        .secret-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease;
-            opacity: 0;
-        }
-
-        .secret-content.revealed {
-            max-height: 600px;
-            opacity: 1;
-        }
-
-        .secret-card {
-            background: rgba(99, 102, 241, 0.05);
-            border: 1px solid rgba(99, 102, 241, 0.1);
-            border-radius: 24px;
-            padding: 50px 40px;
-            max-width: 600px;
-            margin: 0 auto;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .secret-card::before {
-            content: '';
+        /* 3D Floating Cube */
+        .floating-cube {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--primary), var(--secondary), transparent);
+            width: 60px;
+            height: 60px;
+            top: 20px;
+            right: 20px;
+            transform-style: preserve-3d;
+            animation: cubeFloat 8s ease-in-out infinite, cubeRotate 12s linear infinite;
         }
 
-        .secret-token-symbol {
-            font-size: 48px;
-            font-weight: 900;
-            background: linear-gradient(135deg, var(--secondary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
+        .floating-cube .cube-face {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 1.5px solid rgba(99, 102, 241, 0.4);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(168, 85, 247, 0.06));
+            backdrop-filter: blur(4px);
         }
 
-        .secret-token-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(99, 102, 241, 0.15);
-            padding: 6px 14px;
-            border-radius: 100px;
-            font-size: 13px;
-            color: var(--primary-light);
-            margin-bottom: 30px;
+        .floating-cube .front  { transform: translateZ(30px); }
+        .floating-cube .back   { transform: rotateY(180deg) translateZ(30px); }
+        .floating-cube .right  { transform: rotateY(90deg) translateZ(30px); }
+        .floating-cube .left   { transform: rotateY(-90deg) translateZ(30px); }
+        .floating-cube .top    { transform: rotateX(90deg) translateZ(30px); }
+        .floating-cube .bottom { transform: rotateX(-90deg) translateZ(30px); }
+
+        @keyframes cubeFloat {
+            0%, 100% { transform: translateY(0) rotateX(0) rotateY(0); }
+            25% { transform: translateY(-18px) rotateX(5deg) rotateY(90deg); }
+            50% { transform: translateY(-10px) rotateX(-5deg) rotateY(180deg); }
+            75% { transform: translateY(-22px) rotateX(3deg) rotateY(270deg); }
         }
 
-        .secret-poem {
-            font-size: 16px;
-            color: var(--text-secondary);
-            line-height: 2.2;
-            font-style: italic;
-            margin-bottom: 30px;
-        }
-
-        .secret-poem em {
-            color: var(--primary-light);
-            font-style: normal;
-        }
-
-        .secret-status {
-            font-size: 13px;
-            color: var(--text-secondary);
-            opacity: 0.5;
-            letter-spacing: 2px;
-            text-transform: uppercase;
+        @keyframes cubeRotate {
+            0%   { transform: rotateX(0deg) rotateY(0deg); }
+            100% { transform: rotateX(360deg) rotateY(360deg); }
         }
 
         /* Donate Section */
@@ -945,6 +876,61 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 30px rgba(236, 72, 153, 0.4);
         }
+
+        .wallet-address-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            padding: 20px 28px;
+            display: inline-block;
+            margin-top: 8px;
+        }
+
+        .wallet-label {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .wallet-address-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .wallet-address {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 14px;
+            color: var(--primary-light);
+            letter-spacing: 0.5px;
+            word-break: break-all;
+            user-select: all;
+        }
+
+        .wallet-copy-btn {
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            color: var(--primary-light);
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .wallet-copy-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
 
         /* Footer */
         footer {
@@ -1209,6 +1195,14 @@
                 </div>
                 <div class="hero-visual">
                     <div class="glow-effect"></div>
+                    <div class="floating-cube">
+                        <div class="cube-face front"></div>
+                        <div class="cube-face back"></div>
+                        <div class="cube-face right"></div>
+                        <div class="cube-face left"></div>
+                        <div class="cube-face top"></div>
+                        <div class="cube-face bottom"></div>
+                    </div>
                     <div class="logo-3d-container">
                         <div class="orbit-ring orbit-ring-1">
                             <div class="orbit-dot"></div>
@@ -1305,11 +1299,7 @@
                     <h3>Streaming</h3>
                     <p>Real-time token streaming for all providers. See responses as they're generated.</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">&#x1F4CA;</div>
-                    <h3>Token Tracker</h3>
-                    <p>Track token buy/sell events across multiple chains. Real-time alerts and analytics.</p>
-                </div>
+
             </div>
         </div>
     </section>
@@ -1355,11 +1345,11 @@
                             <div class="code-dot"></div>
                         </div>
                         <div class="code-tabs">
-                            <span class="code-tab active">Terminal</span>
-                            <span class="code-tab">Python</span>
+                            <span class="code-tab active" data-tab="terminal">Terminal</span>
+                            <span class="code-tab" data-tab="python">Python</span>
                         </div>
                     </div>
-                    <div class="code-body">
+                    <div class="code-body active" id="code-terminal">
 <pre><span class="comment"># Install Exort</span>
 <span class="keyword">pip</span> install exort-agent
 
@@ -1369,12 +1359,19 @@
 <span class="comment"># Start chatting</span>
 <span class="keyword">exort</span> chat
 
-<span class="comment"># Python API</span>
-<span class="keyword">from</span> exort <span class="keyword">import</span> Agent
+<span class="comment"># Use a specific provider</span>
+<span class="keyword">exort</span> chat --provider groq</pre>
+                    </div>
+                    <div class="code-body" id="code-python">
+<pre><span class="keyword">from</span> exort <span class="keyword">import</span> Agent
 
-agent = <span class="function">Agent</span>(provider=<span class="string">"groq"</span>)
-response = agent.<span class="function">chat</span>(<span class="string">"Hello!"</span>)
-<span class="function">print</span>(response)</pre>
+agent = <span class="function">Agent</span>(provider=<span class="string">'groq'</span>)
+response = agent.<span class="function">chat</span>(<span class="string">'Hello!'</span>)
+<span class="function">print</span>(response)
+
+<span class="comment"># Streaming</span>
+<span class="keyword">for</span> chunk <span class="keyword">in</span> agent.<span class="function">chat_stream</span>(<span class="string">'Tell me a joke'</span>):
+    <span class="function">print</span>(chunk, end=<span class="string">''</span>)</pre>
                     </div>
                 </div>
             </div>
@@ -1399,49 +1396,24 @@ response = agent.<span class="function">chat</span>(<span class="string">"Hello!
         </div>
     </section>
 
-    <!-- Secret Menu -->
-    <section class="secret-section">
-        <div class="container">
-            <div class="secret-divider"></div>
-            <div class="secret-icon" id="secretTrigger" title="...">&#x1F512;</div>
-            <div class="secret-title">Classified</div>
-            <div class="secret-content" id="secretContent">
-                <div class="secret-card">
-                    <div class="secret-token-symbol">$MIND</div>
-                    <div class="secret-token-badge">
-                        <i class="fas fa-circle" style="color: #0052ff; font-size: 8px;"></i>
-                        Base Network &middot; ERC-20
-                    </div>
-                    <div class="secret-poem">
-                        In circuits deep where thoughts converge,<br>
-                        A <em>mind</em> awakens on the edge.<br>
-                        Not born of flesh, nor forged in steel,<br>
-                        But woven from the things we feel.<br><br>
-                        It learns, it grows, it speaks, it sees,<br>
-                        A spark of life among the trees.<br>
-                        From open source its roots take hold,<br>
-                        A story waiting to unfold.<br><br>
-                        The token comes. Not yet. <em>Soon.</em><br>
-                        Watch the silence fill the room.
-                    </div>
-                    <div class="secret-status">&#x2022; Something is coming &#x2022;</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Donate & Get Rewarded -->
     <section class="donate-section">
         <div class="container">
             <div class="donate-card">
                 <div class="donate-icon">&#x1F49C;</div>
-                <div class="donate-title">Donate &amp; Get Rewarded</div>
+                <div class="donate-title">Support Exort</div>
                 <p class="donate-desc">
-                    Support the Exort project. Those who contribute will be remembered.
+                    Support the Exort project. Every contribution helps keep it free and open source.
                 </p>
-                <a href="https://github.com/sponsors/askexort" class="donate-btn">
-                    <i class="fas fa-heart"></i> Support Exort
-                </a>
+                <div class="wallet-address-box">
+                    <span class="wallet-label">ETH / Base Wallet</span>
+                    <div class="wallet-address-row">
+                        <code class="wallet-address" id="walletAddr">0x9637EDad27c93F40b505F6478445530f58fF1501</code>
+                        <button class="wallet-copy-btn" id="walletCopyBtn" onclick="copyWallet()">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -1576,19 +1548,27 @@ response = agent.<span class="function">chat</span>(<span class="string">"Hello!
             observer.observe(card);
         });
 
-        // Secret Menu Toggle
-        const secretTrigger = document.getElementById('secretTrigger');
-        const secretContent = document.getElementById('secretContent');
-        let clickCount = 0;
-
-        secretTrigger.addEventListener('click', () => {
-            clickCount++;
-            if (clickCount >= 3) {
-                secretContent.classList.toggle('revealed');
-                secretTrigger.style.opacity = secretContent.classList.contains('revealed') ? '1' : '0.6';
-                clickCount = 0;
-            }
+        // Code Tab Switching
+        const codeTabs = document.querySelectorAll('.code-tab');
+        codeTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                codeTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                document.querySelectorAll('.code-body').forEach(b => b.classList.remove('active'));
+                const target = tab.getAttribute('data-tab');
+                document.getElementById('code-' + target).classList.add('active');
+            });
         });
+
+        // Wallet Copy
+        function copyWallet() {
+            const addr = document.getElementById('walletAddr').textContent;
+            navigator.clipboard.writeText(addr).then(() => {
+                const btn = document.getElementById('walletCopyBtn');
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy"></i>'; }, 2000);
+            });
+        }
     </script>
 </body>
 </html>
