@@ -99,6 +99,7 @@ async def chat_with_groq(message: str, model: str = None) -> str:
     headers = {
         "Authorization": f"Bearer {GROQ_API_KEY}",
         "Content-Type": "application/json",
+        "User-Agent": "OpenMind-Bot/0.1.0",
     }
 
     req = urllib.request.Request(GROQ_URL, data=payload, headers=headers)
