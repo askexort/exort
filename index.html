@@ -313,48 +313,6 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
 }
 
 /* ---- FAQ ---- */
-.faq{padding:var(--section-pad);position:relative;z-index:2}
-.faq-list{max-width:800px;margin:0 auto}
-.faq-item{
-  border:1px solid var(--card-border);
-  border-radius:var(--radius);
-  margin-bottom:12px;
-  overflow:hidden;
-  background:var(--card-bg);
-  transition:border-color .3s;
-}
-.faq-item.active{border-color:rgba(255,255,255,0.12)}
-.faq-question{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:20px 24px;
-  cursor:pointer;
-  font-weight:600;font-size:1rem;
-  user-select:none;
-  transition:background .2s;
-}
-.faq-question:hover{background:rgba(255,255,255,0.02)}
-.faq-question i{
-  transition:transform .3s;
-  color:var(--secondary);
-  font-size:.9rem;
-}
-.faq-item.active .faq-question i{transform:rotate(180deg)}
-.faq-answer{
-  max-height:0;
-  overflow:hidden;
-  transition:max-height .4s ease,padding .3s ease;
-}
-.faq-item.open .faq-answer{max-height:500px}
-.faq-item.open .faq-question i{transform:rotate(180deg)}
-.faq-question{cursor:pointer;user-select:none}
-.faq-question i{transition:transform .3s ease;pointer-events:none}
-.faq-answer-inner{
-  padding:0 24px 20px;
-  color:var(--secondary);
-  font-size:.95rem;
-  line-height:1.7;
-}
-.faq-item.active .faq-answer{max-height:300px}
 
 /* ---- TESTIMONIALS ---- */
 .testimonials{padding:var(--section-pad);position:relative;z-index:2}
@@ -489,6 +447,23 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
   .hero h1{font-size:2.2rem}
   .hero-buttons{flex-direction:column;align-items:center}
 }
+
+/* FAQ */
+.faq{padding:100px 0}
+.faq-grid{display:flex;flex-direction:column;gap:12px;max-width:800px;margin:0 auto}
+.faq-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .3s}
+.faq-card:hover{border-color:rgba(99,102,241,0.3);background:rgba(99,102,241,0.03)}
+.faq-head{display:flex;align-items:center;gap:16px;padding:20px 24px}
+.faq-icon{width:40px;height:40px;background:rgba(99,102,241,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#6366f1;font-size:1rem;flex-shrink:0}
+.faq-head h3{flex:1;font-size:1rem;font-weight:600;color:#fff}
+.faq-arrow{color:#64748b;font-size:0.8rem;transition:transform .3s ease;flex-shrink:0}
+.faq-body{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.faq-card.open .faq-body{max-height:300px}
+.faq-card.open .faq-arrow{transform:rotate(180deg);color:#6366f1}
+.faq-card.open{border-color:rgba(99,102,241,0.3);background:rgba(99,102,241,0.03)}
+.faq-body p{padding:0 24px 20px 80px;color:var(--text-secondary);font-size:0.95rem;line-height:1.7}
+.faq-body code{background:rgba(99,102,241,0.15);color:#a78bfa;padding:2px 8px;border-radius:6px;font-size:0.85rem}
+
 </style>
     <link rel="icon" href="favicon.jpg" type="image/jpeg">
 </head>
@@ -827,98 +802,118 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
       <h2>Frequently Asked <span class="gradient-text">Questions</span></h2>
       <p>Everything you need to know about Exort</p>
     </div>
-    <div class="faq-list">
-      <div class="faq-item">
-        <div class="faq-question">Is Exort really free?<i class="fas fa-chevron-down"></i></div>
-        <div class="faq-answer"><div class="faq-answer-inner">Yes. Exort is MIT licensed open source. Use free providers like Groq and Cerebras for zero-cost AI. You can also bring your own API keys for OpenAI, Anthropic, etc.</div></div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-question">Do I need a powerful computer?<i class="fas fa-chevron-down"></i></div>
-        <div class="faq-answer"><div class="faq-answer-inner">No. Exort runs on any machine. The AI runs on cloud providers (Groq, OpenAI) so your computer just sends/receives messages. For local AI, use Ollama with a decent GPU.</div></div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-question">How does the Telegram bot work?<i class="fas fa-chevron-down"></i></div>
-        <div class="faq-answer"><div class="faq-answer-inner">Exort polls Telegram for new messages, processes them with AI, and replies. You need a bot token from @BotFather. Run 'exort bot' and it works 24/7.</div></div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-question">Can I use it for my business?<i class="fas fa-chevron-down"></i></div>
-        <div class="faq-answer"><div class="faq-answer-inner">Yes. Exort is MIT licensed — use it for personal or commercial projects. Self-host for full control over your data.</div></div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-question">What AI models does it support?<i class="fas fa-chevron-down"></i></div>
-        <div class="faq-answer"><div class="faq-answer-inner">All major providers — Groq (Llama, Mixtral), OpenAI (GPT-4), Anthropic (Claude), Ollama (any local model), Cerebras, SambaNova, HuggingFace, Google AI Studio.</div></div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-question">How does memory work?<i class="fas fa-chevron-down"></i></div>
-        <div class="faq-answer"><div class="faq-answer-inner">Exort automatically saves important facts from conversations to persistent memory. This memory is injected into every future turn, so it remembers your preferences, environment, and context.</div></div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-question">Can I deploy it on a server?<i class="fas fa-chevron-down"></i></div>
-        <div class="faq-answer"><div class="faq-answer-inner">Yes. Deploy to Render, Railway, Fly.io, or any VPS. The Telegram bot keeps running even when your PC is off. See our deployment guide.</div></div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-question">Is my data safe?<i class="fas fa-chevron-down"></i></div>
-        <div class="faq-answer"><div class="faq-answer-inner">Yes. Exort runs locally on your machine. Your conversations stay on your computer. When using cloud providers, only the message text is sent to the API — your files and memory stay local.</div></div>
-      </div>
-    </div>
-  </div>
-</section>
+    <div class="faq-grid">
 
-<!-- TESTIMONIALS -->
-<section class="testimonials" id="testimonials">
-  <div class="container">
-    <div class="section-title">
-      <h2>What People <span class="gradient-text">Say</span></h2>
-      <p>Trusted by developers, traders, and builders worldwide</p>
-    </div>
-    <div class="test-scroll">
-      <div class="card test-card">
-        <div class="stars">★★★★★</div>
-        <blockquote>"Exort is the first AI tool that actually feels personal. It remembers everything and works exactly how I want."</blockquote>
-        <div class="test-author">@dev_sarah</div>
-        <div class="test-role">Software Engineer</div>
+      <div class="faq-card" onclick="toggleFaq(this)">
+        <div class="faq-head">
+          <div class="faq-icon"><i class="fas fa-gift"></i></div>
+          <h3>Is Exort really free?</h3>
+          <i class="fas fa-chevron-down faq-arrow"></i>
+        </div>
+        <div class="faq-body">
+          <p>Yes. Exort is MIT licensed open source software. You can use free AI providers like Groq, Cerebras, and SambaNova to run AI at zero cost. You can also bring your own API keys for OpenAI, Anthropic, or any other provider. No subscriptions, no hidden fees.</p>
+        </div>
       </div>
-      <div class="card test-card">
-        <div class="stars">★★★★★</div>
-        <blockquote>"Switched from ChatGPT Plus to Exort + Groq. Same quality, completely free. Never going back."</blockquote>
-        <div class="test-author">@crypto_mike</div>
-        <div class="test-role">Trader</div>
-      </div>
-      <div class="card test-card">
-        <div class="stars">★★★★★</div>
-        <blockquote>"The Telegram bot is genius. I message it like a coworker and it handles everything — code, research, file management."</blockquote>
-        <div class="test-author">@ai_builder</div>
-        <div class="test-role">Indie Hacker</div>
-      </div>
-      <div class="card test-card">
-        <div class="stars">★★★★★</div>
-        <blockquote>"Running it on my Raspberry Pi with Ollama. Full privacy, local AI, zero cost. This is the future."</blockquote>
-        <div class="test-author">@privacy_first</div>
-        <div class="test-role">Security Researcher</div>
-      </div>
-      <div class="card test-card">
-        <div class="stars">★★★★★</div>
-        <blockquote>"Built a customer support bot for my store in 30 minutes. Exort's skills system is incredibly powerful."</blockquote>
-        <div class="test-author">@shop_owner</div>
-        <div class="test-role">Entrepreneur</div>
-      </div>
-    </div>
-  </div>
-</section>
 
-<!-- DONATE -->
-<section class="donate" id="donate">
-  <div class="container">
-    <div class="section-title">
-      <h2>Support <span class="gradient-text">Exort</span></h2>
-      <p>Help keep Exort free and open source</p>
-    </div>
-    <div class="card donate-card">
-      <p>Help keep Exort free and open source. Your support helps us maintain the project, add new features, and keep the servers running.</p>
-      <div class="wallet-box">
-        <code id="walletAddr">0x9637EDad27c93F40b505F6478445530f58fF1501</code>
-        <button class="copy-btn" id="copyBtn" onclick="copyWallet()"><i class="fas fa-copy"></i> Copy</button>
+      <div class="faq-card" onclick="toggleFaq(this)">
+        <div class="faq-head">
+          <div class="faq-icon"><i class="fas fa-laptop"></i></div>
+          <h3>Do I need a powerful computer?</h3>
+          <i class="fas fa-chevron-down faq-arrow"></i>
+        </div>
+        <div class="faq-body">
+          <p>No. Exort runs on any machine — even a Raspberry Pi. The AI processing happens on cloud providers (Groq, OpenAI, Anthropic), so your computer just sends and receives messages. If you want to run AI locally with Ollama, you'll need a decent GPU with 8GB+ VRAM.</p>
+        </div>
       </div>
+
+      <div class="faq-card" onclick="toggleFaq(this)">
+        <div class="faq-head">
+          <div class="faq-icon"><i class="fab fa-telegram"></i></div>
+          <h3>How does the Telegram bot work?</h3>
+          <i class="fas fa-chevron-down faq-arrow"></i>
+        </div>
+        <div class="faq-body">
+          <p>Exort polls Telegram for new messages, processes them with AI, and replies. You need a bot token from @BotFather. Run <code>exort bot</code> and it works 24/7. It handles text, images, files, code execution, web browsing, and more. Deploy to a cloud server to keep it running when your PC is off.</p>
+        </div>
+      </div>
+
+      <div class="faq-card" onclick="toggleFaq(this)">
+        <div class="faq-head">
+          <div class="faq-icon"><i class="fas fa-brain"></i></div>
+          <h3>How does memory work?</h3>
+          <i class="fas fa-chevron-down faq-arrow"></i>
+        </div>
+        <div class="faq-body">
+          <p>Exort automatically saves important facts from your conversations to persistent memory files. This memory is injected into every future conversation, so it remembers your preferences, environment, project details, and context. Memory persists across restarts and sessions. You can also create reusable "skills" — markdown files with step-by-step procedures.</p>
+        </div>
+      </div>
+
+      <div class="faq-card" onclick="toggleFaq(this)">
+        <div class="faq-head">
+          <div class="faq-icon"><i class="fas fa-robot"></i></div>
+          <h3>What AI models does it support?</h3>
+          <i class="fas fa-chevron-down faq-arrow"></i>
+        </div>
+        <div class="faq-body">
+          <p>All major providers: Groq (Llama 3, Mixtral), OpenAI (GPT-4o, GPT-4), Anthropic (Claude), Ollama (any local model like Llama, Mistral, Phi), Cerebras, SambaNova, HuggingFace, Google AI Studio, and OpenRouter. You can switch providers anytime with a single command.</p>
+        </div>
+      </div>
+
+      <div class="faq-card" onclick="toggleFaq(this)">
+        <div class="faq-head">
+          <div class="faq-icon"><i class="fas fa-building"></i></div>
+          <h3>Can I use it for my business?</h3>
+          <i class="fas fa-chevron-down faq-arrow"></i>
+        </div>
+        <div class="faq-body">
+          <p>Yes. Exort is MIT licensed — use it for personal or commercial projects with no restrictions. Self-host for full control over your data. Build customer support bots, automate workflows, create internal tools, or integrate AI into your products.</p>
+        </div>
+      </div>
+
+      <div class="faq-card" onclick="toggleFaq(this)">
+        <div class="faq-head">
+          <div class="faq-icon"><i class="fas fa-server"></i></div>
+          <h3>Can I deploy it on a server?</h3>
+          <i class="fas fa-chevron-down faq-arrow"></i>
+        </div>
+        <div class="faq-body">
+          <p>Yes. Deploy to Render, Railway, Fly.io, or any VPS (DigitalOcean, Hetzner, AWS). The Telegram bot keeps running even when your PC is off. We have deployment guides for all major platforms. Render.com offers a free tier with no credit card required.</p>
+        </div>
+      </div>
+
+      <div class="faq-card" onclick="toggleFaq(this)">
+        <div class="faq-head">
+          <div class="faq-icon"><i class="fas fa-shield-alt"></i></div>
+          <h3>Is my data safe?</h3>
+          <i class="fas fa-chevron-down faq-arrow"></i>
+        </div>
+        <div class="faq-body">
+          <p>Yes. Exort runs locally on your machine. Your conversations, memory, and files stay on your computer. When using cloud AI providers, only the message text is sent to the API — your files and memory stay local. For maximum privacy, use Ollama to run AI entirely on your machine with zero data leaving your network.</p>
+        </div>
+      </div>
+
+      <div class="faq-card" onclick="toggleFaq(this)">
+        <div class="faq-head">
+          <div class="faq-icon"><i class="fas fa-code"></i></div>
+          <h3>Can Exort write and run code?</h3>
+          <i class="fas fa-chevron-down faq-arrow"></i>
+        </div>
+        <div class="faq-body">
+          <p>Yes. Exort has full tool use capabilities. It can write Python scripts, execute them in a sandboxed environment, manage files, browse the web, call APIs, run shell commands, search codebases, and much more. It runs code safely with timeouts and output limits.</p>
+        </div>
+      </div>
+
+      <div class="faq-card" onclick="toggleFaq(this)">
+        <div class="faq-head">
+          <div class="faq-icon"><i class="fas fa-users"></i></div>
+          <h3>How do I contribute?</h3>
+          <i class="fas fa-chevron-down faq-arrow"></i>
+        </div>
+        <div class="faq-body">
+          <p>Exort is open source on GitHub. Fork the repo, make your changes, and submit a pull request. You can contribute code, report bugs, suggest features, write documentation, or share skills. Join our Telegram group or Discord to connect with other contributors.</p>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -962,41 +957,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
   </div>
 </footer>
 
-
 <script>
-// FAQ Accordion
-document.querySelectorAll('.faq-question').forEach(function(q) {
-  q.addEventListener('click', function() {
-    var item = this.parentElement;
-    var wasOpen = item.classList.contains('open');
-    document.querySelectorAll(');
-    if (!wasOpen) item.classList.add('open');
-  });
-});
-
-// Mobile Menu
-var mobileBtn = document.querySelector('.mobile-menu-btn');
-var mobileNav = document.querySelector('.mobile-menu');
-if (mobileBtn && mobileNav) {
-  mobileBtn.addEventListener('click', function() {
-    mobileNav.classList.toggle('open');
-    this.querySelector('i').className = mobileNav.classList.contains('open') ? 'fas fa-times' : 'fas fa-bars';
-  });
-  mobileNav.querySelectorAll('a').forEach(function(a) {
-    a.addEventListener('click', function() {
-      mobileNav.classList.remove('open');
-      if (mobileBtn) mobileBtn.querySelector('i').className = 'fas fa-bars';
-    });
-  });
-}
-
-// Smooth Scroll
-document.querySelectorAll('a[href^="#"]').forEach(function(a) {
-  a.addEventListener('click', function(e) {
-    var target = document.querySelector(this.getAttribute('href'));
-    if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-  });
-});
 
 // Copy Wallet
 function copyWallet() {
@@ -1008,6 +969,14 @@ function copyWallet() {
     });
   }
 }
+
+// FAQ Accordion
+function toggleFaq(card) {
+  var wasOpen = card.classList.contains('open');
+  document.querySelectorAll('.faq-card.open').forEach(function(c) { c.classList.remove('open'); });
+  if (!wasOpen) card.classList.add('open');
+}
+
 </script>
 </body>
 </html>
