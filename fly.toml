@@ -6,10 +6,7 @@ primary_region = "iad"
 
 [build]
 
-# No HTTP service — this is a background worker (Telegram polling bot)
-# No [[services]] or [http_service] block needed
-
-# Restart policy
+# Restart policy — always keep the bot running
 [restart]
   policy = "always"
 

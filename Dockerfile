@@ -13,6 +13,6 @@ COPY tests/ tests/
 # Create exort home
 RUN mkdir -p /root/.exort/skills /root/.exort/logs
 
-# Default: interactive chat (override with: docker run ... exort bot)
+# Default: run the Telegram bot (override with: docker run ... exort shell)
 ENTRYPOINT ["exort"]
-CMD ["chat"]
+CMD ["bot"]
