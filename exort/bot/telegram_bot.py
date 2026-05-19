@@ -1,118 +1,121 @@
 """
-Exort Telegram Bot — the engine in your pocket.
-
-Uses the Engine framework with per-user memory and full gear access.
+Exort Telegram Bot — Free AI for Everyone
+Uses Groq (free tier) as default provider. Fully async, no Engine dependency.
 
 Setup:
   1. @BotFather → /newbot → copy token
-  2. echo "TELEGRAM_BOT_TOKEN=..." >> ~/.exort/.env
+  2. Set env vars: TELEGRAM_BOT_TOKEN, GROQ_API_KEY
   3. exort bot
 """
 
 import asyncio
+import json
 import logging
 import os
 import time
+import urllib.request
 from collections import defaultdict
+from datetime import datetime
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from threading import Thread
-from typing import Optional
-
-from exort.engine import Engine
-from exort.config import Config
 
 logger = logging.getLogger(__name__)
 
 
-class ExortBot:
-    """Telegram frontend for the Exort Engine."""
+# ─── Config ───────────────────────────────────────────────────────────────────
 
-    def __init__(self, token: str, cfg: Config):
-        self.token = token
-        self.cfg = cfg
-        self._engines: dict[int, Engine] = {}
-        self._limits: dict[int, list[float]] = defaultdict(list)
-        self._rpm = cfg.get("telegram.rate_per_minute", 10)
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "llama-3.3-70b-versatile")
+RATE_LIMIT = int(os.getenv("RATE_LIMIT_PER_MIN", "10"))
 
-    def _engine(self, uid: int) -> Engine:
-        if uid not in self._engines:
-            e = Engine(config=self.cfg)
-            e.open(f"tg-{uid}")
-            self._engines[uid] = e
-        return self._engines[uid]
+AVAILABLE_MODELS = {
+    "llama-3.3-70b": "llama-3.3-70b-versatile",
+    "llama-3.1-8b": "llama-3.1-8b-instant",
+    "mixtral-8x7b": "mixtral-8x7b-32768",
+    "gemma2-9b": "gemma2-9b-it",
+}
 
-    def _ok(self, uid: int) -> bool:
+SYSTEM_PROMPT = (
+    "You are Exort AI — a free, open-source AI assistant "
+    "created by the Exort community. "
+    "You are helpful, harmless, and honest. Be concise but thorough. "
+    "You can help with coding, analysis, writing, math, and general questions. "
+    "If you don't know something, say so honestly. "
+    "Keep responses under 2000 characters for Telegram readability."
+)
+
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+
+
+# ─── Rate Limiter ─────────────────────────────────────────────────────────────
+
+class RateLimiter:
+    def __init__(self, max_per_min: int = 10):
+        self.max_per_min = max_per_min
+        self.user_timestamps: dict[int, list[float]] = defaultdict(list)
+
+    def is_allowed(self, user_id: int) -> bool:
         now = time.time()
-        self._limits[uid] = [t for t in self._limits[uid] if now - t < 60]
-        if len(self._limits[uid]) >= self._rpm:
+        window = now - 60
+        self.user_timestamps[user_id] = [ts for ts in self.user_timestamps[user_id] if ts > window]
+        if len(self.user_timestamps[user_id]) >= self.max_per_min:
             return False
-        self._limits[uid].append(now)
+        self.user_timestamps[user_id].append(now)
         return True
 
-    async def cmd_start(self, update, ctx):
-        await update.message.reply_text(
-            "⚡ *Exort Engine* — AI Agent\n\n"
-            "I can search the web, run code, manage files, and more.\n"
-            "Just send me a message!\n\n"
-            "/new — fresh conversation\n"
-            "/status — engine stats\n"
-            "/help — this message",
-            parse_mode="Markdown",
-        )
 
-    async def cmd_help(self, update, ctx):
-        await self.cmd_start(update, ctx)
+rate_limiter = RateLimiter(RATE_LIMIT)
 
-    async def cmd_new(self, update, ctx):
-        uid = update.effective_user.id
-        if uid in self._engines:
-            self._engines[uid].close()
-        e = Engine(config=self.cfg)
-        e.open(f"tg-{uid}")
-        self._engines[uid] = e
-        await update.message.reply_text("✅ Fresh session started.")
+# ─── Stats ────────────────────────────────────────────────────────────────────
 
-    async def cmd_status(self, update, ctx):
-        e = self._engine(update.effective_user.id)
-        s = e.status()
-        t = s["tokens"]
-        await update.message.reply_text(
-            f"📊 *Engine Status*\n\n"
-            f"Provider: `{s['provider']}`\n"
-            f"Model: `{s['model']}`\n"
-            f"Turns: {s['turns']}\n"
-            f"Gear calls: {s['gear_calls']}\n"
-            f"Tokens: {t['total_tok']} total\n"
-            f"Gear: {s['gear_count']} available",
-            parse_mode="Markdown",
-        )
+stats: dict = {
+    "total_messages": 0,
+    "total_users": set(),
+    "start_time": datetime.utcnow(),
+    "model_usage": defaultdict(int),
+}
 
-    async def on_message(self, update, ctx):
-        uid = update.effective_user.id
-        text = update.message.text
-        if not text:
-            return
-        if not self._ok(uid):
-            await update.message.reply_text("⏳ Rate limit — wait a moment.")
-            return
-        if update.effective_chat.type in ("group", "supergroup"):
-            bot_name = ctx.bot.username
-            if not (text.startswith(f"@{bot_name}") or
-                    (update.message.reply_to_message and
-                     update.message.reply_to_message.from_user.id == ctx.bot.id)):
-                return
-            text = text.replace(f"@{bot_name}", "").strip()
 
-        await update.message.chat.send_action("typing")
-        e = self._engine(uid)
-        try:
-            resp = e.talk(text, stream=False)
-            if len(resp) > 4000:
-                resp = resp[:4000] + "\n...[truncated]"
-            await update.message.reply_text(resp)
-        except Exception as exc:
-            await update.message.reply_text(f"❌ {str(exc)[:200]}")
+# ─── Groq API (sync, to be wrapped with asyncio.to_thread) ───────────────────
 
+def _groq_chat_sync(message: str, model: str = None) -> str:
+    """Send a message to Groq API and return the response (blocking)."""
+    model = model or DEFAULT_MODEL
+
+    payload = json.dumps({
+        "model": model,
+        "messages": [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": message},
+        ],
+        "temperature": 0.7,
+        "max_tokens": 1024,
+    }).encode()
+
+    headers = {
+        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Content-Type": "application/json",
+        "User-Agent": "Exort-Bot/2.0.0",
+    }
+
+    req = urllib.request.Request(GROQ_URL, data=payload, headers=headers)
+
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = json.loads(resp.read())
+            return data["choices"][0]["message"]["content"]
+    except Exception as e:
+        logger.error(f"Groq API error: {e}")
+        return f"⚠️ API error: {str(e)[:100]}. Try again in a moment."
+
+
+async def chat_with_groq(message: str, model: str = None) -> str:
+    """Async wrapper for Groq API call."""
+    return await asyncio.to_thread(_groq_chat_sync, message, model)
+
+
+# ─── Health Check Server ─────────────────────────────────────────────────────
 
 class _HealthHandler(BaseHTTPRequestHandler):
     """Minimal health check for cloud platforms (Render, Fly, etc)."""
@@ -125,26 +128,358 @@ class _HealthHandler(BaseHTTPRequestHandler):
         pass  # silence request logs
 
 
-def run_bot(token: str, cfg: Config):
-    """Launch the Telegram bot."""
-    try:
-        from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
-    except ImportError:
-        print("Missing: pip install 'python-telegram-bot>=21.0'")
+# ─── Command Handlers ────────────────────────────────────────────────────────
+
+async def cmd_start(update, context):
+    """Welcome message."""
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+    from telegram.constants import ParseMode
+
+    stats["total_users"].add(update.effective_user.id)
+
+    keyboard = [
+        [
+            InlineKeyboardButton("💬 Chat", callback_data="help_chat"),
+            InlineKeyboardButton("🤖 Models", callback_data="models"),
+        ],
+        [
+            InlineKeyboardButton("🌐 Website", url="https://askexort.github.io/exort"),
+            InlineKeyboardButton("📦 GitHub", url="https://github.com/askexort/exort"),
+        ],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    welcome = (
+        "⚡ **Exort Engine** — AI Agent\n\n"
+        "I can help with coding, analysis, writing, math, and more.\n\n"
+        "**Quick Start:**\n"
+        "• Just send me any message to chat\n"
+        "• `/help` — All commands\n\n"
+        "🆓 **100% Free** • 🔓 **Open Source** • 🌍 **For Everyone**\n\n"
+        "_Built by the Exort community_"
+    )
+
+    await update.message.reply_text(
+        welcome, parse_mode=ParseMode.MARKDOWN, reply_markup=reply_markup
+    )
+
+
+async def cmd_help(update, context):
+    """List all commands."""
+    from telegram.constants import ParseMode
+
+    help_text = (
+        "📖 **Exort Bot Commands**\n\n"
+        "**Chat:**\n"
+        "• Send any message — I'll respond!\n"
+        "• `/chat <message>` — Explicit chat\n\n"
+        "**Settings:**\n"
+        "• `/models` — View/switch AI models\n"
+        "• `/model <name>` — Set model directly\n\n"
+        "**Info:**\n"
+        "• `/stats` — Usage statistics\n"
+        "• `/about` — About Exort\n"
+        "• `/new` — Fresh conversation\n"
+        "• `/help` — This message\n\n"
+        f"**Rate Limit:** {RATE_LIMIT} messages/min\n"
+        f"**Current Model:** `{DEFAULT_MODEL}`"
+    )
+
+    await update.message.reply_text(help_text, parse_mode=ParseMode.MARKDOWN)
+
+
+async def cmd_new(update, context):
+    """Fresh conversation (no-op for stateless bot, but user expects it)."""
+    await update.message.reply_text("✅ Fresh session started. Send me a message!")
+
+
+async def cmd_chat(update, context):
+    """Handle explicit /chat command."""
+    from telegram.constants import ParseMode
+
+    if not context.args:
+        await update.message.reply_text(
+            "Usage: `/chat <your message>`", parse_mode=ParseMode.MARKDOWN
+        )
         return
 
-    # Start health check server (keeps Render/fly free tier alive)
+    message = " ".join(context.args)
+    await handle_message(update, context, message)
+
+
+async def cmd_models(update, context):
+    """Show available models."""
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+    from telegram.constants import ParseMode
+
+    keyboard = []
+    for name, model_id in AVAILABLE_MODELS.items():
+        indicator = " ✅" if model_id == DEFAULT_MODEL else ""
+        keyboard.append(
+            [InlineKeyboardButton(f"{name}{indicator}", callback_data=f"setmodel:{model_id}")]
+        )
+
+    await update.message.reply_text(
+        "🤖 **Available Models:**\n\n"
+        "• **llama-3.3-70b** — Best quality (recommended)\n"
+        "• **llama-3.1-8b** — Fastest responses\n"
+        "• **mixtral-8x7b** — Great for coding\n"
+        "• **gemma2-9b** — Balanced\n\n"
+        f"Current: `{DEFAULT_MODEL}`",
+        parse_mode=ParseMode.MARKDOWN,
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
+
+
+async def cmd_model(update, context):
+    """Set model directly."""
+    from telegram.constants import ParseMode
+
+    global DEFAULT_MODEL
+    if not context.args:
+        await update.message.reply_text(
+            f"Current model: `{DEFAULT_MODEL}`", parse_mode=ParseMode.MARKDOWN
+        )
+        return
+
+    model_name = context.args[0].lower()
+    if model_name in AVAILABLE_MODELS:
+        DEFAULT_MODEL = AVAILABLE_MODELS[model_name]
+        await update.message.reply_text(
+            f"✅ Model set to **{model_name}** (`{DEFAULT_MODEL}`)", parse_mode=ParseMode.MARKDOWN
+        )
+    elif model_name in AVAILABLE_MODELS.values():
+        DEFAULT_MODEL = model_name
+        await update.message.reply_text(
+            f"✅ Model set to `{DEFAULT_MODEL}`", parse_mode=ParseMode.MARKDOWN
+        )
+    else:
+        models_list = ", ".join(AVAILABLE_MODELS.keys())
+        await update.message.reply_text(f"❌ Unknown model. Available: {models_list}")
+
+
+async def cmd_stats(update, context):
+    """Show usage statistics."""
+    from telegram.constants import ParseMode
+
+    uptime = datetime.utcnow() - stats["start_time"]
+    hours = int(uptime.total_seconds() // 3600)
+    minutes = int((uptime.total_seconds() % 3600) // 60)
+    text = (
+        "📊 **Exort Bot Stats**\n\n"
+        f"👥 Total Users: `{len(stats['total_users'])}`\n"
+        f"💬 Total Messages: `{stats['total_messages']}`\n"
+        f"⏱ Uptime: `{hours}h {minutes}m`\n"
+        f"🤖 Current Model: `{DEFAULT_MODEL}`\n"
+        f"⚡ Rate Limit: `{RATE_LIMIT}/min`"
+    )
+
+    await update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
+
+
+async def cmd_about(update, context):
+    """About Exort."""
+    from telegram.constants import ParseMode
+
+    text = (
+        "⚡ **About Exort**\n\n"
+        "Exort is a free, open-source AI agent framework + "
+        "decentralized AI platform.\n\n"
+        "**Our Mission:** Make AI accessible to everyone, everywhere.\n\n"
+        "**Features:**\n"
+        "• Free AI chat (no paywalls)\n"
+        "• Open-source code (MIT license)\n"
+        "• Multi-provider support\n"
+        "• Community driven\n\n"
+        "**Links:**\n"
+        "• [GitHub](https://github.com/askexort/exort)\n"
+        "• [Website](https://askexort.github.io/exort)\n"
+        "• [Telegram](https://t.me/Exortai)\n"
+    )
+
+    await update.message.reply_text(
+        text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True
+    )
+
+
+# ─── Message Handler ─────────────────────────────────────────────────────────
+
+async def handle_message(update, context, explicit_msg: str = None):
+    """Handle incoming messages — main chat logic."""
+    from telegram.constants import ChatAction, ParseMode
+
+    user_id = update.effective_user.id
+    username = update.effective_user.username or "unknown"
+    message = explicit_msg or update.message.text
+
+    if not message or not message.strip():
+        return
+
+    # Rate limit check
+    if not rate_limiter.is_allowed(user_id):
+        await update.message.reply_text(
+            f"⏳ Rate limit: max {RATE_LIMIT} messages per minute. Please wait."
+        )
+        return
+
+    # Check API key
+    if not GROQ_API_KEY:
+        await update.message.reply_text(
+            "⚠️ API key not configured. Set GROQ_API_KEY environment variable."
+        )
+        return
+
+    # Show typing indicator
+    await update.message.chat.send_action(ChatAction.TYPING)
+
+    # Update stats
+    stats["total_messages"] += 1
+    stats["total_users"].add(user_id)
+    stats["model_usage"][DEFAULT_MODEL] += 1
+
+    logger.info(f"User {username} ({user_id}): {message[:80]}...")
+
+    # Get AI response (async — doesn't block the event loop)
+    response = await chat_with_groq(message)
+
+    # Telegram has 4096 char limit
+    if len(response) > 4000:
+        response = response[:4000] + "\n\n_[Response truncated]_"
+
+    logger.info(f"Response ({len(response)} chars)")
+
+    await update.message.reply_text(response, parse_mode=ParseMode.MARKDOWN)
+
+
+async def handle_group_message(update, context):
+    """Handle messages in groups — only respond when mentioned."""
+    if update.message and update.message.text:
+        bot_username = context.bot.username
+        if f"@{bot_username}" in update.message.text:
+            message = update.message.text.replace(f"@{bot_username}", "").strip()
+            if message:
+                await handle_message(update, context, message)
+
+
+# ─── Callback Handler ────────────────────────────────────────────────────────
+
+async def handle_callback(update, context):
+    """Handle inline keyboard callbacks."""
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+    from telegram.constants import ParseMode
+
+    global DEFAULT_MODEL
+    query = update.callback_query
+    await query.answer()
+
+    if query.data == "help_chat":
+        await query.edit_message_text(
+            "💬 **How to Chat:**\n\n"
+            "Just send me any message directly!\n"
+            "Or use `/chat <your message>`\n\n"
+            "Example: `/chat What is quantum computing?`",
+            parse_mode=ParseMode.MARKDOWN,
+        )
+
+    elif query.data == "models":
+        keyboard = []
+        for name, model_id in AVAILABLE_MODELS.items():
+            indicator = " ✅" if model_id == DEFAULT_MODEL else ""
+            keyboard.append(
+                [InlineKeyboardButton(f"{name}{indicator}", callback_data=f"setmodel:{model_id}")]
+            )
+        await query.edit_message_text(
+            "🤖 Select a model:", reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+    elif query.data.startswith("setmodel:"):
+        model_id = query.data.split(":", 1)[1]
+        DEFAULT_MODEL = model_id
+        await query.edit_message_text(
+            f"✅ Model set to `{model_id}`", parse_mode=ParseMode.MARKDOWN
+        )
+
+    elif query.data == "stats":
+        uptime = datetime.utcnow() - stats["start_time"]
+        hours = int(uptime.total_seconds() // 3600)
+        minutes = int((uptime.total_seconds() % 3600) // 60)
+        await query.edit_message_text(
+            f"📊 **Stats**\n\n"
+            f"👥 Users: `{len(stats['total_users'])}`\n"
+            f"💬 Messages: `{stats['total_messages']}`\n"
+            f"⏱ Uptime: `{hours}h {minutes}m`\n"
+            f"🤖 Model: `{DEFAULT_MODEL}`",
+            parse_mode=ParseMode.MARKDOWN,
+        )
+
+
+# ─── Error Handler ────────────────────────────────────────────────────────────
+
+async def error_handler(update, context):
+    """Log errors."""
+    logger.error(f"Error: {context.error}", exc_info=context.error)
+    if update and update.message:
+        await update.message.reply_text("⚠️ Something went wrong. Please try again.")
+
+
+# ─── Main Entry Point ────────────────────────────────────────────────────────
+
+def run_bot(token: str, cfg=None):
+    """Launch the Telegram bot. Called by `exort bot` CLI command."""
+    from telegram.ext import (
+        ApplicationBuilder,
+        CallbackQueryHandler,
+        CommandHandler,
+        MessageHandler,
+        filters,
+    )
+
+    if not token:
+        print("❌ TELEGRAM_BOT_TOKEN not set!")
+        return
+
+    if not GROQ_API_KEY:
+        print("⚠️  GROQ_API_KEY not set — bot will respond with error messages.")
+        print("   Get a free key at: https://console.groq.com")
+
+    # Start health check server (keeps Render/Fly free tier alive)
     port = int(os.environ.get("PORT", "8080"))
     httpd = HTTPServer(("0.0.0.0", port), _HealthHandler)
     Thread(target=httpd.serve_forever, daemon=True).start()
+    logger.info(f"Health check server on port {port}")
 
-    bot = ExortBot(token, cfg)
+    print(f"⚡ Exort bot starting... send /start on Telegram to begin.")
+    print(f"   Model: {DEFAULT_MODEL}")
+    print(f"   Rate limit: {RATE_LIMIT}/min")
+
     app = ApplicationBuilder().token(token).build()
-    app.add_handler(CommandHandler("start", bot.cmd_start))
-    app.add_handler(CommandHandler("help", bot.cmd_help))
-    app.add_handler(CommandHandler("new", bot.cmd_new))
-    app.add_handler(CommandHandler("status", bot.cmd_status))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, bot.on_message))
 
-    print("⚡ Exort bot starting... send /start on Telegram to begin.")
-    app.run_polling()
+    # Commands
+    app.add_handler(CommandHandler("start", cmd_start))
+    app.add_handler(CommandHandler("help", cmd_help))
+    app.add_handler(CommandHandler("new", cmd_new))
+    app.add_handler(CommandHandler("chat", cmd_chat))
+    app.add_handler(CommandHandler("models", cmd_models))
+    app.add_handler(CommandHandler("model", cmd_model))
+    app.add_handler(CommandHandler("stats", cmd_stats))
+    app.add_handler(CommandHandler("about", cmd_about))
+
+    # Callbacks
+    app.add_handler(CallbackQueryHandler(handle_callback))
+
+    # Group messages (respond only when mentioned)
+    app.add_handler(
+        MessageHandler(
+            filters.ChatType.GROUPS & filters.TEXT & ~filters.COMMAND, handle_group_message
+        )
+    )
+
+    # Private messages (always respond)
+    app.add_handler(
+        MessageHandler(filters.ChatType.PRIVATE & filters.TEXT & ~filters.COMMAND, handle_message)
+    )
+
+    # Errors
+    app.add_error_handler(error_handler)
+
+    print("✅ Bot running! Press Ctrl+C to stop.")
+    app.run_polling(drop_pending_updates=True)
