@@ -473,7 +473,8 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
       <p class="hero-desc">Exort is a self-hosted AI agent with full tool use, persistent memory, and multi-provider support. Run powerful AI locally or in the cloud — your data, your rules, completely free and open source.</p>
       <div class="hero-buttons">
         <a href="https://github.com/askexort/exort" target="_blank" class="btn-primary"><i class="fab fa-github"></i> Get Started</a>
-        <a href="https://t.me/askexort_bot" target="_blank" class="btn-secondary"><i class="fab fa-telegram"></i> Try Bot</a>
+        <a href="brewing.html">Brewing</a>
+          <a href="https://t.me/askexort_bot" target="_blank" class="btn-secondary"><i class="fab fa-telegram"></i> Try Bot</a>
       </div>
       <div class="stats-row">
         <div class="stat">
@@ -670,7 +671,8 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
         <div class="social-url">github.com/askexort/exort</div>
         <p>Star, fork, and contribute to the project</p>
       </a>
-      <a href="https://t.me/askexort_bot" target="_blank" class="card social-card">
+      <a href="brewing.html">Brewing</a>
+          <a href="https://t.me/askexort_bot" target="_blank" class="card social-card">
         <div class="social-icon"><i class="fab fa-telegram"></i></div>
         <h4>Telegram</h4>
         <div class="social-url">t.me/askexort_bot</div>
@@ -766,6 +768,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
         <p>The open agent engine. Free, private, and powerful AI for everyone. MIT licensed and community-driven.</p>
         <div class="socials">
           <a href="https://github.com/askexort/exort" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
+          <a href="brewing.html">Brewing</a>
           <a href="https://t.me/askexort_bot" target="_blank" title="Telegram"><i class="fab fa-telegram"></i></a>
           <a href="https://x.com/exortresearch" target="_blank" title="Twitter/X"><i class="fab fa-x-twitter"></i></a>
           <a href="https://www.youtube.com/@Askexort" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
@@ -781,7 +784,8 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
       <div class="footer-links">
         <h4>Community</h4>
         <a href="https://github.com/askexort/exort" target="_blank">GitHub</a>
-        <a href="https://t.me/askexort_bot" target="_blank">Telegram</a>
+        <a href="brewing.html">Brewing</a>
+          <a href="https://t.me/askexort_bot" target="_blank">Telegram</a>
         
       </div>
     </div>
@@ -791,5 +795,52 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
   </div>
 </footer>
 
+
+<script>
+// FAQ Accordion
+document.querySelectorAll('.faq-question').forEach(function(q) {
+  q.addEventListener('click', function() {
+    var item = this.parentElement;
+    var wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(function(i) { i.classList.remove('open'); });
+    if (!wasOpen) item.classList.add('open');
+  });
+});
+
+// Mobile Menu
+var mobileBtn = document.querySelector('.mobile-menu-btn');
+var mobileNav = document.querySelector('.mobile-menu');
+if (mobileBtn && mobileNav) {
+  mobileBtn.addEventListener('click', function() {
+    mobileNav.classList.toggle('open');
+    this.querySelector('i').className = mobileNav.classList.contains('open') ? 'fas fa-times' : 'fas fa-bars';
+  });
+  mobileNav.querySelectorAll('a').forEach(function(a) {
+    a.addEventListener('click', function() {
+      mobileNav.classList.remove('open');
+      if (mobileBtn) mobileBtn.querySelector('i').className = 'fas fa-bars';
+    });
+  });
+}
+
+// Smooth Scroll
+document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+  a.addEventListener('click', function(e) {
+    var target = document.querySelector(this.getAttribute('href'));
+    if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  });
+});
+
+// Copy Wallet
+function copyWallet() {
+  var addr = document.getElementById('walletAddr');
+  if (addr) {
+    navigator.clipboard.writeText(addr.textContent).then(function() {
+      var btn = document.getElementById('copyBtn');
+      if (btn) { btn.innerHTML = '<i class="fas fa-check"></i> Copied!'; setTimeout(function() { btn.innerHTML = '<i class="fas fa-copy"></i> Copy'; }, 2000); }
+    });
+  }
+}
+</script>
 </body>
 </html>
