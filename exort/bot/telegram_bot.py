@@ -14,6 +14,8 @@ import logging
 import os
 import time
 from collections import defaultdict
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from threading import Thread
 from typing import Optional
 
 from exort.engine import Engine
@@ -112,6 +114,17 @@ class ExortBot:
             await update.message.reply_text(f"❌ {str(exc)[:200]}")
 
 
+class _HealthHandler(BaseHTTPRequestHandler):
+    """Minimal health check for cloud platforms (Render, Fly, etc)."""
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "text/plain")
+        self.end_headers()
+        self.wfile.write(b"ok")
+    def log_message(self, *_):
+        pass  # silence request logs
+
+
 def run_bot(token: str, cfg: Config):
     """Launch the Telegram bot."""
     try:
@@ -119,6 +132,11 @@ def run_bot(token: str, cfg: Config):
     except ImportError:
         print("Missing: pip install 'python-telegram-bot>=21.0'")
         return
+
+    # Start health check server (keeps Render/fly free tier alive)
+    port = int(os.environ.get("PORT", "8080"))
+    httpd = HTTPServer(("0.0.0.0", port), _HealthHandler)
+    Thread(target=httpd.serve_forever, daemon=True).start()
 
     bot = ExortBot(token, cfg)
     app = ApplicationBuilder().token(token).build()
