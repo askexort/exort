@@ -96,8 +96,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
   box-shadow:0 20px 60px rgba(0,0,0,0.5);
 }
 
-/* ---- PARTICLE CANVAS ---- */
-#particles-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.6}
+
 
 /* ---- HEADER ---- */
 .header{
@@ -542,8 +541,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
 </head>
 <body>
 
-<!-- PARTICLES -->
-<canvas id="particles-canvas"></canvas>
+
 
 <!-- MOBILE MENU -->
 <div class="mobile-menu" id="mobileMenu">
@@ -1024,100 +1022,6 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
   </div>
 </footer>
 
-<script>
-// ---- PARTICLE BACKGROUND ----
-(function(){
-  const canvas=document.getElementById('particles-canvas');
-  const ctx=canvas.getContext('2d');
-  let particles=[];
-  const COUNT=60;
-  function resize(){
-    canvas.width=window.innerWidth;
-    canvas.height=window.innerHeight;
-  }
-  function init(){
-    particles=[];
-    for(let i=0;i<COUNT;i++){
-      particles.push({
-        x:Math.random()*canvas.width,
-        y:Math.random()*canvas.height,
-        r:Math.random()*2+0.5,
-        dx:(Math.random()-0.5)*0.4,
-        dy:(Math.random()-0.5)*0.4,
-        o:Math.random()*0.5+0.1
-      });
-    }
-  }
-  function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    particles.forEach(p=>{
-      ctx.beginPath();
-      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle='rgba(168,85,247,'+p.o+')';
-      ctx.fill();
-      p.x+=p.dx;
-      p.y+=p.dy;
-      if(p.x<0||p.x>canvas.width)p.dx*=-1;
-      if(p.y<0||p.y>canvas.height)p.dy*=-1;
-    });
-    requestAnimationFrame(draw);
-  }
-  resize();
-  init();
-  draw();
-  window.addEventListener('resize',()=>{resize();init()});
-})();
 
-// ---- HEADER SCROLL ----
-window.addEventListener('scroll',()=>{
-  document.getElementById('header').classList.toggle('scrolled',window.scrollY>50);
-});
-
-// ---- MOBILE MENU ----
-document.getElementById('hamburger').addEventListener('click',()=>{
-  document.getElementById('mobileMenu').classList.add('active');
-  document.body.style.overflow='hidden';
-});
-function closeMobile(){
-  document.getElementById('mobileMenu').classList.remove('active');
-  document.body.style.overflow='';
-}
-document.getElementById('closeMenu').addEventListener('click',closeMobile);
-
-// ---- FAQ ACCORDION ----
-document.querySelectorAll('.faq-question').forEach(q=>{
-  q.addEventListener('click',()=>{
-    const item=q.parentElement;
-    const wasActive=item.classList.contains('active');
-    document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('active'));
-    if(!wasActive) item.classList.add('active');
-  });
-});
-
-// ---- COPY WALLET ----
-function copyWallet(){
-  const addr='0x9637EDad27c93F40b505F6478445530f58fF1501';
-  navigator.clipboard.writeText(addr).then(()=>{
-    const btn=document.getElementById('copyBtn');
-    btn.classList.add('copied');
-    btn.innerHTML='<i class="fas fa-check"></i> Copied!';
-    setTimeout(()=>{
-      btn.classList.remove('copied');
-      btn.innerHTML='<i class="fas fa-copy"></i> Copy';
-    },2000);
-  });
-}
-
-// ---- SMOOTH SCROLL (for browsers that don't support CSS smooth) ----
-document.querySelectorAll('a[href^="#"]').forEach(a=>{
-  a.addEventListener('click',e=>{
-    const target=document.querySelector(a.getAttribute('href'));
-    if(target){
-      e.preventDefault();
-      target.scrollIntoView({behavior:'smooth'});
-    }
-  });
-});
-</script>
 </body>
 </html>
