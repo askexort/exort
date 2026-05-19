@@ -7,9 +7,12 @@ __pycache__/
 dist/
 build/
 *.egg
+*.whl
 
-# Environment
+# Environment - NEVER commit these
 .env
+.env.*
+!.env.example
 .venv/
 venv/
 env/
@@ -17,23 +20,44 @@ env/
 # Exort data
 .exort/
 *.db
+*.sqlite
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Node (for contracts)
+# Node
 node_modules/
+package-lock.json
 artifacts/
 cache/
 typechain-types/
+out/
 
 # Logs
 *.log
 logs/
+
+# Hardhat / Solidity
+cache/
+artifacts/
+typechain-types/
+
+# Build
+dist/
+build/
+*.egg
+
+# Secrets
+*.pem
+*.key
+*.secret
+private_key*
