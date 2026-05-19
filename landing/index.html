@@ -13,8 +13,8 @@
         /* ===== CSS Variables ===== */
         :root {
             --bg: #000000;
-            --text: #e2e8f0;
-            --text-secondary: #64748b;
+            --text: #ffffff;
+            --text-secondary: #94a3b8;
             --card-bg: rgba(255, 255, 255, 0.02);
             --border: rgba(255, 255, 255, 0.04);
             --primary: #6366f1;
@@ -27,8 +27,8 @@
 
         [data-theme="light"] {
             --bg: #ffffff;
-            --text: #1e293b;
-            --text-secondary: #64748b;
+            --text: #0f172a;
+            --text-secondary: #475569;
             --card-bg: rgba(0, 0, 0, 0.02);
             --border: rgba(0, 0, 0, 0.06);
             --header-bg: rgba(255, 255, 255, 0.85);
@@ -627,6 +627,69 @@
         }
 
         /* ===== Footer ===== */
+        /* ===== Donate ===== */
+        .donate-section {
+            text-align: center;
+            padding: 80px 0;
+        }
+
+        .donate-section h2 {
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+        }
+
+        .donate-section h2 .chevron {
+            color: var(--primary);
+            margin-right: 8px;
+        }
+
+        .donate-section p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            margin-bottom: 28px;
+        }
+
+        .wallet-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 20px;
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 0.8rem;
+            color: var(--text);
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        .wallet-box code {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .wallet-box .copy-btn {
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+
+        .wallet-box .copy-btn:hover {
+            background: var(--secondary);
+        }
+
         .footer {
             border-top: 1px solid var(--border);
             padding: 40px 0;
@@ -949,6 +1012,18 @@
                 <a href="https://t.me/askexort_bot" target="_blank" rel="noopener" class="btn btn-secondary">
                     <i class="fab fa-telegram"></i> Try Bot
                 </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Donate -->
+    <section class="donate-section">
+        <div class="container">
+            <h2><span class="chevron">⟩</span> Support Exort</h2>
+            <p>Help keep Exort free and open source. Every donation matters.</p>
+            <div class="wallet-box">
+                <code>0x9637EDad27c93F40b505F6478445530f58fF1501</code>
+                <button class="copy-btn" onclick="navigator.clipboard.writeText('0x9637EDad27c93F40b505F6478445530f58fF1501').then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500)})">Copy</button>
             </div>
         </div>
     </section>
