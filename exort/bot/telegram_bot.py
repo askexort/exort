@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+MIMO_API_KEY = os.getenv("MIMO_API_KEY", "")
 CEREBRAS_API_KEY = os.getenv("CEREBRAS_API_KEY", "")
 DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "llama-3.3-70b-versatile")
 RATE_LIMIT = int(os.getenv("RATE_LIMIT_PER_MIN", "10"))
@@ -44,6 +45,13 @@ if GROQ_API_KEY:
             "mixtral-8x7b-32768", "gemma2-9b-it",
         ) else "llama-3.3-70b-versatile",
     })
+if MIMO_API_KEY:
+    PROVIDERS.append({
+        "name": "MiMo",
+        "url": "https://api.xiaomimimo.com/v1/chat/completions",
+        "key": MIMO_API_KEY,
+        "model": "mimo-v2.5-pro",
+    })
 if CEREBRAS_API_KEY:
     PROVIDERS.append({
         "name": "Cerebras",
@@ -57,6 +65,7 @@ AVAILABLE_MODELS = {
     "llama-3.1-8b": "llama-3.1-8b-instant",
     "mixtral-8x7b": "mixtral-8x7b-32768",
     "gemma2-9b": "gemma2-9b-it",
+    "mimo-v2.5-pro": "mimo-v2.5-pro",
 }
 
 SYSTEM_PROMPT = (
@@ -272,6 +281,8 @@ async def cmd_models(update, context):
         "• **llama-3.1-8b** — Fastest\n"
         "• **mixtral-8x7b** — Great for coding\n"
         "• **gemma2-9b** — Balanced\n\n"
+        "**MiMo (Xiaomi):**\n"
+        "• **mimo-v2.5-pro** — Top reasoning\n\n"
         f"Current: `{DEFAULT_MODEL}`",
         parse_mode=ParseMode.MARKDOWN,
         reply_markup=InlineKeyboardMarkup(keyboard),

@@ -10,6 +10,8 @@ services:
         sync: false
       - key: GROQ_API_KEY
         sync: false
+      - key: MIMO_API_KEY
+        sync: false
       - key: CEREBRAS_API_KEY
         sync: false
       - key: DEFAULT_MODEL
