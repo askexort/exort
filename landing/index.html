@@ -36,6 +36,16 @@
             --shadow: rgba(0, 0, 0, 0.08);
         }
 
+        [data-theme="light"] .tornado-glow {
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+        }
+
+        [data-theme="light"] .tornado-logo {
+            box-shadow:
+                0 0 40px rgba(99, 102, 241, 0.2),
+                0 0 80px rgba(168, 85, 247, 0.1);
+        }
+
         /* ===== Reset & Base ===== */
         *, *::before, *::after {
             margin: 0;
@@ -157,8 +167,136 @@
 
         /* ===== Hero ===== */
         .hero {
-            padding: 160px 0 120px;
+            padding: 180px 0 120px;
             text-align: center;
+            position: relative;
+        }
+
+        /* ===== 3D Tornado Logo ===== */
+        .logo-3d-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 48px;
+            position: relative;
+            height: 320px;
+        }
+
+        .logo-3d-scene {
+            width: 300px;
+            height: 320px;
+            position: relative;
+            perspective: 800px;
+        }
+
+        .tornado-container {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 0;
+            height: 100%;
+            transform-style: preserve-3d;
+            animation: tornadoSpin 8s linear infinite;
+        }
+
+        @keyframes tornadoSpin {
+            0% { transform: translateX(-50%) rotateY(0deg); }
+            100% { transform: translateX(-50%) rotateY(360deg); }
+        }
+
+        .tornado-ring {
+            position: absolute;
+            left: 50%;
+            border-radius: 50%;
+            border: 1.5px solid var(--primary);
+            transform-style: preserve-3d;
+            opacity: 0;
+            animation: tornadoRing 8s ease-in-out infinite;
+        }
+
+        .tornado-ring:nth-child(1) { width: 60px; height: 60px; margin-left: -30px; bottom: 0; animation-delay: 0s; border-color: var(--accent); }
+        .tornado-ring:nth-child(2) { width: 90px; height: 90px; margin-left: -45px; bottom: 20px; animation-delay: 0.4s; border-color: var(--secondary); }
+        .tornado-ring:nth-child(3) { width: 120px; height: 120px; margin-left: -60px; bottom: 45px; animation-delay: 0.8s; border-color: var(--primary); }
+        .tornado-ring:nth-child(4) { width: 150px; height: 150px; margin-left: -75px; bottom: 75px; animation-delay: 1.2s; }
+        .tornado-ring:nth-child(5) { width: 180px; height: 180px; margin-left: -90px; bottom: 110px; animation-delay: 1.6s; border-color: var(--secondary); }
+        .tornado-ring:nth-child(6) { width: 200px; height: 200px; margin-left: -100px; bottom: 150px; animation-delay: 2.0s; border-color: var(--accent); }
+        .tornado-ring:nth-child(7) { width: 220px; height: 220px; margin-left: -110px; bottom: 195px; animation-delay: 2.4s; }
+
+        @keyframes tornadoRing {
+            0% { opacity: 0; transform: rotateX(75deg) scale(0.3); }
+            15% { opacity: 0.6; }
+            50% { opacity: 0.4; transform: rotateX(75deg) scale(1); }
+            85% { opacity: 0.6; }
+            100% { opacity: 0; transform: rotateX(75deg) scale(1.3); }
+        }
+
+        .tornado-logo {
+            position: absolute;
+            bottom: 130px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 100px;
+            border-radius: 20px;
+            overflow: hidden;
+            z-index: 10;
+            box-shadow:
+                0 0 40px rgba(99, 102, 241, 0.4),
+                0 0 80px rgba(168, 85, 247, 0.2),
+                0 0 120px rgba(236, 72, 153, 0.1);
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+
+        .tornado-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-12px); }
+        }
+
+        .tornado-particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: var(--primary);
+            opacity: 0;
+            animation: particleRise 4s ease-in-out infinite;
+        }
+
+        .tornado-particle:nth-child(8) { left: calc(50% - 40px); bottom: 0; animation-delay: 0s; background: var(--accent); }
+        .tornado-particle:nth-child(9) { left: calc(50% + 30px); bottom: 10px; animation-delay: 0.6s; background: var(--secondary); }
+        .tornado-particle:nth-child(10) { left: calc(50% - 20px); bottom: 30px; animation-delay: 1.2s; }
+        .tornado-particle:nth-child(11) { left: calc(50% + 45px); bottom: 5px; animation-delay: 1.8s; background: var(--accent); }
+        .tornado-particle:nth-child(12) { left: calc(50% - 55px); bottom: 15px; animation-delay: 2.4s; background: var(--secondary); }
+        .tornado-particle:nth-child(13) { left: calc(50% + 10px); bottom: 25px; animation-delay: 3.0s; }
+
+        @keyframes particleRise {
+            0% { opacity: 0; transform: translateY(0) scale(0); }
+            20% { opacity: 0.8; transform: translateY(-40px) scale(1); }
+            100% { opacity: 0; transform: translateY(-250px) scale(0.3); }
+        }
+
+        .tornado-glow {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(30px);
+            animation: glowPulse 4s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { opacity: 0.4; transform: translateX(-50%) scale(1); }
+            50% { opacity: 0.8; transform: translateX(-50%) scale(1.15); }
         }
 
         .hero h1 {
@@ -177,7 +315,7 @@
             font-size: clamp(0.875rem, 2vw, 1.1rem);
             font-weight: 600;
             letter-spacing: 0.2em;
-            color: var(--text-secondary);
+            color: var(--text);
             margin-bottom: 24px;
         }
 
@@ -523,6 +661,21 @@
                 display: block;
             }
 
+            .logo-3d-wrapper {
+                height: 220px;
+            }
+
+            .logo-3d-scene {
+                width: 200px;
+                height: 220px;
+            }
+
+            .tornado-logo {
+                width: 70px;
+                height: 70px;
+                bottom: 90px;
+            }
+
             .nav {
                 display: none;
                 position: absolute;
@@ -600,6 +753,31 @@
     <!-- Hero -->
     <section class="hero">
         <div class="container">
+            <!-- 3D Tornado Logo -->
+            <div class="logo-3d-wrapper">
+                <div class="logo-3d-scene">
+                    <div class="tornado-container">
+                        <div class="tornado-ring"></div>
+                        <div class="tornado-ring"></div>
+                        <div class="tornado-ring"></div>
+                        <div class="tornado-ring"></div>
+                        <div class="tornado-ring"></div>
+                        <div class="tornado-ring"></div>
+                        <div class="tornado-ring"></div>
+                        <div class="tornado-particle"></div>
+                        <div class="tornado-particle"></div>
+                        <div class="tornado-particle"></div>
+                        <div class="tornado-particle"></div>
+                        <div class="tornado-particle"></div>
+                        <div class="tornado-particle"></div>
+                    </div>
+                    <div class="tornado-logo">
+                        <img src="../openmindlogo.jpg" alt="Exort Logo">
+                    </div>
+                    <div class="tornado-glow"></div>
+                </div>
+            </div>
+
             <h1>Exort</h1>
             <p class="subtitle">THE OPEN AGENT ENGINE.</p>
             <p class="description">Exort is a self-hosted AI agent framework that gives you a fully autonomous assistant with tool use, persistent memory, and multi-provider support. Run it from your terminal, deploy it as a Telegram bot, or embed it anywhere. Your data stays yours. No vendor lock-in. No API fees required &mdash; use free providers like Groq and Cerebras, or bring your own keys.</p>
