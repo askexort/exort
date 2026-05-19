@@ -8,11 +8,11 @@ services:
     envVars:
       - key: TELEGRAM_BOT_TOKEN
         sync: false
-      - key: GEMINI_API_KEY
-        sync: false
       - key: GROQ_API_KEY
         sync: false
+      - key: CEREBRAS_API_KEY
+        sync: false
       - key: DEFAULT_MODEL
-        value: "gemini-2.0-flash"
+        value: "llama-3.3-70b-versatile"
       - key: PORT
         value: "8080"

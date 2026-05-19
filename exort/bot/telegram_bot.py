@@ -1,12 +1,13 @@
 """
 Exort Telegram Bot — Free AI for Everyone
-Multi-provider: Gemini (primary, 1M tok/day free) + Groq (fallback, 100K tok/day).
-Fully async, no Engine dependency.
+Multi-provider: Groq (primary) + Cerebras (optional fallback, 1M tok/day free).
+Auto-fallback when one provider hits rate limits.
 
 Setup:
   1. @BotFather → /newbot → copy token
-  2. Set env vars: TELEGRAM_BOT_TOKEN, GEMINI_API_KEY (or GROQ_API_KEY)
-  3. exort bot
+  2. Set env vars: TELEGRAM_BOT_TOKEN, GROQ_API_KEY
+  3. Optional: CEREBRAS_API_KEY for extra capacity
+  4. exort bot
 """
 
 import asyncio
@@ -26,20 +27,13 @@ logger = logging.getLogger(__name__)
 # ─── Config ───────────────────────────────────────────────────────────────────
 
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
-DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "gemini-2.0-flash")
+CEREBRAS_API_KEY = os.getenv("CEREBRAS_API_KEY", "")
+DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "llama-3.3-70b-versatile")
 RATE_LIMIT = int(os.getenv("RATE_LIMIT_PER_MIN", "10"))
 
 # Provider chain: try each in order until one works
 PROVIDERS = []
-if GEMINI_API_KEY:
-    PROVIDERS.append({
-        "name": "Gemini",
-        "url": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
-        "key": GEMINI_API_KEY,
-        "model": DEFAULT_MODEL if "gemini" in DEFAULT_MODEL else "gemini-2.0-flash",
-    })
 if GROQ_API_KEY:
     PROVIDERS.append({
         "name": "Groq",
@@ -50,10 +44,15 @@ if GROQ_API_KEY:
             "mixtral-8x7b-32768", "gemma2-9b-it",
         ) else "llama-3.3-70b-versatile",
     })
+if CEREBRAS_API_KEY:
+    PROVIDERS.append({
+        "name": "Cerebras",
+        "url": "https://api.cerebras.ai/v1/chat/completions",
+        "key": CEREBRAS_API_KEY,
+        "model": "llama-3.3-70b",
+    })
 
 AVAILABLE_MODELS = {
-    "gemini-2.0-flash": "gemini-2.0-flash",
-    "gemini-2.5-flash": "gemini-2.5-flash-preview-05-20",
     "llama-3.3-70b": "llama-3.3-70b-versatile",
     "llama-3.1-8b": "llama-3.1-8b-instant",
     "mixtral-8x7b": "mixtral-8x7b-32768",
@@ -137,13 +136,23 @@ def _ai_chat_sync(message: str, model: str = None) -> str:
             with urllib.request.urlopen(req, timeout=30) as resp:
                 data = json.loads(resp.read())
                 return data["choices"][0]["message"]["content"]
+        except urllib.error.HTTPError as e:
+            body = e.read().decode("utf-8", errors="replace")
+            if e.code == 429:
+                # Rate limit — try next provider
+                logger.warning(f"{provider['name']} rate limited (429)")
+                last_error = f"{provider['name']} rate limited"
+                continue
+            last_error = f"{provider['name']}: HTTP {e.code}"
+            logger.warning(f"{provider['name']} HTTP error {e.code}: {body[:200]}")
+            continue
         except Exception as e:
             last_error = e
             logger.warning(f"{provider['name']} failed: {e}")
             continue
 
     logger.error(f"All providers failed. Last error: {last_error}")
-    return f"⚠️ All AI providers exhausted. Last error: {str(last_error)[:100]}. Try again later."
+    return f"⚠️ All AI providers exhausted ({last_error}). Try again in a few minutes."
 
 
 async def chat_with_ai(message: str, model: str = None) -> str:
@@ -258,11 +267,8 @@ async def cmd_models(update, context):
 
     await update.message.reply_text(
         "🤖 **Available Models:**\n\n"
-        "**Gemini (free, 1M tok/day):**\n"
-        "• **gemini-2.0-flash** — Fast & capable ✅\n"
-        "• **gemini-2.5-flash** — Latest, with reasoning\n\n"
         "**Groq (free, 100K tok/day):**\n"
-        "• **llama-3.3-70b** — Best quality\n"
+        "• **llama-3.3-70b** — Best quality ✅\n"
         "• **llama-3.1-8b** — Fastest\n"
         "• **mixtral-8x7b** — Great for coding\n"
         "• **gemma2-9b** — Balanced\n\n"
