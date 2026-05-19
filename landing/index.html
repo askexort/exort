@@ -1,1303 +1,966 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exort — The Open Agent Engine</title>
-    <link rel="icon" href="../openmindlogo.jpg" type="image/jpeg">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        /* ===== CSS Variables ===== */
-        :root {
-            --bg: #000000;
-            --text: #ffffff;
-            --text-secondary: #94a3b8;
-            --card-bg: rgba(255, 255, 255, 0.02);
-            --border: rgba(255, 255, 255, 0.04);
-            --primary: #6366f1;
-            --secondary: #a855f7;
-            --accent: #ec4899;
-            --header-bg: rgba(0, 0, 0, 0.8);
-            --code-bg: rgba(255, 255, 255, 0.04);
-            --shadow: rgba(0, 0, 0, 0.3);
-        }
-
-        /* ===== Reset & Base ===== */
-        *, *::before, *::after {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.7;
-            overflow-x: hidden;
-        }
-
-        a {
-            color: var(--primary);
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-        a:hover {
-            color: var(--secondary);
-        }
-
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        /* ===== 3D Floating Particles Canvas ===== */
-        #particles-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        /* ===== Floating 3D Geometric Shapes ===== */
-        .geo-shapes {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-            overflow: hidden;
-        }
-
-        .geo-shape {
-            position: absolute;
-            opacity: 0.06;
-            animation: geoFloat 20s linear infinite;
-        }
-
-        .geo-shape.triangle {
-            width: 0;
-            height: 0;
-            border-left: 30px solid transparent;
-            border-right: 30px solid transparent;
-            border-bottom: 52px solid var(--primary);
-        }
-
-        .geo-shape.circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 2px solid var(--secondary);
-        }
-
-        .geo-shape.square {
-            width: 35px;
-            height: 35px;
-            border: 2px solid var(--accent);
-        }
-
-        .geo-shape:nth-child(1) { top: 10%; left: 5%; animation-duration: 25s; animation-delay: 0s; }
-        .geo-shape:nth-child(2) { top: 30%; left: 85%; animation-duration: 30s; animation-delay: -5s; }
-        .geo-shape:nth-child(3) { top: 50%; left: 15%; animation-duration: 22s; animation-delay: -10s; }
-        .geo-shape:nth-child(4) { top: 70%; left: 75%; animation-duration: 28s; animation-delay: -3s; }
-        .geo-shape:nth-child(5) { top: 20%; left: 50%; animation-duration: 35s; animation-delay: -8s; }
-        .geo-shape:nth-child(6) { top: 80%; left: 30%; animation-duration: 24s; animation-delay: -12s; }
-        .geo-shape:nth-child(7) { top: 40%; left: 90%; animation-duration: 27s; animation-delay: -7s; }
-        .geo-shape:nth-child(8) { top: 60%; left: 10%; animation-duration: 32s; animation-delay: -15s; }
-        .geo-shape:nth-child(9) { top: 15%; left: 70%; animation-duration: 26s; animation-delay: -2s; }
-        .geo-shape:nth-child(10) { top: 85%; left: 55%; animation-duration: 29s; animation-delay: -9s; }
-        .geo-shape:nth-child(11) { top: 45%; left: 40%; animation-duration: 31s; animation-delay: -14s; }
-        .geo-shape:nth-child(12) { top: 75%; left: 60%; animation-duration: 23s; animation-delay: -6s; }
-
-        @keyframes geoFloat {
-            0% { transform: translateY(0) rotate(0deg); opacity: 0.06; }
-            25% { opacity: 0.1; }
-            50% { transform: translateY(-100px) rotate(180deg); opacity: 0.06; }
-            75% { opacity: 0.1; }
-            100% { transform: translateY(0) rotate(360deg); opacity: 0.06; }
-        }
-
-        /* ===== Animated Gradient Mesh Background ===== */
-        .gradient-mesh {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-            opacity: 0.15;
-            background:
-                radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.3) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 20%, rgba(168, 85, 247, 0.2) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 80%, rgba(236, 72, 153, 0.2) 0%, transparent 50%);
-            animation: meshMove 15s ease-in-out infinite alternate;
-        }
-
-        @keyframes meshMove {
-            0% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -20px) scale(1.05); }
-            66% { transform: translate(-20px, 30px) scale(0.95); }
-            100% { transform: translate(10px, 10px) scale(1.02); }
-        }
-
-        /* ===== Header ===== */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            background: var(--header-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .header-inner {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            height: 64px;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 700;
-            font-size: 1.15rem;
-            color: var(--text);
-        }
-
-        .logo img {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-        }
-
-        .nav {
-            display: flex;
-            align-items: center;
-            gap: 32px;
-        }
-
-        .nav a {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: color 0.2s ease;
-        }
-
-        .nav a:hover {
-            color: var(--text);
-        }
-
-        /* ===== Mobile Nav ===== */
-        .mobile-toggle {
-            display: none;
-            background: none;
-            border: none;
-            color: var(--text);
-            font-size: 1.25rem;
-            cursor: pointer;
-        }
-
-        /* ===== Hero ===== */
-        .hero {
-            padding: 180px 0 120px;
-            text-align: center;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* ===== 3D Tornado Logo ===== */
-        .logo-3d-wrapper {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 48px;
-            position: relative;
-            height: 320px;
-        }
-
-        .logo-3d-scene {
-            width: 300px;
-            height: 320px;
-            position: relative;
-            perspective: 800px;
-        }
-
-        .tornado-container {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 0;
-            height: 100%;
-            transform-style: preserve-3d;
-            animation: tornadoSpin 8s linear infinite;
-        }
-
-        @keyframes tornadoSpin {
-            0% { transform: translateX(-50%) rotateY(0deg); }
-            100% { transform: translateX(-50%) rotateY(360deg); }
-        }
-
-        .tornado-ring {
-            position: absolute;
-            left: 50%;
-            border-radius: 50%;
-            border: 1.5px solid var(--primary);
-            transform-style: preserve-3d;
-            opacity: 0;
-            animation: tornadoRing 8s ease-in-out infinite;
-        }
-
-        .tornado-ring:nth-child(1) { width: 60px; height: 60px; margin-left: -30px; bottom: 0; animation-delay: 0s; border-color: var(--accent); }
-        .tornado-ring:nth-child(2) { width: 90px; height: 90px; margin-left: -45px; bottom: 20px; animation-delay: 0.4s; border-color: var(--secondary); }
-        .tornado-ring:nth-child(3) { width: 120px; height: 120px; margin-left: -60px; bottom: 45px; animation-delay: 0.8s; border-color: var(--primary); }
-        .tornado-ring:nth-child(4) { width: 150px; height: 150px; margin-left: -75px; bottom: 75px; animation-delay: 1.2s; }
-        .tornado-ring:nth-child(5) { width: 180px; height: 180px; margin-left: -90px; bottom: 110px; animation-delay: 1.6s; border-color: var(--secondary); }
-        .tornado-ring:nth-child(6) { width: 200px; height: 200px; margin-left: -100px; bottom: 150px; animation-delay: 2.0s; border-color: var(--accent); }
-        .tornado-ring:nth-child(7) { width: 220px; height: 220px; margin-left: -110px; bottom: 195px; animation-delay: 2.4s; }
-
-        @keyframes tornadoRing {
-            0% { opacity: 0; transform: rotateX(75deg) scale(0.3); }
-            15% { opacity: 0.6; }
-            50% { opacity: 0.4; transform: rotateX(75deg) scale(1); }
-            85% { opacity: 0.6; }
-            100% { opacity: 0; transform: rotateX(75deg) scale(1.3); }
-        }
-
-        .tornado-logo {
-            position: absolute;
-            bottom: 130px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 100px;
-            border-radius: 20px;
-            overflow: hidden;
-            z-index: 10;
-            box-shadow:
-                0 0 40px rgba(99, 102, 241, 0.4),
-                0 0 80px rgba(168, 85, 247, 0.2),
-                0 0 120px rgba(236, 72, 153, 0.1);
-            animation: logoFloat 3s ease-in-out infinite;
-        }
-
-        .tornado-logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        @keyframes logoFloat {
-            0%, 100% { transform: translateX(-50%) translateY(0); }
-            50% { transform: translateX(-50%) translateY(-12px); }
-        }
-
-        .tornado-particle {
-            position: absolute;
-            width: 3px;
-            height: 3px;
-            border-radius: 50%;
-            background: var(--primary);
-            opacity: 0;
-            animation: particleRise 4s ease-in-out infinite;
-        }
-
-        .tornado-particle:nth-child(8) { left: calc(50% - 40px); bottom: 0; animation-delay: 0s; background: var(--accent); }
-        .tornado-particle:nth-child(9) { left: calc(50% + 30px); bottom: 10px; animation-delay: 0.6s; background: var(--secondary); }
-        .tornado-particle:nth-child(10) { left: calc(50% - 20px); bottom: 30px; animation-delay: 1.2s; }
-        .tornado-particle:nth-child(11) { left: calc(50% + 45px); bottom: 5px; animation-delay: 1.8s; background: var(--accent); }
-        .tornado-particle:nth-child(12) { left: calc(50% - 55px); bottom: 15px; animation-delay: 2.4s; background: var(--secondary); }
-        .tornado-particle:nth-child(13) { left: calc(50% + 10px); bottom: 25px; animation-delay: 3.0s; }
-
-        @keyframes particleRise {
-            0% { opacity: 0; transform: translateY(0) scale(0); }
-            20% { opacity: 0.8; transform: translateY(-40px) scale(1); }
-            100% { opacity: 0; transform: translateY(-250px) scale(0.3); }
-        }
-
-        .tornado-glow {
-            position: absolute;
-            bottom: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 200px;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
-            border-radius: 50%;
-            filter: blur(30px);
-            animation: glowPulse 4s ease-in-out infinite;
-            z-index: 0;
-        }
-
-        @keyframes glowPulse {
-            0%, 100% { opacity: 0.4; transform: translateX(-50%) scale(1); }
-            50% { opacity: 0.8; transform: translateX(-50%) scale(1.15); }
-        }
-
-        /* ===== 3D Extruded Text Effect ===== */
-        .hero h1 {
-            font-size: clamp(3rem, 8vw, 6rem);
-            font-weight: 700;
-            letter-spacing: -0.03em;
-            line-height: 1.1;
-            margin-bottom: 16px;
-            color: #ffffff;
-            text-shadow:
-                0 1px 0 #cccccc,
-                0 2px 0 #bbbbbb,
-                0 3px 0 #aaaaaa,
-                0 4px 0 #999999,
-                0 5px 0 #888888,
-                0 6px 0 #777777,
-                0 7px 0 #666666,
-                0 8px 15px rgba(99, 102, 241, 0.5),
-                0 9px 25px rgba(168, 85, 247, 0.3),
-                0 10px 40px rgba(236, 72, 153, 0.2);
-        }
-
-        .hero .subtitle {
-            font-size: clamp(0.875rem, 2vw, 1.1rem);
-            font-weight: 600;
-            letter-spacing: 0.2em;
-            color: var(--text);
-            margin-bottom: 24px;
-        }
-
-        .hero .description {
-            max-width: 640px;
-            margin: 0 auto 48px;
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            line-height: 1.8;
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 14px 28px;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
-            border: none;
-        }
-
-        /* ===== Neon Glow CTA Buttons ===== */
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: #ffffff;
-            box-shadow:
-                0 0 15px rgba(99, 102, 241, 0.3),
-                0 0 30px rgba(99, 102, 241, 0.15),
-                0 0 60px rgba(168, 85, 247, 0.1);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow:
-                0 0 20px rgba(99, 102, 241, 0.5),
-                0 0 40px rgba(99, 102, 241, 0.25),
-                0 0 80px rgba(168, 85, 247, 0.15),
-                0 8px 30px rgba(99, 102, 241, 0.3);
-            color: #ffffff;
-        }
-
-        .btn-secondary {
-            background: var(--card-bg);
-            color: var(--text);
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            transform: translateY(-2px);
-            border-color: var(--text-secondary);
-            color: var(--text);
-        }
-
-        /* ===== Sections with Depth Layers ===== */
-        .section {
-            padding: 100px 0;
-            position: relative;
-            z-index: 1;
-        }
-
-        .section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(180deg,
-                transparent 0%,
-                rgba(99, 102, 241, 0.02) 50%,
-                transparent 100%);
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .section:nth-child(odd)::before {
-            background: linear-gradient(180deg,
-                transparent 0%,
-                rgba(168, 85, 247, 0.02) 50%,
-                transparent 100%);
-        }
-
-        .section-header {
-            text-align: center;
-            margin-bottom: 64px;
-            position: relative;
-        }
-
-        /* ===== Glowing Orb Behind Section Headers ===== */
-        .section-header::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 200px;
-            height: 200px;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, transparent 70%);
-            border-radius: 50%;
-            filter: blur(40px);
-            pointer-events: none;
-            z-index: -1;
-            animation: orbPulse 6s ease-in-out infinite;
-        }
-
-        @keyframes orbPulse {
-            0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
-            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-        }
-
-        .section-header h2 {
-            font-size: clamp(1.75rem, 4vw, 2.5rem);
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            position: relative;
-        }
-
-        .section-header h2 .chevron {
-            color: var(--primary);
-            margin-right: 8px;
-        }
-
-        /* ===== How It Works ===== */
-        .steps-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 24px;
-            max-width: 1000px;
-            margin: 0 auto;
-            perspective: 1000px;
-        }
-
-        .step-card {
-            text-align: center;
-            position: relative;
-            transition: transform 0.3s ease;
-            transform-style: preserve-3d;
-        }
-
-        .step-card:hover {
-            transform: perspective(800px) rotateX(-3deg) translateY(-6px);
-        }
-
-        .step-card .step-number {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: #ffffff;
-            font-weight: 700;
-            font-size: 1rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 16px;
-        }
-
-        .step-card h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-
-        .step-card p {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-            line-height: 1.6;
-        }
-
-        .step-connector {
-            display: none;
-        }
-
-        .code-block {
-            background: var(--code-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 14px 16px;
-            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
-            font-size: 0.78rem;
-            color: var(--secondary);
-            text-align: left;
-            overflow-x: auto;
-            line-height: 1.6;
-        }
-
-        .code-block .prompt {
-            color: var(--text-secondary);
-            user-select: none;
-        }
-
-        .code-block .comment {
-            color: var(--text-secondary);
-            opacity: 0.6;
-        }
-
-        /* ===== Features with 3D Tilt ===== */
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            perspective: 1000px;
-        }
-
-        .feature-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 36px 28px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-            transform-style: preserve-3d;
-            will-change: transform;
-        }
-
-        .feature-card:hover {
-            border-color: var(--primary);
-            transform: perspective(800px) rotateX(-2deg) rotateY(2deg) translateY(-8px) translateZ(10px);
-            box-shadow:
-                0 25px 50px rgba(0, 0, 0, 0.4),
-                0 0 30px rgba(99, 102, 241, 0.08);
-        }
-
-        .feature-card .icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            color: #ffffff;
-            margin-bottom: 20px;
-        }
-
-        .feature-card h3 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .feature-card p {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            line-height: 1.7;
-        }
-
-        .feature-card .tag {
-            display: inline-block;
-            background: rgba(99, 102, 241, 0.1);
-            color: var(--primary);
-            font-size: 0.75rem;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 6px;
-            margin-top: 12px;
-        }
-
-        /* ===== Use Cases with 3D Tilt ===== */
-        .usecases-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            perspective: 1000px;
-        }
-
-        .usecase-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 32px 24px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-            text-align: center;
-            transform-style: preserve-3d;
-            will-change: transform;
-        }
-
-        .usecase-card:hover {
-            border-color: var(--secondary);
-            transform: perspective(800px) rotateX(-2deg) rotateY(-2deg) translateY(-8px) translateZ(10px);
-            box-shadow:
-                0 25px 50px rgba(0, 0, 0, 0.4),
-                0 0 30px rgba(168, 85, 247, 0.08);
-        }
-
-        .usecase-card .usecase-icon {
-            font-size: 2rem;
-            margin-bottom: 16px;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .usecase-card h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .usecase-card p {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-
-        /* ===== Providers ===== */
-        .providers-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            justify-content: center;
-        }
-
-        .provider-pill {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 100px;
-            padding: 10px 24px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--text);
-            transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-            cursor: default;
-        }
-
-        .provider-pill:hover {
-            border-color: var(--primary);
-            background: rgba(99, 102, 241, 0.06);
-            transform: translateY(-2px);
-        }
-
-        /* ===== CTA Section ===== */
-        .cta-section {
-            text-align: center;
-            padding: 100px 0;
-            position: relative;
-            z-index: 1;
-        }
-
-        .cta-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.04) 0%, transparent 70%);
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .cta-section h2 {
-            font-size: clamp(1.75rem, 4vw, 2.5rem);
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            margin-bottom: 16px;
-        }
-
-        .cta-section h2 .chevron {
-            color: var(--primary);
-            margin-right: 8px;
-        }
-
-        .cta-section p {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            margin-bottom: 40px;
-        }
-
-        .cta-code {
-            background: var(--code-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px 32px;
-            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
-            font-size: 1rem;
-            color: var(--secondary);
-            display: inline-block;
-            margin-bottom: 32px;
-        }
-
-        .cta-code .prompt {
-            color: var(--text-secondary);
-            user-select: none;
-        }
-
-        /* ===== Donate ===== */
-        .donate-section {
-            text-align: center;
-            padding: 80px 0;
-            position: relative;
-            z-index: 1;
-        }
-
-        .donate-section h2 {
-            font-size: clamp(1.75rem, 4vw, 2.5rem);
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            margin-bottom: 12px;
-        }
-
-        .donate-section h2 .chevron {
-            color: var(--primary);
-            margin-right: 8px;
-        }
-
-        .donate-section p {
-            color: var(--text-secondary);
-            font-size: 1.05rem;
-            margin-bottom: 28px;
-        }
-
-        /* ===== 3D Inset Wallet Box ===== */
-        .wallet-box {
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 12px;
-            padding: 14px 20px;
-            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
-            font-size: 0.8rem;
-            color: var(--text);
-            max-width: 100%;
-            overflow: hidden;
-            box-shadow:
-                inset 0 2px 10px rgba(0, 0, 0, 0.5),
-                inset 0 -1px 3px rgba(255, 255, 255, 0.02),
-                0 1px 0 rgba(255, 255, 255, 0.03);
-        }
-
-        .wallet-box code {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .wallet-box .copy-btn {
-            background: var(--primary);
-            color: #ffffff;
-            border: none;
-            border-radius: 8px;
-            padding: 6px 14px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s ease, background 0.2s ease;
-            white-space: nowrap;
-            font-family: inherit;
-            box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
-        }
-
-        .wallet-box .copy-btn:hover {
-            background: var(--secondary);
-            transform: scale(1.05);
-        }
-
-        /* ===== Footer ===== */
-        .footer {
-            border-top: 1px solid var(--border);
-            padding: 40px 0;
-            text-align: center;
-            position: relative;
-            z-index: 1;
-        }
-
-        .footer p {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            margin-bottom: 16px;
-        }
-
-        .footer-links {
-            display: flex;
-            gap: 24px;
-            justify-content: center;
-        }
-
-        .footer-links a {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            transition: color 0.2s ease;
-        }
-
-        .footer-links a:hover {
-            color: var(--text);
-        }
-
-        /* ===== Responsive ===== */
-        @media (max-width: 768px) {
-            .mobile-toggle {
-                display: block;
-            }
-
-            .logo-3d-wrapper {
-                height: 220px;
-            }
-
-            .logo-3d-scene {
-                width: 200px;
-                height: 220px;
-            }
-
-            .tornado-logo {
-                width: 70px;
-                height: 70px;
-                bottom: 90px;
-            }
-
-            .nav {
-                display: none;
-                position: absolute;
-                top: 64px;
-                left: 0;
-                right: 0;
-                background: var(--header-bg);
-                backdrop-filter: blur(20px);
-                flex-direction: column;
-                padding: 24px;
-                gap: 20px;
-                border-bottom: 1px solid var(--border);
-            }
-
-            .nav.open {
-                display: flex;
-            }
-
-            .features-grid,
-            .usecases-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .steps-grid {
-                grid-template-columns: 1fr;
-                max-width: 400px;
-            }
-
-            .hero {
-                padding: 120px 0 80px;
-            }
-
-            .section {
-                padding: 60px 0;
-            }
-        }
-
-        @media (max-width: 1024px) and (min-width: 769px) {
-            .features-grid,
-            .usecases-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .steps-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exort — The Open Agent Engine | Build Your AI Assistant</title>
+<meta name="description" content="Exort is a free, open-source AI agent with tool use, persistent memory, and multi-provider support. Self-hosted, privacy-first, MIT licensed.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#000000;
+  --text:#ffffff;
+  --secondary:#94a3b8;
+  --card-bg:rgba(255,255,255,0.03);
+  --card-border:rgba(255,255,255,0.06);
+  --radius:16px;
+  --btn-radius:12px;
+  --grad:linear-gradient(135deg,#6366f1,#a855f7,#ec4899);
+  --max-w:1200px;
+  --section-pad:100px 0;
+}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+a{text-decoration:none;color:inherit}
+ul{list-style:none}
+.container{max-width:var(--max-w);margin:0 auto;padding:0 24px}
+h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
+.section-title{
+  text-align:center;
+  margin-bottom:60px;
+}
+.section-title h2{
+  font-size:clamp(2rem,4vw,2.75rem);
+  margin-bottom:16px;
+}
+.section-title p{
+  color:var(--secondary);
+  font-size:1.1rem;
+  max-width:600px;
+  margin:0 auto;
+}
+.gradient-text{
+  background:var(--grad);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:14px 28px;
+  background:var(--grad);
+  color:#fff;
+  border:none;
+  border-radius:var(--btn-radius);
+  font-size:1rem;font-weight:600;
+  cursor:pointer;
+  transition:transform .2s,box-shadow .2s;
+  font-family:inherit;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(99,102,241,.35)}
+.btn-secondary{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:14px 28px;
+  background:transparent;
+  color:#fff;
+  border:1px solid rgba(255,255,255,0.15);
+  border-radius:var(--btn-radius);
+  font-size:1rem;font-weight:600;
+  cursor:pointer;
+  transition:transform .2s,border-color .3s;
+  font-family:inherit;
+}
+.btn-secondary:hover{transform:translateY(-2px);border-color:rgba(255,255,255,0.35)}
+.btn-sm{padding:10px 20px;font-size:.9rem}
+.card{
+  background:var(--card-bg);
+  border:1px solid var(--card-border);
+  border-radius:var(--radius);
+  padding:32px;
+  transition:transform .3s,border-color .3s,box-shadow .3s;
+}
+.card:hover{
+  transform:translateY(-4px);
+  border-color:rgba(255,255,255,0.12);
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+}
+
+/* ---- PARTICLE CANVAS ---- */
+#particles-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.6}
+
+/* ---- HEADER ---- */
+.header{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  padding:16px 0;
+  background:rgba(0,0,0,0.7);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  transition:padding .3s;
+}
+.header.scrolled{padding:10px 0}
+.header .container{display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px;font-size:1.4rem;font-weight:700}
+.logo img{width:36px;height:36px;border-radius:8px}
+.nav{display:flex;align-items:center;gap:32px}
+.nav a{font-size:.95rem;color:var(--secondary);transition:color .2s;font-weight:500}
+.nav a:hover{color:#fff}
+.hamburger{display:none;background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer}
+.mobile-menu{
+  display:none;
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.97);
+  z-index:999;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:28px;
+}
+.mobile-menu.active{display:flex}
+.mobile-menu a{font-size:1.3rem;color:#fff;font-weight:500}
+.mobile-menu .close-menu{
+  position:absolute;top:20px;right:24px;
+  background:none;border:none;color:#fff;font-size:2rem;cursor:pointer;
+}
+
+/* ---- HERO ---- */
+.hero{
+  position:relative;
+  padding:180px 0 120px;
+  text-align:center;
+  min-height:100vh;
+  display:flex;align-items:center;
+}
+.hero-content{position:relative;z-index:2;max-width:800px;margin:0 auto}
+.hero-subtitle{
+  font-size:.85rem;
+  font-weight:600;
+  letter-spacing:4px;
+  color:var(--secondary);
+  margin-bottom:20px;
+  text-transform:uppercase;
+}
+.hero h1{
+  font-size:clamp(2.5rem,6vw,4.5rem);
+  font-weight:700;
+  margin-bottom:24px;
+  letter-spacing:-1px;
+}
+.hero-desc{
+  font-size:1.15rem;
+  color:var(--secondary);
+  max-width:600px;
+  margin:0 auto 36px;
+  line-height:1.7;
+}
+.hero-buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:60px}
+.stats-row{display:flex;justify-content:center;gap:48px;flex-wrap:wrap}
+.stat{text-align:center}
+.stat .stat-number{font-size:2.5rem;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat .stat-label{font-size:.9rem;color:var(--secondary);margin-top:4px}
+
+/* ---- 3D TORNADO ---- */
+.tornado-wrap{
+  position:absolute;
+  right:-100px;top:50%;transform:translateY(-50%);
+  width:400px;height:400px;
+  perspective:800px;
+  opacity:.35;
+  z-index:1;
+  pointer-events:none;
+}
+.tornado{
+  position:relative;width:100%;height:100%;
+  transform-style:preserve-3d;
+  animation:tornadoSpin 12s linear infinite;
+}
+@keyframes tornadoSpin{0%{transform:rotateY(0)}100%{transform:rotateY(360deg)}}
+.tornado-ring{
+  position:absolute;
+  left:50%;top:50%;
+  border:2px solid rgba(99,102,241,0.4);
+  border-radius:50%;
+  transform-style:preserve-3d;
+  animation:ringPulse 3s ease-in-out infinite alternate;
+}
+@keyframes ringPulse{0%{opacity:.3;transform:translate(-50%,-50%) scale(1) rotateX(70deg)}100%{opacity:.7;transform:translate(-50%,-50%) scale(1.05) rotateX(70deg)}}
+.tornado-ring:nth-child(1){width:60px;height:60px;top:15%;animation-delay:0s;border-color:rgba(99,102,241,.6)}
+.tornado-ring:nth-child(2){width:100px;height:100px;top:25%;animation-delay:.3s;border-color:rgba(139,92,246,.5)}
+.tornado-ring:nth-child(3){width:150px;height:150px;top:35%;animation-delay:.6s;border-color:rgba(168,85,247,.4)}
+.tornado-ring:nth-child(4){width:200px;height:200px;top:45%;animation-delay:.9s;border-color:rgba(192,72,235,.35)}
+.tornado-ring:nth-child(5){width:260px;height:260px;top:55%;animation-delay:1.2s;border-color:rgba(215,60,210,.3)}
+.tornado-ring:nth-child(6){width:320px;height:320px;top:65%;animation-delay:1.5s;border-color:rgba(236,72,153,.25)}
+.tornado-ring:nth-child(7){width:380px;height:380px;top:75%;animation-delay:1.8s;border-color:rgba(244,63,94,.2)}
+.tornado-logo{
+  position:absolute;left:50%;top:5%;
+  transform:translate(-50%,0);
+  width:60px;height:60px;
+  background:var(--grad);
+  border-radius:16px;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:1.2rem;color:#fff;
+  box-shadow:0 0 40px rgba(139,92,246,0.5),0 0 80px rgba(139,92,246,0.2);
+  animation:logoFloat 3s ease-in-out infinite alternate;
+}
+@keyframes logoFloat{0%{transform:translate(-50%,0)}100%{transform:translate(-50%,-15px)}}
+.tornado-particle{
+  position:absolute;
+  width:3px;height:3px;
+  background:rgba(168,85,247,0.6);
+  border-radius:50%;
+  animation:particleDrift 4s linear infinite;
+}
+@keyframes particleDrift{
+  0%{opacity:0;transform:translateY(0) scale(0)}
+  20%{opacity:1;transform:translateY(-30px) scale(1)}
+  100%{opacity:0;transform:translateY(-200px) scale(0)}
+}
+
+/* ---- HOW IT WORKS ---- */
+.how-it-works{padding:var(--section-pad);position:relative;z-index:2}
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.step-card{text-align:center;padding:36px 24px}
+.step-card .step-num{
+  width:48px;height:48px;
+  background:var(--grad);
+  border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:1.1rem;
+  margin-bottom:20px;
+}
+.step-card .step-icon{
+  width:52px;height:52px;
+  background:rgba(99,102,241,0.1);
+  border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 16px;
+  font-size:1.3rem;
+  color:#a78bfa;
+}
+.step-card h4{font-size:1.15rem;margin-bottom:10px}
+.step-card p{color:var(--secondary);font-size:.9rem;margin-bottom:12px}
+.step-card code{
+  display:inline-block;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:8px;
+  padding:8px 16px;
+  font-family:'Courier New',monospace;
+  font-size:.85rem;
+  color:#c4b5fd;
+}
+
+/* ---- FEATURES DEEP DIVE ---- */
+.features-deep{padding:var(--section-pad);position:relative;z-index:2}
+.feature-large{margin-bottom:24px}
+.feature-large .card{padding:40px 36px}
+.feature-large .feature-header{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.feature-large .feature-header .feature-icon{
+  width:52px;height:52px;
+  background:rgba(99,102,241,0.1);
+  border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;
+  color:#a78bfa;
+  flex-shrink:0;
+}
+.feature-large h4{font-size:1.25rem}
+.feature-large p{color:var(--secondary);font-size:1rem;line-height:1.8;margin-bottom:20px}
+.feature-tags{display:flex;flex-wrap:wrap;gap:8px}
+.feature-tag{
+  padding:5px 12px;
+  font-size:.8rem;
+  background:rgba(99,102,241,0.08);
+  border:1px solid rgba(99,102,241,0.15);
+  border-radius:20px;
+  color:#c4b5fd;
+}
+
+/* ---- USE CASES ---- */
+.use-cases{padding:var(--section-pad);position:relative;z-index:2}
+.usecases-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.usecase-card .usecase-icon{
+  width:52px;height:52px;
+  background:rgba(236,72,153,0.1);
+  border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:20px;
+  font-size:1.3rem;
+  color:#f472b6;
+}
+.usecase-card h4{font-size:1.15rem;margin-bottom:10px}
+.usecase-card p{color:var(--secondary);font-size:.95rem}
+
+/* ---- PROVIDERS ---- */
+.providers{padding:var(--section-pad);position:relative;z-index:2}
+.pill-grid{display:flex;flex-wrap:wrap;gap:14px;justify-content:center}
+.pill{
+  padding:12px 28px;
+  background:var(--card-bg);
+  border:1px solid var(--card-border);
+  border-radius:40px;
+  font-size:.95rem;font-weight:500;
+  transition:border-color .3s,transform .3s;
+  cursor:default;
+}
+.pill:hover{border-color:rgba(255,255,255,0.15);transform:translateY(-2px)}
+
+/* ---- SOCIALS ---- */
+.socials-section{padding:var(--section-pad);position:relative;z-index:2}
+.socials-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:24px}
+.social-card{text-align:center;padding:32px 20px}
+.social-card .social-icon{
+  width:56px;height:56px;
+  margin:0 auto 16px;
+  background:rgba(99,102,241,0.1);
+  border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.5rem;
+  color:#a78bfa;
+}
+.social-card h4{font-size:1.05rem;margin-bottom:6px}
+.social-card .social-url{color:#c4b5fd;font-size:.8rem;font-family:'Courier New',monospace;margin-bottom:8px}
+.social-card p{color:var(--secondary);font-size:.85rem}
+
+/* ---- FAQ ---- */
+.faq{padding:var(--section-pad);position:relative;z-index:2}
+.faq-list{max-width:800px;margin:0 auto}
+.faq-item{
+  border:1px solid var(--card-border);
+  border-radius:var(--radius);
+  margin-bottom:12px;
+  overflow:hidden;
+  background:var(--card-bg);
+  transition:border-color .3s;
+}
+.faq-item.active{border-color:rgba(255,255,255,0.12)}
+.faq-question{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 24px;
+  cursor:pointer;
+  font-weight:600;font-size:1rem;
+  user-select:none;
+  transition:background .2s;
+}
+.faq-question:hover{background:rgba(255,255,255,0.02)}
+.faq-question i{
+  transition:transform .3s;
+  color:var(--secondary);
+  font-size:.9rem;
+}
+.faq-item.active .faq-question i{transform:rotate(180deg)}
+.faq-answer{
+  max-height:0;
+  overflow:hidden;
+  transition:max-height .4s ease,padding .3s ease;
+}
+.faq-answer-inner{
+  padding:0 24px 20px;
+  color:var(--secondary);
+  font-size:.95rem;
+  line-height:1.7;
+}
+.faq-item.active .faq-answer{max-height:300px}
+
+/* ---- DONATE ---- */
+.donate{padding:var(--section-pad);position:relative;z-index:2}
+.donate-card{
+  max-width:600px;
+  margin:0 auto;
+  text-align:center;
+  padding:48px 40px;
+}
+.donate-card p{color:var(--secondary);font-size:1.05rem;margin-bottom:28px}
+.wallet-box{
+  display:flex;align-items:center;gap:12px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:10px;
+  padding:14px 20px;
+  margin-bottom:24px;
+  word-break:break-all;
+}
+.wallet-box code{
+  flex:1;
+  font-family:'Courier New',monospace;
+  font-size:.85rem;
+  color:#c4b5fd;
+  text-align:left;
+}
+.copy-btn{
+  padding:10px 18px;
+  background:var(--grad);
+  border:none;
+  border-radius:8px;
+  color:#fff;
+  font-weight:600;
+  font-size:.85rem;
+  cursor:pointer;
+  white-space:nowrap;
+  font-family:inherit;
+  transition:opacity .2s;
+}
+.copy-btn:hover{opacity:.85}
+.copy-btn.copied{background:#22c55e}
+
+/* ---- FOOTER ---- */
+.footer{
+  padding:60px 0 40px;
+  border-top:1px solid var(--card-border);
+  position:relative;z-index:2;
+}
+.footer-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:start;
+  flex-wrap:wrap;
+  gap:40px;
+  margin-bottom:40px;
+}
+.footer-brand{max-width:300px}
+.footer-brand .logo{margin-bottom:16px}
+.footer-brand p{color:var(--secondary);font-size:.9rem;line-height:1.7}
+.footer-links h4{font-size:.95rem;margin-bottom:16px;color:#fff}
+.footer-links a{display:block;color:var(--secondary);font-size:.9rem;padding:4px 0;transition:color .2s}
+.footer-links a:hover{color:#fff}
+.socials{display:flex;gap:12px;margin-top:20px}
+.socials a{
+  width:40px;height:40px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--secondary);
+  font-size:1rem;
+  transition:all .2s;
+}
+.socials a:hover{color:#fff;border-color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.08)}
+.footer-bottom{
+  text-align:center;
+  padding-top:30px;
+  border-top:1px solid var(--card-border);
+  color:var(--secondary);
+  font-size:.85rem;
+}
+
+/* ---- RESPONSIVE ---- */
+@media(max-width:1024px){
+  .steps-grid{grid-template-columns:repeat(2,1fr)}
+  .socials-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:768px){
+  :root{--section-pad:70px 0}
+  .nav{display:none}
+  .hamburger{display:block}
+  .steps-grid{grid-template-columns:1fr}
+  .usecases-grid{grid-template-columns:1fr 1fr}
+  .socials-grid{grid-template-columns:1fr 1fr}
+  .hero{padding:140px 0 80px;min-height:auto}
+  .tornado-wrap{display:none}
+  .stats-row{gap:28px}
+  .stat .stat-number{font-size:2rem}
+  .footer-top{flex-direction:column}
+}
+@media(max-width:480px){
+  .usecases-grid,.socials-grid{grid-template-columns:1fr}
+  .hero h1{font-size:2.2rem}
+  .hero-buttons{flex-direction:column;align-items:center}
+}
+</style>
 </head>
 <body>
 
-    <!-- Animated Gradient Mesh Background -->
-    <div class="gradient-mesh"></div>
+<!-- PARTICLES -->
+<canvas id="particles-canvas"></canvas>
 
-    <!-- 3D Floating Particles -->
-    <canvas id="particles-canvas"></canvas>
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="close-menu" id="closeMenu"><i class="fas fa-times"></i></button>
+  <a href="#features" onclick="closeMobile()">Features</a>
+  <a href="#how-it-works" onclick="closeMobile()">How It Works</a>
+  <a href="#use-cases" onclick="closeMobile()">Use Cases</a>
+  <a href="#providers" onclick="closeMobile()">Providers</a>
+  <a href="#socials" onclick="closeMobile()">Socials</a>
+  <a href="#faq" onclick="closeMobile()">FAQ</a>
+  <a href="#donate" onclick="closeMobile()">Donate</a>
+  <a href="https://github.com/askexort/exort" target="_blank" class="btn-primary btn-sm">Get Started</a>
+</div>
 
-    <!-- Floating 3D Geometric Shapes -->
-    <div class="geo-shapes">
-        <div class="geo-shape triangle"></div>
-        <div class="geo-shape circle"></div>
-        <div class="geo-shape square"></div>
-        <div class="geo-shape triangle"></div>
-        <div class="geo-shape circle"></div>
-        <div class="geo-shape square"></div>
-        <div class="geo-shape triangle"></div>
-        <div class="geo-shape circle"></div>
-        <div class="geo-shape square"></div>
-        <div class="geo-shape triangle"></div>
-        <div class="geo-shape circle"></div>
-        <div class="geo-shape square"></div>
+<!-- HEADER -->
+<header class="header" id="header">
+  <div class="container">
+    <a href="#" class="logo">
+      <img src="openmindlogo.jpg" alt="Exort Logo">
+      <span>Exort</span>
+    </a>
+    <nav class="nav">
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#use-cases">Use Cases</a>
+      <a href="#providers">Providers</a>
+      <a href="#socials">Socials</a>
+      <a href="#faq">FAQ</a>
+      <a href="#donate">Donate</a>
+      <a href="https://github.com/askexort/exort" target="_blank" class="btn-primary btn-sm">Get Started</a>
+    </nav>
+    <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="tornado-wrap">
+    <div class="tornado">
+      <div class="tornado-ring"></div>
+      <div class="tornado-ring"></div>
+      <div class="tornado-ring"></div>
+      <div class="tornado-ring"></div>
+      <div class="tornado-ring"></div>
+      <div class="tornado-ring"></div>
+      <div class="tornado-ring"></div>
+      <div class="tornado-logo">E</div>
+      <div class="tornado-particle" style="left:30%;top:40%;animation-delay:0s"></div>
+      <div class="tornado-particle" style="left:60%;top:55%;animation-delay:.7s"></div>
+      <div class="tornado-particle" style="left:45%;top:30%;animation-delay:1.4s"></div>
+      <div class="tornado-particle" style="left:70%;top:60%;animation-delay:2.1s"></div>
+      <div class="tornado-particle" style="left:35%;top:50%;animation-delay:2.8s"></div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-subtitle">THE OPEN AGENT ENGINE</div>
+      <h1><span class="gradient-text">Build Your AI Assistant</span></h1>
+      <p class="hero-desc">Exort is a self-hosted AI agent with full tool use, persistent memory, and multi-provider support. Run powerful AI locally or in the cloud — your data, your rules, completely free and open source.</p>
+      <div class="hero-buttons">
+        <a href="https://github.com/askexort/exort" target="_blank" class="btn-primary"><i class="fab fa-github"></i> Get Started</a>
+        <a href="https://t.me/askexort_bot" target="_blank" class="btn-secondary"><i class="fab fa-telegram"></i> Try Bot</a>
+      </div>
+      <div class="stats-row">
+        <div class="stat">
+          <div class="stat-number">9+</div>
+          <div class="stat-label">Providers</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">24/7</div>
+          <div class="stat-label">AI Operations</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">100%</div>
+          <div class="stat-label">Free &amp; Open Source</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-it-works" id="how-it-works">
+  <div class="container">
+    <div class="section-title">
+      <h2>How <span class="gradient-text">Exort Works</span></h2>
+      <p>From install to production in four simple steps</p>
+    </div>
+    <div class="steps-grid">
+      <div class="card step-card">
+        <div class="step-num">1</div>
+        <div class="step-icon"><i class="fas fa-download"></i></div>
+        <h4>Install</h4>
+        <p>One command is all it takes. No cloning repos, no config files, no dependencies to wrangle.</p>
+        <code>pip install exort-agent</code>
+      </div>
+      <div class="card step-card">
+        <div class="step-num">2</div>
+        <div class="step-icon"><i class="fas fa-cog"></i></div>
+        <h4>Configure</h4>
+        <p>Interactive setup walks you through choosing an AI provider and adding your API key.</p>
+        <code>exort setup</code>
+      </div>
+      <div class="card step-card">
+        <div class="step-num">3</div>
+        <div class="step-icon"><i class="fas fa-comments"></i></div>
+        <h4>Chat</h4>
+        <p>Use the terminal shell for local development or deploy a Telegram bot for 24/7 access anywhere.</p>
+        <code>exort shell / exort bot</code>
+      </div>
+      <div class="card step-card">
+        <div class="step-num">4</div>
+        <div class="step-icon"><i class="fas fa-puzzle-piece"></i></div>
+        <h4>Extend</h4>
+        <p>Skills, memory, and tools grow over time. The more you use Exort, the smarter it becomes.</p>
+        <code>Skills + Memory + Tools</code>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES DEEP DIVE -->
+<section class="features-deep" id="features">
+  <div class="container">
+    <div class="section-title">
+      <h2>What <span class="gradient-text">Exort Can Do</span></h2>
+      <p>Deep capabilities that make Exort the most versatile open-source AI agent</p>
     </div>
 
-    <!-- Header -->
-    <header class="header">
-        <div class="container header-inner">
-            <a href="#" class="logo">
-                <img src="../logo.jpg" alt="Exort Logo">
-                <span>Exort</span>
-            </a>
-            <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation">
-                <i class="fas fa-bars"></i>
-            </button>
-            <nav class="nav" id="navMenu">
-                <a href="#how-it-works">How It Works</a>
-                <a href="#features">Features</a>
-                <a href="#use-cases">Use Cases</a>
-                <a href="#providers">Providers</a>
-                <a href="https://github.com/askexort/exort" target="_blank" rel="noopener">GitHub</a>
-            </nav>
+    <div class="feature-large">
+      <div class="card">
+        <div class="feature-header">
+          <div class="feature-icon"><i class="fas fa-wrench"></i></div>
+          <h4>Tool Use &amp; Execution</h4>
         </div>
-    </header>
-
-    <!-- Hero -->
-    <section class="hero">
-        <div class="container">
-            <!-- 3D Tornado Logo -->
-            <div class="logo-3d-wrapper">
-                <div class="logo-3d-scene">
-                    <div class="tornado-container">
-                        <div class="tornado-ring"></div>
-                        <div class="tornado-ring"></div>
-                        <div class="tornado-ring"></div>
-                        <div class="tornado-ring"></div>
-                        <div class="tornado-ring"></div>
-                        <div class="tornado-ring"></div>
-                        <div class="tornado-ring"></div>
-                        <div class="tornado-particle"></div>
-                        <div class="tornado-particle"></div>
-                        <div class="tornado-particle"></div>
-                        <div class="tornado-particle"></div>
-                        <div class="tornado-particle"></div>
-                        <div class="tornado-particle"></div>
-                    </div>
-                    <div class="tornado-logo">
-                        <img src="../openmindlogo.jpg" alt="Exort Logo">
-                    </div>
-                    <div class="tornado-glow"></div>
-                </div>
-            </div>
-
-            <h1>Exort</h1>
-            <p class="subtitle">THE OPEN AGENT ENGINE.</p>
-            <p class="description">Exort is a self-hosted AI agent framework that gives you a fully autonomous assistant with tool use, persistent memory, and multi-provider support. Run it from your terminal, deploy it as a Telegram bot, or embed it anywhere. Your data stays yours. No vendor lock-in. No API fees required &mdash; use free providers like Groq and Cerebras, or bring your own keys.</p>
-            <div class="hero-buttons">
-                <a href="#quick-start" class="btn btn-primary">
-                    <i class="fas fa-rocket"></i> Get Started
-                </a>
-                <a href="https://t.me/askexort_bot" target="_blank" rel="noopener" class="btn btn-secondary">
-                    <i class="fab fa-telegram"></i> Telegram Bot
-                </a>
-            </div>
+        <p>Exort doesn't just chat — it acts. Run Python code directly, execute shell commands, browse the web, manage files on your system, and make API calls. All through natural language. It can read and write files, install packages, run scripts, fetch web pages, search the internet, and chain multiple tools together to complete complex tasks autonomously.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">Python</span>
+          <span class="feature-tag">Shell</span>
+          <span class="feature-tag">HTTP</span>
+          <span class="feature-tag">Files</span>
+          <span class="feature-tag">Search</span>
         </div>
-    </section>
+      </div>
+    </div>
 
-    <!-- How It Works -->
-    <section class="section" id="how-it-works">
-        <div class="container">
-            <div class="section-header">
-                <h2><span class="chevron">&#x27E9;</span> How It Works</h2>
-            </div>
-            <div class="steps-grid">
-                <div class="step-card">
-                    <div class="step-number">1</div>
-                    <h3>Install</h3>
-                    <p>One command to get started. Python package installs everything you need.</p>
-                    <div class="code-block"><span class="prompt">$ </span>pip install exort-agent</div>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">2</div>
-                    <h3>Configure</h3>
-                    <p>Interactive setup walks you through provider and API key selection.</p>
-                    <div class="code-block"><span class="prompt">$ </span>exort setup<br><span class="comment"># Choose provider &amp; enter key</span></div>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">3</div>
-                    <h3>Chat</h3>
-                    <p>Drop into the interactive shell. Ask questions, run tools, test everything locally.</p>
-                    <div class="code-block"><span class="prompt">$ </span>exort shell<br>exort&gt; Hello!<br>exort&gt; /tools</div>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">4</div>
-                    <h3>Deploy</h3>
-                    <p>Launch as a Telegram bot, Discord bot, or any interface. One command.</p>
-                    <div class="code-block"><span class="prompt">$ </span>exort bot<br><span class="comment"># Bot is now live on Telegram</span></div>
-                </div>
-            </div>
+    <div class="feature-large">
+      <div class="card">
+        <div class="feature-header">
+          <div class="feature-icon"><i class="fas fa-brain"></i></div>
+          <h4>Persistent Memory</h4>
         </div>
-    </section>
-
-    <!-- Features Deep Dive -->
-    <section class="section" id="features">
-        <div class="container">
-            <div class="section-header">
-                <h2><span class="chevron">&#x27E9;</span> Features</h2>
-            </div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="icon"><i class="fas fa-cogs"></i></div>
-                    <h3>Engine</h3>
-                    <p>The core reasoning loop. Handles multi-turn conversations, context management, and orchestrates tool calls autonomously. Supports streaming responses and graceful error recovery.</p>
-                    <span class="tag">Core</span>
-                </div>
-                <div class="feature-card">
-                    <div class="icon"><i class="fas fa-wrench"></i></div>
-                    <h3>GearBox</h3>
-                    <p>Extensible tool system. Built-in tools for code execution, web browsing, file management, and shell access. Write custom tools in Python &mdash; just decorate a function.</p>
-                    <span class="tag">Tools</span>
-                </div>
-                <div class="feature-card">
-                    <div class="icon"><i class="fas fa-brain"></i></div>
-                    <h3>Memory</h3>
-                    <p>Persistent conversation memory that survives restarts. The agent builds understanding over time, remembering your preferences, past decisions, and ongoing projects.</p>
-                    <span class="tag">Persistent</span>
-                </div>
-                <div class="feature-card">
-                    <div class="icon"><i class="fas fa-layer-group"></i></div>
-                    <h3>Providers</h3>
-                    <p>Nine LLM backends supported out of the box. Switch between Groq, OpenAI, Anthropic, Ollama, OpenRouter, Cerebras, SambaNova, HuggingFace, and Google AI Studio.</p>
-                    <span class="tag">9 Backends</span>
-                </div>
-                <div class="feature-card">
-                    <div class="icon"><i class="fas fa-book"></i></div>
-                    <h3>Playbooks</h3>
-                    <p>Inject domain knowledge into your agent. Markdown-based knowledge files that define expertise, behavior patterns, and specialized skills for any use case.</p>
-                    <span class="tag">Knowledge</span>
-                </div>
-                <div class="feature-card">
-                    <div class="icon"><i class="fab fa-telegram"></i></div>
-                    <h3>Telegram Bot</h3>
-                    <p>Full-featured Telegram deployment. Supports private chats, group conversations, inline queries, and command menus. Deploy with one command, share with anyone.</p>
-                    <span class="tag">Interface</span>
-                </div>
-            </div>
+        <p>Exort remembers. It automatically saves important facts from every conversation to a persistent memory store. It recalls past conversations, builds a growing understanding of your preferences and environment, and uses a skill system to save reusable procedures as markdown files. Session search lets you find anything from your history. Memory persists across restarts, so Exort is always learning.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">Auto-Save</span>
+          <span class="feature-tag">Context</span>
+          <span class="feature-tag">Skills</span>
+          <span class="feature-tag">Sessions</span>
         </div>
-    </section>
+      </div>
+    </div>
 
-    <!-- Use Cases -->
-    <section class="section" id="use-cases">
-        <div class="container">
-            <div class="section-header">
-                <h2><span class="chevron">&#x27E9;</span> What You Can Build</h2>
-            </div>
-            <div class="usecases-grid">
-                <div class="usecase-card">
-                    <div class="usecase-icon"><i class="fas fa-user-astronaut"></i></div>
-                    <h3>Personal AI Assistant</h3>
-                    <p>Your always-on assistant that remembers context, manages tasks, and helps with daily work. Accessible from your phone via Telegram.</p>
-                </div>
-                <div class="usecase-card">
-                    <div class="usecase-icon"><i class="fas fa-headset"></i></div>
-                    <h3>Customer Support Bot</h3>
-                    <p>Deploy a knowledgeable support agent with custom playbooks for your product. Handles FAQs, escalates complex issues, works 24/7.</p>
-                </div>
-                <div class="usecase-card">
-                    <div class="usecase-icon"><i class="fas fa-code"></i></div>
-                    <h3>Code Assistant</h3>
-                    <p>An agent that writes, debugs, and reviews code. Execute snippets directly, manage files, and iterate on solutions in real-time.</p>
-                </div>
-                <div class="usecase-card">
-                    <div class="usecase-icon"><i class="fas fa-flask"></i></div>
-                    <h3>Research Agent</h3>
-                    <p>Browse the web, summarize papers, extract data, and compile findings. A tireless research partner that never loses focus.</p>
-                </div>
-                <div class="usecase-card">
-                    <div class="usecase-icon"><i class="fas fa-pen-fancy"></i></div>
-                    <h3>Content Creator</h3>
-                    <p>Generate articles, social posts, and marketing copy. Maintain consistent voice across channels with custom playbooks.</p>
-                </div>
-                <div class="usecase-card">
-                    <div class="usecase-icon"><i class="fas fa-chart-line"></i></div>
-                    <h3>Data Analyst</h3>
-                    <p>Run Python code, query databases, generate visualizations, and produce reports. Transform raw data into actionable insights.</p>
-                </div>
-            </div>
+    <div class="feature-large">
+      <div class="card">
+        <div class="feature-header">
+          <div class="feature-icon"><i class="fas fa-plug"></i></div>
+          <h4>Multi-Provider AI</h4>
         </div>
-    </section>
-
-    <!-- Providers -->
-    <section class="section" id="providers">
-        <div class="container">
-            <div class="section-header">
-                <h2><span class="chevron">&#x27E9;</span> Works With Free AI</h2>
-            </div>
-            <div class="providers-grid">
-                <span class="provider-pill">Groq</span>
-                <span class="provider-pill">OpenAI</span>
-                <span class="provider-pill">Anthropic</span>
-                <span class="provider-pill">Ollama</span>
-                <span class="provider-pill">OpenRouter</span>
-                <span class="provider-pill">Cerebras</span>
-                <span class="provider-pill">SambaNova</span>
-                <span class="provider-pill">HuggingFace</span>
-                <span class="provider-pill">Google AI Studio</span>
-            </div>
+        <p>Switch between free providers like Groq and Cerebras at zero cost, or use premium models from OpenAI and Anthropic when you need them. Run everything locally with Ollama for full privacy. Mix and match providers for different tasks. Auto-fallback ensures your agent never goes down. All configured through a single YAML file or the interactive setup wizard.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">Groq</span>
+          <span class="feature-tag">OpenAI</span>
+          <span class="feature-tag">Ollama</span>
+          <span class="feature-tag">Free</span>
         </div>
-    </section>
+      </div>
+    </div>
 
-    <!-- Quick Start / CTA -->
-    <section class="cta-section" id="quick-start">
-        <div class="container">
-            <h2><span class="chevron">&#x27E9;</span> Start Building</h2>
-            <p>One install. Infinite possibilities.</p>
-            <div class="cta-code"><span class="prompt">$ </span>pip install exort-agent</div>
-            <br><br>
-            <div class="hero-buttons">
-                <a href="https://github.com/askexort/exort" target="_blank" rel="noopener" class="btn btn-primary">
-                    <i class="fab fa-github"></i> View on GitHub
-                </a>
-                <a href="https://t.me/askexort_bot" target="_blank" rel="noopener" class="btn btn-secondary">
-                    <i class="fab fa-telegram"></i> Try Bot
-                </a>
-            </div>
+  </div>
+</section>
+
+<!-- USE CASES -->
+<section class="use-cases" id="use-cases">
+  <div class="container">
+    <div class="section-title">
+      <h2>What You Can <span class="gradient-text">Build</span></h2>
+      <p>Real-world applications powered by Exort's flexible agent engine</p>
+    </div>
+    <div class="usecases-grid">
+      <div class="card usecase-card">
+        <div class="usecase-icon"><i class="fas fa-user-tie"></i></div>
+        <h4>Personal Assistant</h4>
+        <p>Set reminders, research topics, manage your schedule, draft emails, and organize your day — all through natural conversation.</p>
+      </div>
+      <div class="card usecase-card">
+        <div class="usecase-icon"><i class="fas fa-code"></i></div>
+        <h4>Code Helper</h4>
+        <p>Write, debug, and review code. Run scripts directly, manage repos, and get instant feedback on your projects.</p>
+      </div>
+      <div class="card usecase-card">
+        <div class="usecase-icon"><i class="fas fa-headset"></i></div>
+        <h4>Customer Support Bot</h4>
+        <p>Deploy 24/7 Telegram support with memory of your products, FAQs, and customer history. Always helpful, always available.</p>
+      </div>
+      <div class="card usecase-card">
+        <div class="usecase-icon"><i class="fas fa-search"></i></div>
+        <h4>Research Agent</h4>
+        <p>Search the web, read academic papers, summarize findings, and compile reports. Deep research on autopilot.</p>
+      </div>
+      <div class="card usecase-card">
+        <div class="usecase-icon"><i class="fas fa-chart-line"></i></div>
+        <h4>Trading Signals</h4>
+        <p>Monitor markets, analyze data patterns, and send real-time alerts via Telegram. Data-driven decisions, automated.</p>
+      </div>
+      <div class="card usecase-card">
+        <div class="usecase-icon"><i class="fas fa-pen-fancy"></i></div>
+        <h4>Content Creator</h4>
+        <p>Write posts, threads, and scripts. Generate ideas, plan content calendars, and maintain a consistent voice across platforms.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROVIDERS -->
+<section class="providers" id="providers">
+  <div class="container">
+    <div class="section-title">
+      <h2>Works With <span class="gradient-text">Free AI</span></h2>
+      <p>Connect to the best AI providers — many completely free</p>
+    </div>
+    <div class="pill-grid">
+      <div class="pill">Groq</div>
+      <div class="pill">OpenAI</div>
+      <div class="pill">Anthropic</div>
+      <div class="pill">Ollama</div>
+      <div class="pill">OpenRouter</div>
+      <div class="pill">Cerebras</div>
+      <div class="pill">SambaNova</div>
+      <div class="pill">HuggingFace</div>
+      <div class="pill">Google AI Studio</div>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIALS -->
+<section class="socials-section" id="socials">
+  <div class="container">
+    <div class="section-title">
+      <h2>Join the <span class="gradient-text">Community</span></h2>
+      <p>Connect with builders, contributors, and users worldwide</p>
+    </div>
+    <div class="socials-grid">
+      <a href="https://github.com/askexort/exort" target="_blank" class="card social-card">
+        <div class="social-icon"><i class="fab fa-github"></i></div>
+        <h4>GitHub</h4>
+        <div class="social-url">github.com/askexort/exort</div>
+        <p>Star, fork, and contribute to the project</p>
+      </a>
+      <a href="https://t.me/askexort_bot" target="_blank" class="card social-card">
+        <div class="social-icon"><i class="fab fa-telegram"></i></div>
+        <h4>Telegram</h4>
+        <div class="social-url">t.me/askexort_bot</div>
+        <p>Try the bot directly on Telegram</p>
+      </a>
+      <a href="https://x.com/askexort" target="_blank" class="card social-card">
+        <div class="social-icon"><i class="fab fa-x-twitter"></i></div>
+        <h4>Twitter/X</h4>
+        <div class="social-url">x.com/askexort</div>
+        <p>Updates and announcements</p>
+      </a>
+      <a href="https://youtube.com/@askexort" target="_blank" class="card social-card">
+        <div class="social-icon"><i class="fab fa-youtube"></i></div>
+        <h4>YouTube</h4>
+        <div class="social-url">youtube.com/@askexort</div>
+        <p>Tutorials and demos</p>
+      </a>
+      <a href="https://discord.gg/exort" target="_blank" class="card social-card">
+        <div class="social-icon"><i class="fab fa-discord"></i></div>
+        <h4>Discord</h4>
+        <div class="social-url">discord.gg/exort</div>
+        <p>Community chat and support</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+  <div class="container">
+    <div class="section-title">
+      <h2>Frequently Asked <span class="gradient-text">Questions</span></h2>
+      <p>Everything you need to know about Exort</p>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-question">Is Exort really free?<i class="fas fa-chevron-down"></i></div>
+        <div class="faq-answer"><div class="faq-answer-inner">Yes. Exort is MIT licensed open source. Use free providers like Groq and Cerebras for zero-cost AI. You can also bring your own API keys for OpenAI, Anthropic, etc.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">Do I need a powerful computer?<i class="fas fa-chevron-down"></i></div>
+        <div class="faq-answer"><div class="faq-answer-inner">No. Exort runs on any machine. The AI runs on cloud providers (Groq, OpenAI) so your computer just sends/receives messages. For local AI, use Ollama with a decent GPU.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">How does the Telegram bot work?<i class="fas fa-chevron-down"></i></div>
+        <div class="faq-answer"><div class="faq-answer-inner">Exort polls Telegram for new messages, processes them with AI, and replies. You need a bot token from @BotFather. Run 'exort bot' and it works 24/7.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">Can I use it for my business?<i class="fas fa-chevron-down"></i></div>
+        <div class="faq-answer"><div class="faq-answer-inner">Yes. Exort is MIT licensed — use it for personal or commercial projects. Self-host for full control over your data.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">What AI models does it support?<i class="fas fa-chevron-down"></i></div>
+        <div class="faq-answer"><div class="faq-answer-inner">All major providers — Groq (Llama, Mixtral), OpenAI (GPT-4), Anthropic (Claude), Ollama (any local model), Cerebras, SambaNova, HuggingFace, Google AI Studio.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">How does memory work?<i class="fas fa-chevron-down"></i></div>
+        <div class="faq-answer"><div class="faq-answer-inner">Exort automatically saves important facts from conversations to persistent memory. This memory is injected into every future turn, so it remembers your preferences, environment, and context.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">Can I deploy it on a server?<i class="fas fa-chevron-down"></i></div>
+        <div class="faq-answer"><div class="faq-answer-inner">Yes. Deploy to Render, Railway, Fly.io, or any VPS. The Telegram bot keeps running even when your PC is off. See our deployment guide.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">Is my data safe?<i class="fas fa-chevron-down"></i></div>
+        <div class="faq-answer"><div class="faq-answer-inner">Yes. Exort runs locally on your machine. Your conversations stay on your computer. When using cloud providers, only the message text is sent to the API — your files and memory stay local.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DONATE -->
+<section class="donate" id="donate">
+  <div class="container">
+    <div class="section-title">
+      <h2>Support <span class="gradient-text">Exort</span></h2>
+      <p>Help keep Exort free and open source</p>
+    </div>
+    <div class="card donate-card">
+      <p>Help keep Exort free and open source. Your support helps us maintain the project, add new features, and keep the servers running.</p>
+      <div class="wallet-box">
+        <code id="walletAddr">0x9637EDad27c93F40b505F6478445530f58fF1501</code>
+        <button class="copy-btn" id="copyBtn" onclick="copyWallet()"><i class="fas fa-copy"></i> Copy</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="logo">
+          <img src="openmindlogo.jpg" alt="Exort Logo">
+          <span>Exort</span>
         </div>
-    </section>
-
-    <!-- Donate -->
-    <section class="donate-section">
-        <div class="container">
-            <h2><span class="chevron">⟩</span> Support Exort</h2>
-            <p>Help keep Exort free and open source. Every donation matters.</p>
-            <div class="wallet-box">
-                <code>0x9637EDad27c93F40b505F6478445530f58fF1501</code>
-                <button class="copy-btn" onclick="navigator.clipboard.writeText('0x9637EDad27c93F40b505F6478445530f58fF1501').then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500)})">Copy</button>
-            </div>
+        <p>The open agent engine. Free, private, and powerful AI for everyone. MIT licensed and community-driven.</p>
+        <div class="socials">
+          <a href="https://github.com/askexort/exort" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
+          <a href="https://t.me/askexort_bot" target="_blank" title="Telegram"><i class="fab fa-telegram"></i></a>
+          <a href="https://x.com/askexort" target="_blank" title="Twitter/X"><i class="fab fa-x-twitter"></i></a>
+          <a href="https://youtube.com/@askexort" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
+          <a href="https://discord.gg/exort" target="_blank" title="Discord"><i class="fab fa-discord"></i></a>
         </div>
-    </section>
+      </div>
+      <div class="footer-links">
+        <h4>Product</h4>
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div class="footer-links">
+        <h4>Community</h4>
+        <a href="https://github.com/askexort/exort" target="_blank">GitHub</a>
+        <a href="https://t.me/askexort_bot" target="_blank">Telegram</a>
+        <a href="https://discord.gg/exort" target="_blank">Discord</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 Exort Contributors. MIT License.
+    </div>
+  </div>
+</footer>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2026 Exort Contributors. Open Source under MIT License.</p>
-            <div class="footer-links">
-                <a href="https://github.com/askexort/exort" target="_blank" rel="noopener"><i class="fab fa-github"></i> GitHub</a>
-                <a href="https://t.me/askexort_bot" target="_blank" rel="noopener"><i class="fab fa-telegram"></i> Telegram</a>
-            </div>
-        </div>
-    </footer>
+<script>
+// ---- PARTICLE BACKGROUND ----
+(function(){
+  const canvas=document.getElementById('particles-canvas');
+  const ctx=canvas.getContext('2d');
+  let particles=[];
+  const COUNT=60;
+  function resize(){
+    canvas.width=window.innerWidth;
+    canvas.height=window.innerHeight;
+  }
+  function init(){
+    particles=[];
+    for(let i=0;i<COUNT;i++){
+      particles.push({
+        x:Math.random()*canvas.width,
+        y:Math.random()*canvas.height,
+        r:Math.random()*2+0.5,
+        dx:(Math.random()-0.5)*0.4,
+        dy:(Math.random()-0.5)*0.4,
+        o:Math.random()*0.5+0.1
+      });
+    }
+  }
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p=>{
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(168,85,247,'+p.o+')';
+      ctx.fill();
+      p.x+=p.dx;
+      p.y+=p.dy;
+      if(p.x<0||p.x>canvas.width)p.dx*=-1;
+      if(p.y<0||p.y>canvas.height)p.dy*=-1;
+    });
+    requestAnimationFrame(draw);
+  }
+  resize();
+  init();
+  draw();
+  window.addEventListener('resize',()=>{resize();init()});
+})();
 
-    <!-- JavaScript -->
-    <script>
-        // ===== 3D Floating Particles =====
-        (function() {
-            const canvas = document.getElementById('particles-canvas');
-            const ctx = canvas.getContext('2d');
-            let particles = [];
-            const PARTICLE_COUNT = 60;
+// ---- HEADER SCROLL ----
+window.addEventListener('scroll',()=>{
+  document.getElementById('header').classList.toggle('scrolled',window.scrollY>50);
+});
 
-            function resize() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            }
-            resize();
-            window.addEventListener('resize', resize);
+// ---- MOBILE MENU ----
+document.getElementById('hamburger').addEventListener('click',()=>{
+  document.getElementById('mobileMenu').classList.add('active');
+  document.body.style.overflow='hidden';
+});
+function closeMobile(){
+  document.getElementById('mobileMenu').classList.remove('active');
+  document.body.style.overflow='';
+}
+document.getElementById('closeMenu').addEventListener('click',closeMobile);
 
-            function createParticle() {
-                return {
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    size: Math.random() * 2 + 0.5,
-                    speedX: (Math.random() - 0.5) * 0.3,
-                    speedY: (Math.random() - 0.5) * 0.3 - 0.1,
-                    opacity: Math.random() * 0.4 + 0.1,
-                    color: ['#6366f1', '#a855f7', '#ec4899', '#ffffff'][Math.floor(Math.random() * 4)]
-                };
-            }
+// ---- FAQ ACCORDION ----
+document.querySelectorAll('.faq-question').forEach(q=>{
+  q.addEventListener('click',()=>{
+    const item=q.parentElement;
+    const wasActive=item.classList.contains('active');
+    document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('active'));
+    if(!wasActive) item.classList.add('active');
+  });
+});
 
-            for (let i = 0; i < PARTICLE_COUNT; i++) {
-                particles.push(createParticle());
-            }
+// ---- COPY WALLET ----
+function copyWallet(){
+  const addr='0x9637EDad27c93F40b505F6478445530f58fF1501';
+  navigator.clipboard.writeText(addr).then(()=>{
+    const btn=document.getElementById('copyBtn');
+    btn.classList.add('copied');
+    btn.innerHTML='<i class="fas fa-check"></i> Copied!';
+    setTimeout(()=>{
+      btn.classList.remove('copied');
+      btn.innerHTML='<i class="fas fa-copy"></i> Copy';
+    },2000);
+  });
+}
 
-            function animate() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                for (let i = 0; i < particles.length; i++) {
-                    const p = particles[i];
-                    p.x += p.speedX;
-                    p.y += p.speedY;
-
-                    if (p.x < 0) p.x = canvas.width;
-                    if (p.x > canvas.width) p.x = 0;
-                    if (p.y < 0) p.y = canvas.height;
-                    if (p.y > canvas.height) p.y = 0;
-
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    ctx.fillStyle = p.color;
-                    ctx.globalAlpha = p.opacity;
-                    ctx.fill();
-                }
-                ctx.globalAlpha = 1;
-                requestAnimationFrame(animate);
-            }
-            animate();
-        })();
-
-        // Mobile Nav Toggle
-        const mobileToggle = document.getElementById('mobileToggle');
-        const navMenu = document.getElementById('navMenu');
-
-        mobileToggle.addEventListener('click', () => {
-            navMenu.classList.toggle('open');
-            const icon = mobileToggle.querySelector('i');
-            if (navMenu.classList.contains('open')) {
-                icon.className = 'fas fa-times';
-            } else {
-                icon.className = 'fas fa-bars';
-            }
-        });
-
-        // Close mobile nav on link click
-        navMenu.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                navMenu.classList.remove('open');
-                mobileToggle.querySelector('i').className = 'fas fa-bars';
-            });
-        });
-    </script>
-
+// ---- SMOOTH SCROLL ----
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const target=document.querySelector(a.getAttribute('href'));
+    if(target){
+      e.preventDefault();
+      target.scrollIntoView({behavior:'smooth'});
+    }
+  });
+});
+</script>
 </body>
 </html>
