@@ -1,0 +1,19 @@
+# Exort Telegram Bot — Fly.io deployment
+# Free tier: 3 shared-cpu-1x VMs (256MB), always on
+
+app = "exort-bot"
+primary_region = "iad"
+
+[build]
+
+# No HTTP service — this is a background worker (Telegram polling bot)
+# No [[services]] or [http_service] block needed
+
+# Restart policy
+[restart]
+  policy = "always"
+
+# VM sizing — 256MB is enough for the bot
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
