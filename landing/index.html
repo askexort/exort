@@ -1,28 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exort - Free AI for Everyone</title>
-    <link rel="icon" type="image/jpeg" href="../openmindlogo.jpg">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <title>Exort — The Open Agent Engine</title>
+    <link rel="icon" href="../openmindlogo.jpg" type="image/jpeg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
+        /* ===== CSS Variables ===== */
         :root {
+            --bg: #000000;
+            --text: #e2e8f0;
+            --text-secondary: #64748b;
+            --card-bg: rgba(255, 255, 255, 0.02);
+            --border: rgba(255, 255, 255, 0.04);
             --primary: #6366f1;
-            --primary-light: #818cf8;
             --secondary: #a855f7;
             --accent: #ec4899;
-            --bg-dark: #000000;
-            --bg-card: rgba(255, 255, 255, 0.02);
-            --text-primary: #e2e8f0;
-            --text-secondary: #64748b;
-            --border: rgba(255, 255, 255, 0.04);
-            --gold: #fbbf24;
-            --gold-dark: #d97706;
+            --header-bg: rgba(0, 0, 0, 0.8);
+            --code-bg: rgba(255, 255, 255, 0.04);
+            --shadow: rgba(0, 0, 0, 0.3);
         }
 
-        * {
+        [data-theme="light"] {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --card-bg: rgba(0, 0, 0, 0.02);
+            --border: rgba(0, 0, 0, 0.06);
+            --header-bg: rgba(255, 255, 255, 0.85);
+            --code-bg: rgba(0, 0, 0, 0.04);
+            --shadow: rgba(0, 0, 0, 0.08);
+        }
+
+        /* ===== Reset & Base ===== */
+        *, *::before, *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -34,1994 +49,795 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-primary);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            transition: background 0.3s ease, color 0.3s ease;
             overflow-x: hidden;
-            line-height: 1.6;
         }
 
-        /* 3D Grid Background */
-        .bg-3d-grid {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -2;
-            background:
-                linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
-            background-size: 60px 60px;
-            transform: perspective(500px) rotateX(60deg);
-            transform-origin: center top;
+        a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: color 0.2s ease;
         }
 
-        .bg-3d-grid::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 60%;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+        a:hover {
+            color: var(--secondary);
         }
 
-        /* Deep Dark Ambient */
-        .bg-ambient {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -3;
-            background: radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.06) 0%, transparent 50%),
-                        radial-gradient(ellipse at 80% 80%, rgba(168, 85, 247, 0.04) 0%, transparent 50%),
-                        radial-gradient(ellipse at 50% 50%, rgba(236, 72, 153, 0.03) 0%, transparent 60%);
-        }
-
-        /* Floating Particles */
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        .particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: var(--primary);
-            border-radius: 50%;
-            opacity: 0.3;
-            animation: floatParticle linear infinite;
-        }
-
-        @keyframes floatParticle {
-            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-            10% { opacity: 0.3; }
-            90% { opacity: 0.3; }
-            100% { transform: translateY(-100px) rotate(720deg); opacity: 0; }
-        }
-
-        /* Container */
         .container {
-            max-width: 1400px;
+            max-width: 1100px;
             margin: 0 auto;
-            padding: 0 40px;
+            padding: 0 24px;
         }
 
-        /* Header */
-        header {
+        /* ===== Header ===== */
+        .header {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 1000;
-            padding: 20px 0;
-            transition: all 0.3s ease;
+            background: var(--header-bg);
             backdrop-filter: blur(20px);
-            background: rgba(0, 0, 0, 0.85);
+            -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
+            transition: background 0.3s ease;
         }
 
-        header.scrolled {
-            padding: 15px 0;
-            background: rgba(0, 0, 0, 0.95);
-        }
-
-        nav {
+        .header-inner {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+            height: 64px;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 12px;
-            text-decoration: none;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: var(--text);
         }
 
-        .logo-icon {
-            width: 48px;
-            height: 48px;
-            position: relative;
+        .logo img {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
         }
 
-        .logo-icon svg {
-            width: 100%;
-            height: 100%;
-        }
-
-        .logo-text {
-            font-size: 28px;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.5px;
-        }
-
-        .nav-links {
+        .nav {
             display: flex;
-            gap: 40px;
-            list-style: none;
             align-items: center;
+            gap: 32px;
         }
 
-        .nav-links a {
+        .nav a {
             color: var(--text-secondary);
-            text-decoration: none;
+            font-size: 0.875rem;
             font-weight: 500;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            position: relative;
+            transition: color 0.2s ease;
         }
 
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            transition: width 0.3s ease;
+        .nav a:hover {
+            color: var(--text);
         }
 
-        .nav-links a:hover {
-            color: var(--text-primary);
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        .btn {
-            padding: 12px 28px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border: none;
-            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.4);
-        }
-
-        .btn-primary::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .btn-primary:hover::before {
-            left: 100%;
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: var(--primary-light);
-            border: 2px solid var(--primary);
-        }
-
-        .btn-secondary:hover {
-            background: var(--primary);
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        .btn-ghost {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-primary);
+        .theme-toggle {
+            background: var(--card-bg);
             border: 1px solid var(--border);
-            backdrop-filter: blur(10px);
+            color: var(--text-secondary);
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: all 0.2s ease;
         }
 
-        .btn-ghost:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: var(--primary);
+        .theme-toggle:hover {
+            color: var(--text);
+            border-color: var(--text-secondary);
         }
 
-        /* Mobile Menu */
-        .mobile-menu-btn {
+        /* ===== Mobile Nav ===== */
+        .mobile-toggle {
             display: none;
             background: none;
             border: none;
-            color: var(--text-primary);
-            font-size: 24px;
+            color: var(--text);
+            font-size: 1.25rem;
             cursor: pointer;
         }
 
-        /* Hero Section */
+        /* ===== Hero ===== */
         .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            padding: 150px 0 100px;
-            position: relative;
+            padding: 160px 0 120px;
+            text-align: center;
         }
 
-        .hero-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 80px;
-            align-items: center;
-        }
-
-        .hero-text {
-            position: relative;
-            z-index: 2;
-        }
-
-        h1 {
-            font-size: 72px;
-            font-weight: 900;
-            line-height: 1.1;
-            margin-bottom: 24px;
-            letter-spacing: -2px;
-            color: #ffffff;
-        }
-
-        h1 .gradient-text {
+        .hero h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 700;
+            letter-spacing: -0.03em;
             background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-size: 200% auto;
-            animation: gradientShift 3s ease-in-out infinite;
+            background-clip: text;
+            line-height: 1.1;
+            margin-bottom: 16px;
         }
 
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% center; }
-            50% { background-position: 200% center; }
-        }
-
-        .hero-description {
-            font-size: 20px;
+        .hero .subtitle {
+            font-size: clamp(0.875rem, 2vw, 1.1rem);
+            font-weight: 600;
+            letter-spacing: 0.2em;
             color: var(--text-secondary);
-            margin-bottom: 40px;
-            max-width: 500px;
+            margin-bottom: 24px;
+        }
+
+        .hero .description {
+            max-width: 640px;
+            margin: 0 auto 48px;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
             line-height: 1.8;
         }
 
         .hero-buttons {
             display: flex;
             gap: 16px;
-            margin-bottom: 60px;
-        }
-
-        .hero-stats {
-            display: flex;
-            gap: 40px;
-        }
-
-        .stat {
-            text-align: left;
-        }
-
-        .stat-number {
-            font-size: 32px;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-top: 4px;
-        }
-
-        /* 3D Logo Container */
-        .hero-visual {
-            position: relative;
-            display: flex;
             justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
             align-items: center;
-            perspective: 1000px;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
         }
 
-        .logo-3d-container {
-            width: 400px;
-            height: 400px;
-            position: relative;
-            transform-style: preserve-3d;
-            animation: rotate3D 20s linear infinite;
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #ffffff;
         }
 
-        @keyframes rotate3D {
-            0% { transform: rotateY(0deg) rotateX(5deg); }
-            100% { transform: rotateY(360deg) rotateX(5deg); }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.3);
+            color: #ffffff;
         }
 
-        .logo-3d-main {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 200px;
-            height: 200px;
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--border);
         }
 
-        .logo-3d-main svg {
-            width: 100%;
-            height: 100%;
-            filter: drop-shadow(0 0 30px rgba(99, 102, 241, 0.5));
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            border-color: var(--text-secondary);
+            color: var(--text);
         }
 
-        .orbit-ring {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            border: 1px solid rgba(99, 102, 241, 0.2);
-            border-radius: 50%;
-            transform-style: preserve-3d;
-        }
-
-        .orbit-ring-1 {
-            width: 300px;
-            height: 300px;
-            margin: -150px 0 0 -150px;
-            animation: orbit1 10s linear infinite;
-        }
-
-        .orbit-ring-2 {
-            width: 350px;
-            height: 350px;
-            margin: -175px 0 0 -175px;
-            animation: orbit2 15s linear infinite;
-            border-color: rgba(168, 85, 247, 0.2);
-        }
-
-        .orbit-ring-3 {
-            width: 400px;
-            height: 400px;
-            margin: -200px 0 0 -200px;
-            animation: orbit3 20s linear infinite;
-            border-color: rgba(236, 72, 153, 0.2);
-        }
-
-        @keyframes orbit1 { 0% { transform: rotateX(60deg) rotateZ(0deg); } 100% { transform: rotateX(60deg) rotateZ(360deg); } }
-        @keyframes orbit2 { 0% { transform: rotateX(70deg) rotateZ(0deg); } 100% { transform: rotateX(70deg) rotateZ(-360deg); } }
-        @keyframes orbit3 { 0% { transform: rotateX(80deg) rotateZ(0deg); } 100% { transform: rotateX(80deg) rotateZ(360deg); } }
-
-        .orbit-dot {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            background: var(--primary);
-            border-radius: 50%;
-            box-shadow: 0 0 20px var(--primary);
-        }
-
-        .orbit-ring-1 .orbit-dot { top: -6px; left: 50%; margin-left: -6px; }
-        .orbit-ring-2 .orbit-dot { bottom: -6px; left: 50%; margin-left: -6px; background: var(--secondary); box-shadow: 0 0 20px var(--secondary); }
-        .orbit-ring-3 .orbit-dot { top: 50%; right: -6px; margin-top: -6px; background: var(--accent); box-shadow: 0 0 20px var(--accent); }
-
-        /* Glow Effect */
-        .glow-effect {
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, transparent 70%);
-            border-radius: 50%;
-            filter: blur(40px);
-            animation: glowPulse 4s ease-in-out infinite;
-        }
-
-        @keyframes glowPulse {
-            0%, 100% { opacity: 0.5; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.2); }
-        }
-
-        /* Features Section */
-        .features {
-            padding: 150px 0;
-            position: relative;
+        /* ===== Sections ===== */
+        .section {
+            padding: 100px 0;
         }
 
         .section-header {
             text-align: center;
-            margin-bottom: 80px;
+            margin-bottom: 64px;
         }
 
-        .section-label {
+        .section-header h2 {
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .section-header h2 .chevron {
+            color: var(--primary);
+            margin-right: 8px;
+        }
+
+        /* ===== How It Works ===== */
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .step-card {
+            text-align: center;
+            position: relative;
+        }
+
+        .step-card .step-number {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 1rem;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--primary-light);
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            justify-content: center;
             margin-bottom: 16px;
         }
 
-        .section-title {
-            font-size: 48px;
-            font-weight: 800;
-            letter-spacing: -1.5px;
-            margin-bottom: 20px;
-            color: #ffffff;
-        }
-
-        .section-subtitle {
-            font-size: 18px;
-            color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-        }
-
-        .feature-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 40px;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-        }
-
-        .feature-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--primary), transparent);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            border-color: rgba(99, 102, 241, 0.3);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8),
-                        0 0 40px rgba(99, 102, 241, 0.1);
-        }
-
-        .feature-card:hover::before {
-            opacity: 1;
-        }
-
-        .feature-icon {
-            width: 64px;
-            height: 64px;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2));
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            margin-bottom: 24px;
-            position: relative;
-        }
-
-        .feature-icon::after {
-            content: '';
-            position: absolute;
-            inset: -2px;
-            border-radius: 18px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            z-index: -1;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .feature-card:hover .feature-icon::after {
-            opacity: 0.5;
-        }
-
-        .feature-card h3 {
-            font-size: 22px;
-            font-weight: 700;
+        .step-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
             margin-bottom: 12px;
-            letter-spacing: -0.5px;
-            color: #ffffff;
         }
 
-        .feature-card p {
+        .step-card p {
+            font-size: 0.85rem;
             color: var(--text-secondary);
-            font-size: 15px;
-            line-height: 1.7;
+            margin-bottom: 16px;
+            line-height: 1.6;
         }
 
-        /* Code Section */
-        .code-section {
-            padding: 150px 0;
-            position: relative;
-        }
-
-        .code-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 80px;
-            align-items: center;
-        }
-
-        .code-info h2 {
-            font-size: 40px;
-            font-weight: 800;
-            margin-bottom: 20px;
-            letter-spacing: -1px;
-            color: #ffffff;
-        }
-
-        .code-info p {
-            color: var(--text-secondary);
-            font-size: 17px;
-            margin-bottom: 30px;
-            line-height: 1.8;
-        }
-
-        .code-features {
-            list-style: none;
-            margin-bottom: 40px;
-        }
-
-        .code-features li {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 0;
-            color: var(--text-secondary);
-            font-size: 15px;
-        }
-
-        .code-features li i {
-            color: var(--primary);
-            font-size: 18px;
-        }
-
-        .code-block {
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-        }
-
-        .code-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px 24px;
-            background: rgba(255, 255, 255, 0.02);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .code-dots {
-            display: flex;
-            gap: 8px;
-        }
-
-        .code-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
-        .code-dot:nth-child(1) { background: #ff5f57; }
-        .code-dot:nth-child(2) { background: #ffbd2e; }
-        .code-dot:nth-child(3) { background: #28ca42; }
-
-        .code-tabs {
-            display: flex;
-            gap: 20px;
-        }
-
-        .code-tab {
-            color: var(--text-secondary);
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            padding: 6px 14px;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-        }
-
-        .code-tab.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .code-body {
+        .step-connector {
             display: none;
         }
 
-        .code-body.active {
-            display: block;
-        }
-
-        .code-body {
-            padding: 30px;
-            font-family: 'Fira Code', 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 2;
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 0.78rem;
+            color: var(--secondary);
+            text-align: left;
             overflow-x: auto;
+            line-height: 1.6;
         }
 
-        .code-body pre {
-            margin: 0;
-        }
-
-        .code-body .comment { color: #6b7280; }
-        .code-body .keyword { color: #c084fc; }
-        .code-body .string { color: #34d399; }
-        .code-body .function { color: #60a5fa; }
-        .code-body .variable { color: #f472b6; }
-        .code-body .operator { color: #94a3b8; }
-
-        /* CTA Section */
-        .cta-section {
-            padding: 150px 0;
-            text-align: center;
-            position: relative;
-        }
-
-        .cta-card {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
-            border: 1px solid rgba(99, 102, 241, 0.15);
-            border-radius: 40px;
-            padding: 80px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .cta-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.2) 0%, transparent 60%);
-        }
-
-        .cta-card h2 {
-            font-size: 48px;
-            font-weight: 800;
-            margin-bottom: 20px;
-            position: relative;
-            z-index: 1;
-            color: #ffffff;
-        }
-
-        .cta-card p {
-            font-size: 18px;
+        .code-block .prompt {
             color: var(--text-secondary);
-            margin-bottom: 40px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            position: relative;
-            z-index: 1;
+            user-select: none;
         }
 
-        .cta-buttons {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* 3D Floating Cube */
-        .floating-cube {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            top: 20px;
-            right: 20px;
-            transform-style: preserve-3d;
-            animation: cubeFloat 8s ease-in-out infinite, cubeRotate 12s linear infinite;
-        }
-
-        .floating-cube .cube-face {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            border: 1.5px solid rgba(99, 102, 241, 0.4);
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(168, 85, 247, 0.06));
-            backdrop-filter: blur(4px);
-        }
-
-        .floating-cube .front  { transform: translateZ(30px); }
-        .floating-cube .back   { transform: rotateY(180deg) translateZ(30px); }
-        .floating-cube .right  { transform: rotateY(90deg) translateZ(30px); }
-        .floating-cube .left   { transform: rotateY(-90deg) translateZ(30px); }
-        .floating-cube .top    { transform: rotateX(90deg) translateZ(30px); }
-        .floating-cube .bottom { transform: rotateX(-90deg) translateZ(30px); }
-
-        @keyframes cubeFloat {
-            0%, 100% { transform: translateY(0) rotateX(0) rotateY(0); }
-            25% { transform: translateY(-18px) rotateX(5deg) rotateY(90deg); }
-            50% { transform: translateY(-10px) rotateX(-5deg) rotateY(180deg); }
-            75% { transform: translateY(-22px) rotateX(3deg) rotateY(270deg); }
-        }
-
-        @keyframes cubeRotate {
-            0%   { transform: rotateX(0deg) rotateY(0deg); }
-            100% { transform: rotateX(360deg) rotateY(360deg); }
-        }
-
-        /* Donate Section */
-        .donate-section {
-            padding: 80px 0 60px;
-            position: relative;
-        }
-
-        .donate-card {
-            background: linear-gradient(135deg, rgba(236, 72, 153, 0.05), rgba(168, 85, 247, 0.05));
-            border: 1px solid rgba(236, 72, 153, 0.08);
-            border-radius: 32px;
-            padding: 60px;
-            text-align: center;
-            max-width: 700px;
-            margin: 0 auto;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .donate-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--accent), var(--secondary), transparent);
-            opacity: 0.5;
-        }
-
-        .donate-icon {
-            font-size: 40px;
-            margin-bottom: 20px;
-            animation: heartbeat 1.5s ease-in-out infinite;
-        }
-
-        @keyframes heartbeat {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        .donate-title {
-            font-size: 28px;
-            font-weight: 800;
-            margin-bottom: 12px;
-            background: linear-gradient(135deg, var(--accent), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .donate-desc {
+        .code-block .comment {
             color: var(--text-secondary);
-            font-size: 16px;
-            margin-bottom: 30px;
-            line-height: 1.8;
-            max-width: 450px;
-            margin-left: auto;
-            margin-right: auto;
+            opacity: 0.6;
         }
 
-        .donate-btn {
-            background: linear-gradient(135deg, var(--accent), var(--secondary));
-            color: white;
-            border: none;
-            padding: 14px 36px;
-            border-radius: 14px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(236, 72, 153, 0.3);
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
+        /* ===== Features ===== */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
         }
 
-        .donate-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(236, 72, 153, 0.4);
-        }
-
-        .wallet-address-box {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(99, 102, 241, 0.2);
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 20px 28px;
-            display: inline-block;
-            margin-top: 8px;
+            padding: 36px 28px;
+            transition: all 0.3s ease;
         }
 
-        .wallet-label {
-            display: block;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--text-secondary);
+        .feature-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px var(--shadow);
+        }
+
+        .feature-card .icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
             margin-bottom: 10px;
         }
 
-        .wallet-address-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        .feature-card p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
         }
 
-        .wallet-address {
-            font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 14px;
-            color: var(--primary-light);
-            letter-spacing: 0.5px;
-            word-break: break-all;
-            user-select: all;
+        .feature-card .tag {
+            display: inline-block;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            margin-top: 12px;
         }
 
-        .wallet-copy-btn {
-            background: rgba(99, 102, 241, 0.15);
-            border: 1px solid rgba(99, 102, 241, 0.25);
-            color: var(--primary-light);
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            flex-shrink: 0;
+        /* ===== Use Cases ===== */
+        .usecases-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
         }
 
-        .wallet-copy-btn:hover {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-
-        /* $MIND Ticker */
-        .mind-ticker-section {
-            padding: 40px 0 20px;
+        .usecase-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px 24px;
+            transition: all 0.3s ease;
             text-align: center;
         }
 
-        .mind-ticker {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(168, 85, 247, 0.08);
-            border: 1px solid rgba(168, 85, 247, 0.15);
-            border-radius: 100px;
-            padding: 12px 32px;
-            backdrop-filter: blur(10px);
+        .usecase-card:hover {
+            border-color: var(--secondary);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px var(--shadow);
         }
 
-        .mind-ticker-symbol {
-            font-size: 20px;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--secondary), var(--accent));
+        .usecase-card .usecase-icon {
+            font-size: 2rem;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            letter-spacing: 2px;
+            background-clip: text;
         }
 
-        .mind-teaser {
-            margin-top: 24px;
-            font-size: 16px;
-            color: var(--text-secondary);
-            line-height: 2;
-            max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
-            text-align: center;
-            animation: teaserFadeIn 2s ease-out;
-        }
-
-        .mind-teaser em {
-            color: var(--primary-light);
-            font-style: normal;
+        .usecase-card h3 {
+            font-size: 1rem;
             font-weight: 600;
+            margin-bottom: 8px;
         }
 
-        .mind-teaser-dots {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 20px;
-        }
-
-        .mind-teaser-dots span {
-            width: 8px;
-            height: 8px;
-            background: var(--secondary);
-            border-radius: 50%;
-            opacity: 0.4;
-            animation: dotPulse 1.5s ease-in-out infinite;
-        }
-
-        .mind-teaser-dots span:nth-child(2) { animation-delay: 0.3s; }
-        .mind-teaser-dots span:nth-child(3) { animation-delay: 0.6s; }
-
-        @keyframes dotPulse {
-            0%, 100% { opacity: 0.2; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.4); }
-        }
-
-        @keyframes teaserFadeIn {
-            0% { opacity: 0; transform: translateY(10px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-
-
-
-        /* 3D Token Coin */
-        .mind-token-3d-wrapper {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            margin-top: 40px;
-            perspective: 800px;
-        }
-
-        .mind-token-3d {
-            width: 140px;
-            height: 140px;
-            position: relative;
-            transform-style: preserve-3d;
-            animation: tokenSpin 8s ease-in-out infinite;
-        }
-
-        .mind-token-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            backface-visibility: hidden;
-            overflow: hidden;
-        }
-
-        .mind-token-front {
-            background: #0a0a0a;
-            border: 3px solid rgba(99, 102, 241, 0.5);
-            box-shadow: 0 0 40px rgba(99, 102, 241, 0.3), inset 0 0 20px rgba(99, 102, 241, 0.1);
-        }
-
-        .mind-token-front img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 50%;
-        }
-
-        .mind-token-back {
-            background: linear-gradient(135deg, #0a0a0a, #1a0a2e);
-            border: 3px solid rgba(168, 85, 247, 0.5);
-            box-shadow: 0 0 40px rgba(168, 85, 247, 0.3), inset 0 0 20px rgba(168, 85, 247, 0.1);
-            transform: rotateY(180deg);
-        }
-
-        .mind-token-glow {
-            position: absolute;
-            width: 160px;
-            height: 160px;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, transparent 70%);
-            border-radius: 50%;
-            filter: blur(20px);
-            animation: tokenGlow 3s ease-in-out infinite alternate;
-            z-index: -1;
-        }
-
-        @keyframes tokenSpin {
-            0% { transform: rotateY(0deg) rotateX(5deg); }
-            25% { transform: rotateY(90deg) rotateX(-5deg); }
-            50% { transform: rotateY(180deg) rotateX(5deg); }
-            75% { transform: rotateY(270deg) rotateX(-5deg); }
-            100% { transform: rotateY(360deg) rotateX(5deg); }
-        }
-
-        @keyframes tokenGlow {
-            0% { opacity: 0.4; transform: scale(1); }
-            100% { opacity: 0.8; transform: scale(1.2); }
-        }
-
-
-        /* Footer */
-        footer {
-            padding: 80px 0 40px;
-            border-top: 1px solid var(--border);
-            background: rgba(0, 0, 0, 0.3);
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 60px;
-            margin-bottom: 60px;
-        }
-
-        .footer-brand .logo {
-            margin-bottom: 20px;
-        }
-
-        .footer-brand p {
+        .usecase-card p {
+            font-size: 0.85rem;
             color: var(--text-secondary);
-            font-size: 14px;
-            line-height: 1.8;
-            margin-bottom: 24px;
+            line-height: 1.6;
         }
 
-        .social-links {
+        /* ===== Providers ===== */
+        .providers-grid {
             display: flex;
-            gap: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
         }
 
-        .social-links a {
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.05);
+        .provider-pill {
+            background: var(--card-bg);
             border: 1px solid var(--border);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: all 0.3s ease;
+            border-radius: 100px;
+            padding: 10px 24px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text);
+            transition: all 0.2s ease;
+            cursor: default;
         }
 
-        .social-links a:hover {
-            background: var(--primary);
+        .provider-pill:hover {
             border-color: var(--primary);
-            color: white;
-            transform: translateY(-3px);
+            background: rgba(99, 102, 241, 0.06);
         }
 
-        .footer-column h4 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 24px;
-            color: #ffffff;
+        /* ===== CTA Section ===== */
+        .cta-section {
+            text-align: center;
+            padding: 100px 0;
         }
 
-        .footer-column ul {
-            list-style: none;
+        .cta-section h2 {
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
         }
 
-        .footer-column li {
-            margin-bottom: 12px;
+        .cta-section h2 .chevron {
+            color: var(--primary);
+            margin-right: 8px;
         }
 
-        .footer-column a {
+        .cta-section p {
             color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 14px;
-            transition: color 0.3s ease;
+            font-size: 1.1rem;
+            margin-bottom: 40px;
         }
 
-        .footer-column a:hover {
-            color: var(--primary-light);
+        .cta-code {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 32px;
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 1rem;
+            color: var(--secondary);
+            display: inline-block;
+            margin-bottom: 32px;
         }
 
-        .footer-bottom {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 40px;
+        .cta-code .prompt {
+            color: var(--text-secondary);
+            user-select: none;
+        }
+
+        /* ===== Footer ===== */
+        .footer {
             border-top: 1px solid var(--border);
+            padding: 40px 0;
+            text-align: center;
         }
 
-        .footer-bottom p {
+        .footer p {
             color: var(--text-secondary);
-            font-size: 13px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
         }
 
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .hero-content,
-            .code-content {
-                grid-template-columns: 1fr;
-                gap: 60px;
-            }
-
-            .hero-visual {
-                order: -1;
-            }
-
-            .features-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .footer-links {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
         }
 
+        .footer-links a {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            transition: color 0.2s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--text);
+        }
+
+        /* ===== Responsive ===== */
         @media (max-width: 768px) {
-            .container {
-                padding: 0 20px;
-            }
-
-            h1 {
-                font-size: 44px;
-            }
-
-            .section-title {
-                font-size: 36px;
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .hero-buttons {
-                flex-direction: column;
-            }
-
-            .hero-stats {
-                flex-direction: column;
-                gap: 20px;
-            }
-
-            .footer-content {
-                grid-template-columns: 1fr;
-                gap: 40px;
-            }
-
-            .nav-links {
-                display: none;
-            }
-
-            .mobile-menu-btn {
+            .mobile-toggle {
                 display: block;
             }
 
-            .logo-3d-container {
-                width: 280px;
-                height: 280px;
-            }
-
-            .cta-card {
-                padding: 40px 20px;
-            }
-
-            .cta-card h2 {
-                font-size: 32px;
-            }
-
-            .cta-buttons {
+            .nav {
+                display: none;
+                position: absolute;
+                top: 64px;
+                left: 0;
+                right: 0;
+                background: var(--header-bg);
+                backdrop-filter: blur(20px);
                 flex-direction: column;
-                align-items: center;
+                padding: 24px;
+                gap: 20px;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .nav.open {
+                display: flex;
+            }
+
+            .features-grid,
+            .usecases-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .steps-grid {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+            }
+
+            .hero {
+                padding: 120px 0 80px;
+            }
+
+            .section {
+                padding: 60px 0;
             }
         }
-        /* How It Works */
-        .how-it-works { padding: 120px 0; position: relative; }
-        .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 60px; }
-        .step-card { text-align: center; padding: 40px 30px; position: relative; }
-        .step-number { width: 64px; height: 64px; border-radius: 20px; background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(168,85,247,0.1)); border: 1px solid rgba(99,102,241,0.2); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 28px; font-weight: 800; color: var(--primary-light); }
-        .step-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 12px; color: #fff; }
-        .step-card p { color: var(--text-secondary); font-size: 15px; line-height: 1.7; }
-        .step-connector { position: absolute; top: 72px; right: -20px; color: var(--text-secondary); font-size: 20px; opacity: 0.3; }
-        .step-card:last-child .step-connector { display: none; }
 
-        /* Providers */
-        .providers-section { padding: 120px 0; position: relative; }
-        .providers-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 60px; }
-        .provider-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 24px; padding: 40px 32px; transition: all 0.3s ease; position: relative; overflow: hidden; }
-        .provider-card:hover { border-color: rgba(99,102,241,0.3); transform: translateY(-4px); }
-        .provider-card .provider-badge { display: inline-block; padding: 4px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
-        .provider-card .badge-free { background: rgba(52,211,153,0.15); color: #34d399; }
-        .provider-card .badge-paid { background: rgba(251,191,36,0.15); color: #fbbf24; }
-        .provider-card .badge-local { background: rgba(96,165,250,0.15); color: #60a5fa; }
-        .provider-card h3 { font-size: 22px; font-weight: 700; margin-bottom: 8px; color: #fff; }
-        .provider-card .provider-model { color: var(--text-secondary); font-size: 13px; margin-bottom: 20px; }
-        .provider-card ul { list-style: none; }
-        .provider-card li { color: var(--text-secondary); font-size: 14px; padding: 8px 0; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
-        .provider-card li i { color: var(--primary-light); font-size: 12px; }
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .features-grid,
+            .usecases-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
 
-        /* Use Cases */
-        .usecases-section { padding: 120px 0; position: relative; }
-        .usecases-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-top: 60px; }
-        .usecase-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 24px; padding: 36px; transition: all 0.3s ease; }
-        .usecase-card:hover { border-color: rgba(99,102,241,0.3); transform: translateY(-3px); }
-        .usecase-icon { font-size: 36px; margin-bottom: 16px; }
-        .usecase-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 10px; color: #fff; }
-        .usecase-card p { color: var(--text-secondary); font-size: 15px; line-height: 1.7; }
-        .usecase-card code { background: rgba(99,102,241,0.1); padding: 2px 8px; border-radius: 6px; font-size: 13px; color: var(--primary-light); }
-
-        /* FAQ */
-        .faq-section { padding: 120px 0; position: relative; }
-        .faq-grid { max-width: 800px; margin: 60px auto 0; }
-        .faq-item { border: 1px solid var(--border); border-radius: 16px; margin-bottom: 12px; overflow: hidden; transition: all 0.3s ease; }
-        .faq-item:hover { border-color: rgba(99,102,241,0.2); }
-        .faq-question { padding: 24px 28px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); }
-        .faq-question h3 { font-size: 16px; font-weight: 600; color: #fff; flex: 1; }
-        .faq-question i { color: var(--text-secondary); transition: transform 0.3s ease; font-size: 14px; }
-        .faq-item.open .faq-question i { transform: rotate(180deg); }
-        .faq-answer { padding: 0 28px; max-height: 0; overflow: hidden; transition: all 0.3s ease; }
-        .faq-item.open .faq-answer { padding: 0 28px 24px; max-height: 300px; }
-        .faq-answer p { color: var(--text-secondary); font-size: 15px; line-height: 1.8; }
-        .faq-answer code { background: rgba(99,102,241,0.1); padding: 2px 8px; border-radius: 6px; font-size: 13px; color: var(--primary-light); }
-
-        @media (max-width: 768px) {
-            .steps-grid, .providers-grid, .usecases-grid { grid-template-columns: 1fr; }
-            .step-connector { display: none; }
+            .steps-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Background Effects -->
-    <div class="bg-ambient"></div>
-    <div class="bg-3d-grid"></div>
-    <div class="particles" id="particles"></div>
 
     <!-- Header -->
-    <header id="header">
-        <nav class="container">
-            <a href="/" class="logo">
-                <div class="logo-icon">
-                    <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="logoGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" style="stop-color:#6366f1"/>
-                                <stop offset="100%" style="stop-color:#a855f7"/>
-                            </linearGradient>
-                            <linearGradient id="logoGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" style="stop-color:#a855f7"/>
-                                <stop offset="100%" style="stop-color:#ec4899"/>
-                            </linearGradient>
-                        </defs>
-                        <circle cx="256" cy="256" r="240" fill="#000000" stroke="url(#logoGrad1)" stroke-width="8"/>
-                        <circle cx="256" cy="120" r="20" fill="url(#logoGrad1)"/>
-                        <circle cx="156" cy="200" r="16" fill="url(#logoGrad1)" opacity="0.9"/>
-                        <circle cx="356" cy="200" r="16" fill="url(#logoGrad1)" opacity="0.9"/>
-                        <circle cx="120" cy="320" r="14" fill="url(#logoGrad2)" opacity="0.8"/>
-                        <circle cx="256" cy="280" r="18" fill="url(#logoGrad2)"/>
-                        <circle cx="392" cy="320" r="14" fill="url(#logoGrad2)" opacity="0.8"/>
-                        <circle cx="200" cy="400" r="12" fill="url(#logoGrad1)" opacity="0.7"/>
-                        <circle cx="312" cy="400" r="12" fill="url(#logoGrad1)" opacity="0.7"/>
-                        <line x1="256" y1="140" x2="172" y2="188" stroke="url(#logoGrad1)" stroke-width="2" opacity="0.6"/>
-                        <line x1="256" y1="140" x2="340" y2="188" stroke="url(#logoGrad1)" stroke-width="2" opacity="0.6"/>
-                        <line x1="172" y1="216" x2="134" y2="308" stroke="url(#logoGrad1)" stroke-width="1.5" opacity="0.5"/>
-                        <line x1="172" y1="216" x2="256" y2="264" stroke="url(#logoGrad1)" stroke-width="1.5" opacity="0.5"/>
-                        <line x1="340" y1="216" x2="378" y2="308" stroke="url(#logoGrad1)" stroke-width="1.5" opacity="0.5"/>
-                        <line x1="340" y1="216" x2="256" y2="264" stroke="url(#logoGrad1)" stroke-width="1.5" opacity="0.5"/>
-                        <line x1="134" y1="334" x2="200" y2="390" stroke="url(#logoGrad2)" stroke-width="1" opacity="0.4"/>
-                        <line x1="256" y1="298" x2="200" y2="390" stroke="url(#logoGrad2)" stroke-width="1" opacity="0.4"/>
-                        <line x1="256" y1="298" x2="312" y2="390" stroke="url(#logoGrad2)" stroke-width="1" opacity="0.4"/>
-                        <line x1="378" y1="334" x2="312" y2="390" stroke="url(#logoGrad2)" stroke-width="1" opacity="0.4"/>
-                        <text x="256" y="310" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" font-size="160" fill="white" opacity="0.1">E</text>
-                    </svg>
-                </div>
-                <span class="logo-text">Exort</span>
+    <header class="header">
+        <div class="container header-inner">
+            <a href="#" class="logo">
+                <img src="../logo.jpg" alt="Exort Logo">
+                <span>Exort</span>
             </a>
-            <ul class="nav-links">
-                <li><a href="#features">Features</a></li>
-                <li><a href="#code">Code</a></li>
-                <li><a href="https://github.com/askexort/exort">GitHub</a></li>
-                <li><a href="#how-it-works">How It Works</a></li>
-                <li><a href="#providers">Providers</a></li>
-                <li><a href="https://t.me/askexort_bot" class="btn btn-primary"><i class="fab fa-telegram"></i> Try Bot</a></li>
-            </ul>
-            <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation">
                 <i class="fas fa-bars"></i>
             </button>
-        </nav>
+            <nav class="nav" id="navMenu">
+                <a href="#how-it-works">How It Works</a>
+                <a href="#features">Features</a>
+                <a href="#use-cases">Use Cases</a>
+                <a href="#providers">Providers</a>
+                <a href="https://github.com/askexort/exort" target="_blank" rel="noopener">GitHub</a>
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                    <i class="fas fa-sun" id="themeIcon"></i>
+                </button>
+            </nav>
+        </div>
     </header>
 
-    <!-- Hero Section -->
+    <!-- Hero -->
     <section class="hero">
         <div class="container">
-            <div class="hero-content">
-                <div class="hero-text">
-                    <h1>
-                        Build AI<br>
-                        <span class="gradient-text">Agents</span><br>
-                        That Think
-                    </h1>
-                    <p class="hero-description">
-                        Exort is an open-source AI agent framework with tool use, memory, and multi-provider support. 
-                        Create autonomous agents that reason, act, and learn.
-                    </p>
-                    <div class="hero-buttons">
-                        <a href="https://github.com/askexort/exort" class="btn btn-primary">
-                            <i class="fab fa-github"></i> View on GitHub
-                        </a>
-                        <a href="#code" class="btn btn-secondary">
-                            <i class="fas fa-code"></i> Quick Start
-                        </a>
-                    </div>
-                    <div class="hero-stats">
-                        <div class="stat">
-                            <div class="stat-number">100%</div>
-                            <div class="stat-label">Free & Open Source</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-number">3+</div>
-                            <div class="stat-label">AI Providers</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-number">&infin;</div>
-                            <div class="stat-label">Possibilities</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="hero-visual">
-                    <div class="glow-effect"></div>
-                    <div class="floating-cube">
-                        <div class="cube-face front"></div>
-                        <div class="cube-face back"></div>
-                        <div class="cube-face right"></div>
-                        <div class="cube-face left"></div>
-                        <div class="cube-face top"></div>
-                        <div class="cube-face bottom"></div>
-                    </div>
-                    <div class="logo-3d-container">
-                        <div class="orbit-ring orbit-ring-1">
-                            <div class="orbit-dot"></div>
-                        </div>
-                        <div class="orbit-ring orbit-ring-2">
-                            <div class="orbit-dot"></div>
-                        </div>
-                        <div class="orbit-ring orbit-ring-3">
-                            <div class="orbit-dot"></div>
-                        </div>
-                        <div class="logo-3d-main">
-                            <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-                                <defs>
-                                    <linearGradient id="heroGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" style="stop-color:#6366f1"/>
-                                        <stop offset="100%" style="stop-color:#a855f7"/>
-                                    </linearGradient>
-                                    <linearGradient id="heroGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" style="stop-color:#a855f7"/>
-                                        <stop offset="100%" style="stop-color:#ec4899"/>
-                                    </linearGradient>
-                                    <filter id="glow">
-                                        <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-                                        <feMerge>
-                                            <feMergeNode in="coloredBlur"/>
-                                            <feMergeNode in="SourceGraphic"/>
-                                        </feMerge>
-                                    </filter>
-                                </defs>
-                                <circle cx="256" cy="256" r="240" fill="#000000" stroke="url(#heroGrad1)" stroke-width="10"/>
-                                <g filter="url(#glow)">
-                                    <circle cx="256" cy="120" r="24" fill="url(#heroGrad1)"/>
-                                    <circle cx="156" cy="200" r="20" fill="url(#heroGrad1)" opacity="0.9"/>
-                                    <circle cx="356" cy="200" r="20" fill="url(#heroGrad1)" opacity="0.9"/>
-                                    <circle cx="120" cy="320" r="18" fill="url(#heroGrad2)" opacity="0.8"/>
-                                    <circle cx="256" cy="280" r="22" fill="url(#heroGrad2)"/>
-                                    <circle cx="392" cy="320" r="18" fill="url(#heroGrad2)" opacity="0.8"/>
-                                    <circle cx="200" cy="400" r="16" fill="url(#heroGrad1)" opacity="0.7"/>
-                                    <circle cx="312" cy="400" r="16" fill="url(#heroGrad1)" opacity="0.7"/>
-                                </g>
-                                <line x1="256" y1="144" x2="176" y2="185" stroke="url(#heroGrad1)" stroke-width="3" opacity="0.6"/>
-                                <line x1="256" y1="144" x2="336" y2="185" stroke="url(#heroGrad1)" stroke-width="3" opacity="0.6"/>
-                                <line x1="176" y1="220" x2="138" y2="305" stroke="url(#heroGrad1)" stroke-width="2.5" opacity="0.5"/>
-                                <line x1="176" y1="220" x2="256" y2="260" stroke="url(#heroGrad1)" stroke-width="2.5" opacity="0.5"/>
-                                <line x1="336" y1="220" x2="372" y2="305" stroke="url(#heroGrad1)" stroke-width="2.5" opacity="0.5"/>
-                                <line x1="336" y1="220" x2="256" y2="260" stroke="url(#heroGrad1)" stroke-width="2.5" opacity="0.5"/>
-                                <line x1="138" y1="338" x2="200" y2="385" stroke="url(#heroGrad2)" stroke-width="2" opacity="0.4"/>
-                                <line x1="256" y1="302" x2="200" y2="385" stroke="url(#heroGrad2)" stroke-width="2" opacity="0.4"/>
-                                <line x1="256" y1="302" x2="312" y2="385" stroke="url(#heroGrad2)" stroke-width="2" opacity="0.4"/>
-                                <line x1="372" y1="338" x2="312" y2="385" stroke="url(#heroGrad2)" stroke-width="2" opacity="0.4"/>
-                                <text x="256" y="310" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" font-size="180" fill="white" opacity="0.15">E</text>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Features Section -->
-    <section class="features" id="features">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-label">
-                    <i class="fas fa-sparkles"></i>
-                    <span>Features</span>
-                </div>
-                <h2 class="section-title">Everything You Need</h2>
-                <p class="section-subtitle">Build powerful AI agents with our comprehensive framework</p>
-            </div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">&#x1F916;</div>
-                    <h3>Agentic Loop</h3>
-                    <p>Think &#x2192; Act &#x2192; Observe architecture for autonomous reasoning and intelligent decision making.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">&#x1F50C;</div>
-                    <h3>Multi-Provider</h3>
-                    <p>OpenAI, Ollama (local), Groq (free tier) out of the box. Switch providers with a single flag.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">&#x1F6E0;&#xFE0F;</div>
-                    <h3>Plugin Tools</h3>
-                    <p>Decorator-based tool registration system. Easy to extend with custom capabilities.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">&#x1F4BE;</div>
-                    <h3>Conversation Memory</h3>
-                    <p>SQLite-backed persistent conversations. Remember context across sessions.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">&#x26A1;</div>
-                    <h3>Streaming</h3>
-                    <p>Real-time token streaming for all providers. See responses as they're generated.</p>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- Code Section -->
-    <section class="code-section" id="code">
-        <div class="container">
-            <div class="code-content">
-                <div class="code-info">
-                    <div class="section-label">
-                        <i class="fas fa-terminal"></i>
-                        <span>Quick Start</span>
-                    </div>
-                    <h2>Start Building in Minutes</h2>
-                    <p>Get up and running with Exort in just a few commands. No complex setup required.</p>
-                    <ul class="code-features">
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            <span>Simple pip install</span>
-                        </li>
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            <span>Free Groq API included</span>
-                        </li>
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            <span>Python &amp; CLI interface</span>
-                        </li>
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            <span>Extensive documentation</span>
-                        </li>
-                    </ul>
-                    <a href="https://github.com/askexort/exort" class="btn btn-primary">
-                        <i class="fab fa-github"></i> View Documentation
-                    </a>
-                </div>
-                <div class="code-block">
-                    <div class="code-header">
-                        <div class="code-dots">
-                            <div class="code-dot"></div>
-                            <div class="code-dot"></div>
-                            <div class="code-dot"></div>
-                        </div>
-                        <div class="code-tabs">
-                            <span class="code-tab active" data-tab="terminal">Terminal</span>
-                            <span class="code-tab" data-tab="python">Python</span>
-                        </div>
-                    </div>
-                    <div class="code-body active" id="code-terminal">
-<pre><span class="comment"># Install Exort</span>
-<span class="keyword">pip</span> install exort-agent
-
-<span class="comment"># Set up config</span>
-<span class="keyword">exort</span> config --init
-
-<span class="comment"># Start chatting</span>
-<span class="keyword">exort</span> chat
-
-<span class="comment"># Use a specific provider</span>
-<span class="keyword">exort</span> chat --provider groq</pre>
-                    </div>
-                    <div class="code-body" id="code-python">
-<pre><span class="keyword">from</span> exort <span class="keyword">import</span> Agent
-
-agent = <span class="function">Agent</span>(provider=<span class="string">'groq'</span>)
-response = agent.<span class="function">chat</span>(<span class="string">'Hello!'</span>)
-<span class="function">print</span>(response)
-
-<span class="comment"># Streaming</span>
-<span class="keyword">for</span> chunk <span class="keyword">in</span> agent.<span class="function">chat_stream</span>(<span class="string">'Tell me a joke'</span>):
-    <span class="function">print</span>(chunk, end=<span class="string">''</span>)</pre>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="cta-section">
-        <div class="container">
-            <div class="cta-card">
-                <h2>Ready to Build?</h2>
-                <p>Join the developers using Exort to build the next generation of AI applications.</p>
-                <div class="cta-buttons">
-                    <a href="https://github.com/askexort/exort" class="btn btn-primary btn-lg">
-                        <i class="fab fa-github"></i> Star on GitHub
-                    </a>
-                    <a href="https://t.me/askexort_bot" class="btn btn-ghost btn-lg">
-                        <i class="fab fa-telegram"></i> Try Telegram Bot
-                    </a>
-                </div>
+            <h1>Exort</h1>
+            <p class="subtitle">THE OPEN AGENT ENGINE.</p>
+            <p class="description">Exort is a self-hosted AI agent framework that gives you a fully autonomous assistant with tool use, persistent memory, and multi-provider support. Run it from your terminal, deploy it as a Telegram bot, or embed it anywhere. Your data stays yours. No vendor lock-in. No API fees required &mdash; use free providers like Groq and Cerebras, or bring your own keys.</p>
+            <div class="hero-buttons">
+                <a href="#quick-start" class="btn btn-primary">
+                    <i class="fas fa-rocket"></i> Get Started
+                </a>
+                <a href="https://t.me/askexort_bot" target="_blank" rel="noopener" class="btn btn-secondary">
+                    <i class="fab fa-telegram"></i> Telegram Bot
+                </a>
             </div>
         </div>
     </section>
 
     <!-- How It Works -->
-    <section class="how-it-works" id="how-it-works">
+    <section class="section" id="how-it-works">
         <div class="container">
             <div class="section-header">
-                <div class="section-label"><i class="fas fa-route"></i><span>How It Works</span></div>
-                <h2 class="section-title">Three Steps to Your AI Agent</h2>
-                <p class="section-subtitle">From zero to autonomous agent in under 5 minutes</p>
+                <h2><span class="chevron">&#x27E9;</span> How It Works</h2>
             </div>
             <div class="steps-grid">
                 <div class="step-card">
                     <div class="step-number">1</div>
                     <h3>Install</h3>
-                    <p>Run <code>pip install exort-agent</code> to get the framework. Works on Windows, macOS, and Linux with Python 3.10+.</p>
-                    <span class="step-connector">→</span>
+                    <p>One command to get started. Python package installs everything you need.</p>
+                    <div class="code-block"><span class="prompt">$ </span>pip install exort-agent</div>
                 </div>
                 <div class="step-card">
                     <div class="step-number">2</div>
                     <h3>Configure</h3>
-                    <p>Run <code>exort config --init</code> to set up your AI provider. Use Groq for free, OpenAI for best quality, or Ollama for 100% local.</p>
-                    <span class="step-connector">→</span>
+                    <p>Interactive setup walks you through provider and API key selection.</p>
+                    <div class="code-block"><span class="prompt">$ </span>exort setup<br><span class="comment"># Choose provider &amp; enter key</span></div>
                 </div>
                 <div class="step-card">
                     <div class="step-number">3</div>
-                    <h3>Build</h3>
-                    <p>Start chatting with <code>exort chat</code>, or import the Python SDK to build custom agents with tools, memory, and streaming.</p>
+                    <h3>Chat</h3>
+                    <p>Drop into the interactive shell. Ask questions, run tools, test everything locally.</p>
+                    <div class="code-block"><span class="prompt">$ </span>exort shell<br>exort&gt; Hello!<br>exort&gt; /tools</div>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <h3>Deploy</h3>
+                    <p>Launch as a Telegram bot, Discord bot, or any interface. One command.</p>
+                    <div class="code-block"><span class="prompt">$ </span>exort bot<br><span class="comment"># Bot is now live on Telegram</span></div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Provider Comparison -->
-    <section class="providers-section" id="providers">
+    <!-- Features Deep Dive -->
+    <section class="section" id="features">
         <div class="container">
             <div class="section-header">
-                <div class="section-label"><i class="fas fa-plug"></i><span>Providers</span></div>
-                <h2 class="section-title">Your AI, Your Choice</h2>
-                <p class="section-subtitle">9 providers. 6 completely free. Switch with a single flag.</p>
+                <h2><span class="chevron">&#x27E9;</span> Features</h2>
             </div>
-            <div class="providers-grid">
-                <div class="provider-card">
-                    <span class="provider-badge badge-free">Free</span>
-                    <h3>Google AI Studio</h3>
-                    <p class="provider-model">Gemini 2.5 Flash — best overall free tier</p>
-                    <ul>
-                        <li><i class="fas fa-check"></i> 1,500 requests/day free</li>
-                        <li><i class="fas fa-check"></i> 1M token context window</li>
-                        <li><i class="fas fa-check"></i> Vision & multimodal</li>
-                        <li><i class="fas fa-check"></i> No credit card required</li>
-                    </ul>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="icon"><i class="fas fa-cogs"></i></div>
+                    <h3>Engine</h3>
+                    <p>The core reasoning loop. Handles multi-turn conversations, context management, and orchestrates tool calls autonomously. Supports streaming responses and graceful error recovery.</p>
+                    <span class="tag">Core</span>
                 </div>
-                <div class="provider-card">
-                    <span class="provider-badge badge-free">Free</span>
-                    <h3>Groq</h3>
-                    <p class="provider-model">Llama 3.3 70B — blazing fast inference</p>
-                    <ul>
-                        <li><i class="fas fa-check"></i> 315 tokens/sec throughput</li>
-                        <li><i class="fas fa-check"></i> ~1,000 requests/day</li>
-                        <li><i class="fas fa-check"></i> No credit card required</li>
-                        <li><i class="fas fa-check"></i> OpenAI-compatible API</li>
-                    </ul>
+                <div class="feature-card">
+                    <div class="icon"><i class="fas fa-wrench"></i></div>
+                    <h3>GearBox</h3>
+                    <p>Extensible tool system. Built-in tools for code execution, web browsing, file management, and shell access. Write custom tools in Python &mdash; just decorate a function.</p>
+                    <span class="tag">Tools</span>
                 </div>
-                <div class="provider-card">
-                    <span class="provider-badge badge-free">Free</span>
-                    <h3>Cerebras</h3>
-                    <p class="provider-model">Llama 3.3 70B — ~1,000 TPS inference</p>
-                    <ul>
-                        <li><i class="fas fa-check"></i> ~1,700 requests/day</li>
-                        <li><i class="fas fa-check"></i> Fastest inference available</li>
-                        <li><i class="fas fa-check"></i> High daily capacity</li>
-                        <li><i class="fas fa-check"></i> No credit card required</li>
-                    </ul>
+                <div class="feature-card">
+                    <div class="icon"><i class="fas fa-brain"></i></div>
+                    <h3>Memory</h3>
+                    <p>Persistent conversation memory that survives restarts. The agent builds understanding over time, remembering your preferences, past decisions, and ongoing projects.</p>
+                    <span class="tag">Persistent</span>
                 </div>
-                <div class="provider-card">
-                    <span class="provider-badge badge-free">Free</span>
-                    <h3>OpenRouter</h3>
-                    <p class="provider-model">11+ free models — Llama, Gemini, Mistral</p>
-                    <ul>
-                        <li><i class="fas fa-check"></i> 200 requests/day</li>
-                        <li><i class="fas fa-check"></i> Many models with one API key</li>
-                        <li><i class="fas fa-check"></i> Auto model routing</li>
-                        <li><i class="fas fa-check"></i> No credit card required</li>
-                    </ul>
+                <div class="feature-card">
+                    <div class="icon"><i class="fas fa-layer-group"></i></div>
+                    <h3>Providers</h3>
+                    <p>Nine LLM backends supported out of the box. Switch between Groq, OpenAI, Anthropic, Ollama, OpenRouter, Cerebras, SambaNova, HuggingFace, and Google AI Studio.</p>
+                    <span class="tag">9 Backends</span>
                 </div>
-                <div class="provider-card">
-                    <span class="provider-badge badge-free">Free</span>
-                    <h3>SambaNova</h3>
-                    <p class="provider-model">Llama 3.3 70B — fast Groq alternative</p>
-                    <ul>
-                        <li><i class="fas fa-check"></i> 294 tokens/sec</li>
-                        <li><i class="fas fa-check"></i> Free tier available</li>
-                        <li><i class="fas fa-check"></i> No credit card required</li>
-                        <li><i class="fas fa-check"></i> OpenAI-compatible API</li>
-                    </ul>
+                <div class="feature-card">
+                    <div class="icon"><i class="fas fa-book"></i></div>
+                    <h3>Playbooks</h3>
+                    <p>Inject domain knowledge into your agent. Markdown-based knowledge files that define expertise, behavior patterns, and specialized skills for any use case.</p>
+                    <span class="tag">Knowledge</span>
                 </div>
-                <div class="provider-card">
-                    <span class="provider-badge badge-free">Free</span>
-                    <h3>HuggingFace</h3>
-                    <p class="provider-model">1000s of open source models</p>
-                    <ul>
-                        <li><i class="fas fa-check"></i> Massive model library</li>
-                        <li><i class="fas fa-check"></i> Inference API included</li>
-                        <li><i class="fas fa-check"></i> Community models</li>
-                        <li><i class="fas fa-check"></i> No credit card required</li>
-                    </ul>
-                </div>
-                <div class="provider-card">
-                    <span class="provider-badge badge-paid">Premium</span>
-                    <h3>OpenAI</h3>
-                    <p class="provider-model">GPT-4o, GPT-4o-mini, o3 — industry leading</p>
-                    <ul>
-                        <li><i class="fas fa-check"></i> Best reasoning quality</li>
-                        <li><i class="fas fa-check"></i> Vision & multimodal support</li>
-                        <li><i class="fas fa-check"></i> Function calling built-in</li>
-                        <li><i class="fas fa-check"></i> Largest ecosystem</li>
-                    </ul>
-                </div>
-                <div class="provider-card">
-                    <span class="provider-badge badge-paid">Premium</span>
-                    <h3>Anthropic</h3>
-                    <p class="provider-model">Claude Sonnet 4, Opus 4 — top reasoning</p>
-                    <ul>
-                        <li><i class="fas fa-check"></i> 200K token context</li>
-                        <li><i class="fas fa-check"></i> Best-in-class coding</li>
-                        <li><i class="fas fa-check"></i> Extended thinking mode</li>
-                        <li><i class="fas fa-check"></i> Strong safety guarantees</li>
-                    </ul>
-                </div>
-                <div class="provider-card">
-                    <span class="provider-badge badge-local">Local</span>
-                    <h3>Ollama</h3>
-                    <p class="provider-model">Llama 3, Phi-3, Gemma — your hardware</p>
-                    <ul>
-                        <li><i class="fas fa-check"></i> 100% private — stays on your machine</li>
-                        <li><i class="fas fa-check"></i> No API key needed</li>
-                        <li><i class="fas fa-check"></i> Works offline</li>
-                        <li><i class="fas fa-check"></i> Supports 50+ open models</li>
-                    </ul>
+                <div class="feature-card">
+                    <div class="icon"><i class="fab fa-telegram"></i></div>
+                    <h3>Telegram Bot</h3>
+                    <p>Full-featured Telegram deployment. Supports private chats, group conversations, inline queries, and command menus. Deploy with one command, share with anyone.</p>
+                    <span class="tag">Interface</span>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Use Cases -->
-    <section class="usecases-section" id="usecases">
+    <section class="section" id="use-cases">
         <div class="container">
             <div class="section-header">
-                <div class="section-label"><i class="fas fa-lightbulb"></i><span>Use Cases</span></div>
-                <h2 class="section-title">What Can You Build?</h2>
-                <p class="section-subtitle">From simple chatbots to autonomous research agents</p>
+                <h2><span class="chevron">&#x27E9;</span> What You Can Build</h2>
             </div>
             <div class="usecases-grid">
                 <div class="usecase-card">
-                    <div class="usecase-icon">💬</div>
-                    <h3>Smart Chatbots</h3>
-                    <p>Build conversational AI that remembers context, uses tools, and provides accurate answers. Deploy on Telegram, Discord, or web.</p>
+                    <div class="usecase-icon"><i class="fas fa-user-astronaut"></i></div>
+                    <h3>Personal AI Assistant</h3>
+                    <p>Your always-on assistant that remembers context, manages tasks, and helps with daily work. Accessible from your phone via Telegram.</p>
                 </div>
                 <div class="usecase-card">
-                    <div class="usecase-icon">🔬</div>
-                    <h3>Research Assistants</h3>
-                    <p>Create agents that search the web, read papers, and synthesize findings. Automate your research workflow.</p>
+                    <div class="usecase-icon"><i class="fas fa-headset"></i></div>
+                    <h3>Customer Support Bot</h3>
+                    <p>Deploy a knowledgeable support agent with custom playbooks for your product. Handles FAQs, escalates complex issues, works 24/7.</p>
                 </div>
                 <div class="usecase-card">
-                    <div class="usecase-icon">⚙️</div>
-                    <h3>Task Automation</h3>
-                    <p>Automate repetitive workflows — file processing, data extraction, report generation. Let the agent handle the boring stuff.</p>
+                    <div class="usecase-icon"><i class="fas fa-code"></i></div>
+                    <h3>Code Assistant</h3>
+                    <p>An agent that writes, debugs, and reviews code. Execute snippets directly, manage files, and iterate on solutions in real-time.</p>
                 </div>
                 <div class="usecase-card">
-                    <div class="usecase-icon">🧑‍💻</div>
-                    <h3>Coding Assistants</h3>
-                    <p>Build agents that write, review, and debug code. Integrate with your IDE or terminal for seamless developer experience.</p>
+                    <div class="usecase-icon"><i class="fas fa-flask"></i></div>
+                    <h3>Research Agent</h3>
+                    <p>Browse the web, summarize papers, extract data, and compile findings. A tireless research partner that never loses focus.</p>
+                </div>
+                <div class="usecase-card">
+                    <div class="usecase-icon"><i class="fas fa-pen-fancy"></i></div>
+                    <h3>Content Creator</h3>
+                    <p>Generate articles, social posts, and marketing copy. Maintain consistent voice across channels with custom playbooks.</p>
+                </div>
+                <div class="usecase-card">
+                    <div class="usecase-icon"><i class="fas fa-chart-line"></i></div>
+                    <h3>Data Analyst</h3>
+                    <p>Run Python code, query databases, generate visualizations, and produce reports. Transform raw data into actionable insights.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- FAQ -->
-    <section class="faq-section" id="faq">
+    <!-- Providers -->
+    <section class="section" id="providers">
         <div class="container">
             <div class="section-header">
-                <div class="section-label"><i class="fas fa-circle-question"></i><span>FAQ</span></div>
-                <h2 class="section-title">Frequently Asked Questions</h2>
+                <h2><span class="chevron">&#x27E9;</span> Works With Free AI</h2>
             </div>
-            <div class="faq-grid">
-                <div class="faq-item">
-                    <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-                        <h3>Is Exort really free?</h3>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer"><p>Yes. Exort is MIT licensed and 100% open source. You can use Groq's free tier for inference at zero cost. No hidden fees, no premium tiers.</p></div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-                        <h3>Do I need a GPU?</h3>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer"><p>No. Use Groq (free cloud) or OpenAI (cloud) and you don't need any local hardware. If you want to run models locally with Ollama, you'll need a decent GPU (8GB+ VRAM recommended).</p></div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-                        <h3>What Python version do I need?</h3>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer"><p>Python 3.10 or higher. We recommend using a virtual environment: <code>python -m venv .venv && source .venv/bin/activate</code></p></div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-                        <h3>How do I add custom tools?</h3>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer"><p>Use the <code>@tool</code> decorator on any Python function. Exort automatically generates the JSON schema for the LLM. See the GitHub repo for examples.</p></div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-                        <h3>Can I use it in production?</h3>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer"><p>Exort is designed for production use with persistent memory, error handling, and streaming. However, as with any open-source project, test thoroughly before deploying.</p></div>
-                </div>
+            <div class="providers-grid">
+                <span class="provider-pill">Groq</span>
+                <span class="provider-pill">OpenAI</span>
+                <span class="provider-pill">Anthropic</span>
+                <span class="provider-pill">Ollama</span>
+                <span class="provider-pill">OpenRouter</span>
+                <span class="provider-pill">Cerebras</span>
+                <span class="provider-pill">SambaNova</span>
+                <span class="provider-pill">HuggingFace</span>
+                <span class="provider-pill">Google AI Studio</span>
             </div>
         </div>
     </section>
 
-    <!-- Donate & Get Rewarded -->
-    <section class="donate-section">
+    <!-- Quick Start / CTA -->
+    <section class="cta-section" id="quick-start">
         <div class="container">
-            <div class="donate-card">
-                <div class="donate-icon">&#x1F49C;</div>
-                <div class="donate-title">Support Exort</div>
-                <p class="donate-desc">
-                    Support the Exort project. Every contribution helps keep it free and open source.
-                </p>
-                <div class="wallet-address-box">
-                    <span class="wallet-label">ETH / Base Wallet</span>
-                    <div class="wallet-address-row">
-                        <code class="wallet-address" id="walletAddr">0x9637EDad27c93F40b505F6478445530f58fF1501</code>
-                        <button class="wallet-copy-btn" id="walletCopyBtn" onclick="copyWallet()">
-                            <i class="fas fa-copy"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- $MIND Ticker -->
-    <section class="mind-ticker-section">
-        <div class="container">
-            <div class="mind-ticker">
-                <span class="mind-ticker-symbol">$MIND</span>
-            </div>
-            <p class="mind-teaser">
-                Something is brewing in the Exort ecosystem. <em>Think deeper. Build smarter.</em><br>
-                The mind that powers the agents is evolving. Stay close.
-            </p>
-            <div class="mind-teaser-dots">
-                <span></span><span></span><span></span>
-            </div>
-            <div class="mind-token-3d-wrapper">
-                <div class="mind-token-3d">
-                    <div class="mind-token-face mind-token-front">
-                        <img src="openmindlogo.jpg" alt="Exort">
-                    </div>
-                    <div class="mind-token-face mind-token-back"></div>
-                </div>
-                <div class="mind-token-glow"></div>
+            <h2><span class="chevron">&#x27E9;</span> Start Building</h2>
+            <p>One install. Infinite possibilities.</p>
+            <div class="cta-code"><span class="prompt">$ </span>pip install exort-agent</div>
+            <br><br>
+            <div class="hero-buttons">
+                <a href="https://github.com/askexort/exort" target="_blank" rel="noopener" class="btn btn-primary">
+                    <i class="fab fa-github"></i> View on GitHub
+                </a>
+                <a href="https://t.me/askexort_bot" target="_blank" rel="noopener" class="btn btn-secondary">
+                    <i class="fab fa-telegram"></i> Try Bot
+                </a>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer>
+    <footer class="footer">
         <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <a href="/" class="logo">
-                        <div class="logo-icon">
-                            <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="256" cy="256" r="240" fill="#000000" stroke="url(#logoGrad1)" stroke-width="8"/>
-                                <circle cx="256" cy="120" r="20" fill="url(#logoGrad1)"/>
-                                <circle cx="156" cy="200" r="16" fill="url(#logoGrad1)" opacity="0.9"/>
-                                <circle cx="256" cy="280" r="18" fill="url(#logoGrad2)"/>
-                                <text x="256" y="310" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" font-size="160" fill="white" opacity="0.1">E</text>
-                            </svg>
-                        </div>
-                        <span class="logo-text">Exort</span>
-                    </a>
-                    <p>Free AI for Everyone. Open source, community driven, forever free.</p>
-                    <div class="social-links">
-                        <a href="https://github.com/askexort/exort"><i class="fab fa-github"></i></a>
-                        <a href="https://t.me/askexort_bot"><i class="fab fa-telegram"></i></a>
-                        <a href="https://x.com/exortresearch"><i class="fab fa-x-twitter"></i></a>
-                    </div>
-                </div>
-                <div class="footer-column">
-                    <h4>Product</h4>
-                    <ul>
-                        <li><a href="#features">Features</a></li>
-                        <li><a href="#how-it-works">How It Works</a></li>
-                        <li><a href="#providers">Providers</a></li>
-                        <li><a href="#usecases">Use Cases</a></li>
-                        <li><a href="#faq">FAQ</a></li>
-                        <li><a href="#code">Quick Start</a></li>
-                        <li><a href="https://github.com/askexort/exort">Documentation</a></li>
-                        <li><a href="https://github.com/askexort/exort/releases">Changelog</a></li>
-                        <li><a href="https://github.com/askexort/exort/blob/main/LICENSE">License (MIT)</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h4>Resources</h4>
-                    <ul>
-                        <li><a href="https://github.com/askexort/exort">Source Code</a></li>
-                        <li><a href="https://github.com/askexort/exort/issues">Bug Reports</a></li>
-                        <li><a href="https://github.com/askexort/exort/pulls">Pull Requests</a></li>
-                        <li><a href="https://pypi.org/project/exort-agent/">PyPI Package</a></li>
-                        <li><a href="https://github.com/askexort/exort/wiki">Wiki</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h4>Community</h4>
-                    <ul>
-                        <li><a href="https://github.com/askexort/exort">GitHub</a></li>
-                        <li><a href="https://t.me/askexort_bot">Telegram Bot</a></li>
-                        <li><a href="https://github.com/askexort/exort/graphs/contributors">Contributors</a></li>
-                        <li><a href="https://github.com/askexort/exort/discussions">Discussions</a></li>
-                        <li><a href="https://github.com/askexort/exort/blob/main/CONTRIBUTING.md">Contributing</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 Exort. Open source under MIT License.</p>
-                <p>Built with &#x2764;&#xFE0F; by the community</p>
+            <p>&copy; 2026 Exort Contributors. Open Source under MIT License.</p>
+            <div class="footer-links">
+                <a href="https://github.com/askexort/exort" target="_blank" rel="noopener"><i class="fab fa-github"></i> GitHub</a>
+                <a href="https://t.me/askexort_bot" target="_blank" rel="noopener"><i class="fab fa-telegram"></i> Telegram</a>
             </div>
         </div>
     </footer>
 
+    <!-- JavaScript -->
     <script>
-        // Create floating particles
-        function createParticles() {
-            const container = document.getElementById('particles');
-            const particleCount = 30;
-            
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDuration = (Math.random() * 20 + 10) + 's';
-                particle.style.animationDelay = Math.random() * 10 + 's';
-                particle.style.width = (Math.random() * 4 + 2) + 'px';
-                particle.style.height = particle.style.width;
-                container.appendChild(particle);
-            }
-        }
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const html = document.documentElement;
 
-        // Header scroll effect
-        window.addEventListener('scroll', () => {
-            const header = document.getElementById('header');
-            if (window.scrollY > 50) {
-                header.classList.add('scrolled');
+        function setTheme(theme) {
+            html.setAttribute('data-theme', theme);
+            localStorage.setItem('exort-theme', theme);
+            if (theme === 'light') {
+                themeIcon.className = 'fas fa-moon';
             } else {
-                header.classList.remove('scrolled');
+                themeIcon.className = 'fas fa-sun';
+            }
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('exort-theme');
+        if (savedTheme) {
+            setTheme(savedTheme);
+        } else {
+            setTheme('dark');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const current = html.getAttribute('data-theme');
+            setTheme(current === 'dark' ? 'light' : 'dark');
+        });
+
+        // Mobile Nav Toggle
+        const mobileToggle = document.getElementById('mobileToggle');
+        const navMenu = document.getElementById('navMenu');
+
+        mobileToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('open');
+            const icon = mobileToggle.querySelector('i');
+            if (navMenu.classList.contains('open')) {
+                icon.className = 'fas fa-times';
+            } else {
+                icon.className = 'fas fa-bars';
             }
         });
 
-        // Smooth scroll for navigation
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
+        // Close mobile nav on link click
+        navMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('open');
+                mobileToggle.querySelector('i').className = 'fas fa-bars';
             });
         });
-
-        // Initialize
-        createParticles();
-
-        // Intersection Observer for animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-
-        // Observe feature cards
-        document.querySelectorAll('.feature-card').forEach(card => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(20px)';
-            card.style.transition = 'all 0.6s ease';
-            observer.observe(card);
-        });
-
-        // Code Tab Switching
-        const codeTabs = document.querySelectorAll('.code-tab');
-        codeTabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                codeTabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                document.querySelectorAll('.code-body').forEach(b => b.classList.remove('active'));
-                const target = tab.getAttribute('data-tab');
-                document.getElementById('code-' + target).classList.add('active');
-            });
-        });
-
-        // Wallet Copy
-        function copyWallet() {
-            const addr = document.getElementById('walletAddr').textContent;
-            navigator.clipboard.writeText(addr).then(() => {
-                const btn = document.getElementById('walletCopyBtn');
-                btn.innerHTML = '<i class="fas fa-check"></i>';
-                setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy"></i>'; }, 2000);
-            });
-        }
     </script>
+
 </body>
 </html>
