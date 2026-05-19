@@ -30,11 +30,27 @@ BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 MIMO_API_KEY = os.getenv("MIMO_API_KEY", "")
 CEREBRAS_API_KEY = os.getenv("CEREBRAS_API_KEY", "")
-DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "llama-3.3-70b-versatile")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "google/gemma-4-26b-a4b-it:free")
 RATE_LIMIT = int(os.getenv("RATE_LIMIT_PER_MIN", "10"))
 
 # Provider chain: try each in order until one works
+# OpenRouter free models (multiple for resilience against rate limits)
+OPENROUTER_FREE_MODELS = [
+    "google/gemma-4-26b-a4b-it:free",
+    "google/gemma-4-31b-it:free",
+    "deepseek/deepseek-v4-flash:free",
+    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+]
 PROVIDERS = []
+if OPENROUTER_API_KEY:
+    for model in OPENROUTER_FREE_MODELS:
+        PROVIDERS.append({
+            "name": f"OpenRouter/{model.split('/')[1].split(':')[0]}",
+            "url": "https://openrouter.ai/api/v1/chat/completions",
+            "key": OPENROUTER_API_KEY,
+            "model": model,
+        })
 if GROQ_API_KEY:
     PROVIDERS.append({
         "name": "Groq",
@@ -61,6 +77,9 @@ if CEREBRAS_API_KEY:
     })
 
 AVAILABLE_MODELS = {
+    "deepseek-v4-flash": "deepseek/deepseek-v4-flash:free",
+    "gemma-4-31b": "google/gemma-4-31b-it:free",
+    "gemma-4-26b": "google/gemma-4-26b-a4b-it:free",
     "llama-3.3-70b": "llama-3.3-70b-versatile",
     "llama-3.1-8b": "llama-3.1-8b-instant",
     "mixtral-8x7b": "mixtral-8x7b-32768",
