@@ -313,6 +313,10 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
   overflow:hidden;
   transition:max-height .4s ease,padding .3s ease;
 }
+.faq-item.open .faq-answer{max-height:500px}
+.faq-item.open .faq-question i{transform:rotate(180deg)}
+.faq-question{cursor:pointer;user-select:none}
+.faq-question i{transition:transform .3s ease;pointer-events:none}
 .faq-answer-inner{
   padding:0 24px 20px;
   color:var(--secondary);
@@ -802,7 +806,7 @@ document.querySelectorAll('.faq-question').forEach(function(q) {
   q.addEventListener('click', function() {
     var item = this.parentElement;
     var wasOpen = item.classList.contains('open');
-    document.querySelectorAll('.faq-item.open').forEach(function(i) { i.classList.remove('open'); });
+    document.querySelectorAll(');
     if (!wasOpen) item.classList.add('open');
   });
 });

@@ -11,9 +11,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Inter',sans-serif;background:#000;color:#fff;overflow:hidden;height:100vh;width:100vw}
+    body{font-family:'Inter',sans-serif;background:#000;color:#fff;height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column}
 
-    /* HEADER */
     .header{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(0,0,0,0.8);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.06);padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between}
     .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.15rem;color:#fff;text-decoration:none}
     .logo img{width:32px;height:32px;border-radius:8px}
@@ -24,133 +23,21 @@
     .btn-start{background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;padding:8px 20px;border-radius:10px;font-size:0.85rem;font-weight:600;text-decoration:none;transition:all .2s}
     .btn-start:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(99,102,241,0.3)}
 
-    /* 3D SCENE */
-    .scene{position:fixed;top:0;left:0;width:100%;height:100%;perspective:1200px;overflow:hidden}
+    .content{text-align:center}
+    .content h1{font-size:clamp(2.5rem,7vw,5rem);font-weight:900;letter-spacing:-0.03em;background:linear-gradient(135deg,#6366f1,#a855f7,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.1;margin-bottom:16px}
+    .content .sub{font-size:clamp(1rem,2.5vw,1.5rem);font-weight:600;color:#94a3b8;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:32px}
+    .content .tag{display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:100px;padding:14px 32px;font-size:1rem;font-weight:600;color:#fff;animation:pulse 2s ease-in-out infinite}
+    .content .tag i{color:#6366f1;font-size:1.2rem}
 
-    /* NEURAL NETWORK NODES */
-    .node{position:absolute;border-radius:50%;animation:nodeFloat 6s ease-in-out infinite}
-    .node-core{width:80px;height:80px;background:radial-gradient(circle,rgba(99,102,241,0.6),rgba(99,102,241,0.1));box-shadow:0 0 60px rgba(99,102,241,0.4),0 0 120px rgba(168,85,247,0.2)}
-    .node-sm{width:40px;height:40px;background:radial-gradient(circle,rgba(168,85,247,0.5),rgba(168,85,247,0.1));box-shadow:0 0 40px rgba(168,85,247,0.3)}
-    .node-xs{width:20px;height:20px;background:radial-gradient(circle,rgba(236,72,153,0.4),rgba(236,72,153,0.1));box-shadow:0 0 30px rgba(236,72,153,0.2)}
-
-    .node:nth-child(1){top:15%;left:20%;animation-delay:0s}
-    .node:nth-child(2){top:60%;left:15%;animation-delay:1s}
-    .node:nth-child(3){top:30%;left:70%;animation-delay:2s}
-    .node:nth-child(4){top:75%;left:75%;animation-delay:0.5s}
-    .node:nth-child(5){top:45%;left:40%;animation-delay:1.5s}
-    .node:nth-child(6){top:20%;left:50%;animation-delay:2.5s}
-    .node:nth-child(7){top:80%;left:45%;animation-delay:0.8s}
-    .node:nth-child(8){top:50%;left:85%;animation-delay:1.8s}
-    .node:nth-child(9){top:10%;left:85%;animation-delay:3s}
-    .node:nth-child(10){top:90%;left:25%;animation-delay:2.2s}
-
-    @keyframes nodeFloat{
-      0%,100%{transform:translateY(0) translateX(0) scale(1)}
-      25%{transform:translateY(-30px) translateX(15px) scale(1.1)}
-      50%{transform:translateY(-10px) translateX(-20px) scale(0.95)}
-      75%{transform:translateY(-25px) translateX(10px) scale(1.05)}
-    }
-
-    /* CONNECTION LINES (SVG) */
-    .connections{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none}
-    .conn-line{stroke:rgba(99,102,241,0.15);stroke-width:1;animation:pulseLine 4s ease-in-out infinite}
-    .conn-line:nth-child(even){stroke:rgba(168,85,247,0.12);animation-delay:1s}
-    .conn-line:nth-child(3n){stroke:rgba(236,72,153,0.1);animation-delay:2s}
-
-    @keyframes pulseLine{
-      0%,100%{opacity:0.3;stroke-width:1}
-      50%{opacity:0.8;stroke-width:2}
-    }
-
-    /* 3D FLOATING SHAPES */
-    .shape{position:absolute;transform-style:preserve-3d;animation:shapeSpin 12s linear infinite}
-    .shape-cube{width:60px;height:60px;border:2px solid rgba(99,102,241,0.3);border-radius:8px}
-    .shape-tetra{width:0;height:0;border-left:30px solid transparent;border-right:30px solid transparent;border-bottom:52px solid rgba(168,85,247,0.15)}
-    .shape-ring{width:80px;height:80px;border:2px solid rgba(236,72,153,0.2);border-radius:50%}
-    .shape-triangle{width:50px;height:50px;border:2px solid rgba(99,102,241,0.2);clip-path:polygon(50% 0%,0% 100%,100% 100%)}
-
-    .shape:nth-child(1){top:20%;left:10%;animation-duration:15s;animation-delay:0s}
-    .shape:nth-child(2){top:70%;left:80%;animation-duration:20s;animation-delay:2s}
-    .shape:nth-child(3){top:40%;left:60%;animation-duration:18s;animation-delay:4s}
-    .shape:nth-child(4){top:85%;left:30%;animation-duration:22s;animation-delay:1s}
-    .shape:nth-child(5){top:10%;left:75%;animation-duration:16s;animation-delay:3s}
-    .shape:nth-child(6){top:55%;left:20%;animation-duration:19s;animation-delay:5s}
-
-    @keyframes shapeSpin{
-      0%{transform:rotateX(0) rotateY(0) rotateZ(0)}
-      100%{transform:rotateX(360deg) rotateY(360deg) rotateZ(360deg)}
-    }
-
-    /* AI CHARACTERS */
-    .ai-bot{position:absolute;animation:botFloat 5s ease-in-out infinite}
-    .bot-body{width:50px;height:50px;background:linear-gradient(135deg,#6366f1,#a855f7);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;box-shadow:0 0 30px rgba(99,102,241,0.4)}
-    .bot-eyes{position:absolute;top:-8px;display:flex;gap:8px}
-    .bot-eye{width:8px;height:8px;background:#fff;border-radius:50%;animation:blink 3s ease-in-out infinite}
-    .bot-eye:nth-child(2){animation-delay:.1s}
-
-    .ai-bot:nth-child(1){top:25%;left:30%;animation-delay:0s}
-    .ai-bot:nth-child(2){top:55%;left:65%;animation-delay:1.2s}
-    .ai-bot:nth-child(3){top:70%;left:25%;animation-delay:2.4s}
-    .ai-bot:nth-child(4){top:35%;left:75%;animation-delay:0.6s}
-    .ai-bot:nth-child(5){top:80%;left:55%;animation-delay:1.8s}
-
-    @keyframes botFloat{
-      0%,100%{transform:translateY(0) rotate(0deg)}
-      25%{transform:translateY(-20px) rotate(5deg)}
-      50%{transform:translateY(-5px) rotate(-3deg)}
-      75%{transform:translateY(-15px) rotate(2deg)}
-    }
-
-    @keyframes blink{
-      0%,90%,100%{transform:scaleY(1)}
-      95%{transform:scaleY(0.1)}
-    }
-
-    /* ENERGY BEAMS */
-    .beam{position:absolute;height:2px;background:linear-gradient(90deg,transparent,rgba(99,102,241,0.6),transparent);animation:beamMove 3s linear infinite}
-    .beam:nth-child(1){top:30%;left:0;width:100%;animation-delay:0s}
-    .beam:nth-child(2){top:60%;left:0;width:100%;animation-delay:1s}
-    .beam:nth-child(3){top:45%;left:0;width:100%;animation-delay:2s}
-
-    @keyframes beamMove{
-      0%{transform:translateX(-100%);opacity:0}
-      10%{opacity:1}
-      90%{opacity:1}
-      100%{transform:translateX(100%);opacity:0}
-    }
-
-    /* CENTER TEXT */
-    .center-content{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10;text-align:center}
-    .center-content h1{font-size:clamp(2rem,6vw,4.5rem);font-weight:900;letter-spacing:-0.03em;background:linear-gradient(135deg,#6366f1,#a855f7,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.1;margin-bottom:16px;text-shadow:none}
-    .center-content .sub{font-size:clamp(1rem,2.5vw,1.6rem);font-weight:600;color:#94a3b8;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:24px}
-    .center-content .base-tag{display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:100px;padding:12px 28px;font-size:1rem;font-weight:600;color:#fff;animation:pulseTag 2s ease-in-out infinite}
-    .center-content .base-tag i{color:#6366f1;font-size:1.2rem}
-
-    @keyframes pulseTag{
+    @keyframes pulse{
       0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,0.3)}
       50%{box-shadow:0 0 0 12px rgba(99,102,241,0)}
     }
 
-    /* GLOW ORB */
-    .glow-orb{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:500px;height:500px;background:radial-gradient(circle,rgba(99,102,241,0.12) 0%,transparent 70%);border-radius:50%;filter:blur(60px);z-index:0;animation:orbPulse 4s ease-in-out infinite}
-
-    @keyframes orbPulse{
-      0%,100%{opacity:0.5;transform:translate(-50%,-50%) scale(1)}
-      50%{opacity:0.8;transform:translate(-50%,-50%) scale(1.2)}
-    }
-
-    /* RESPONSIVE */
-    @media(max-width:768px){
-      .header{padding:0 20px}
-      .nav-links{display:none}
-      .ai-bot .bot-body{width:36px;height:36px;font-size:1rem}
-      .node-core{width:50px;height:50px}
-    }
+    @media(max-width:768px){.header{padding:0 20px}.nav-links{display:none}}
   </style>
 </head>
 <body>
-
-  <!-- HEADER -->
   <header class="header">
     <a href="index.html" class="logo">
       <img src="openmindlogo.jpg" alt="Exort">
@@ -166,83 +53,13 @@
     </nav>
   </header>
 
-  <!-- 3D SCENE -->
-  <div class="scene">
-
-    <!-- Glow Orb -->
-    <div class="glow-orb"></div>
-
-    <!-- Energy Beams -->
-    <div class="beam"></div>
-    <div class="beam"></div>
-    <div class="beam"></div>
-
-    <!-- Neural Network Nodes -->
-    <div class="node node-core"></div>
-    <div class="node node-sm"></div>
-    <div class="node node-core"></div>
-    <div class="node node-sm"></div>
-    <div class="node node-xs"></div>
-    <div class="node node-xs"></div>
-    <div class="node node-sm"></div>
-    <div class="node node-xs"></div>
-    <div class="node node-xs"></div>
-    <div class="node node-sm"></div>
-
-    <!-- Connection Lines -->
-    <svg class="connections" viewBox="0 0 1920 1080" preserveAspectRatio="none">
-      <line class="conn-line" x1="384" y1="162" x2="288" y2="648"/>
-      <line class="conn-line" x1="384" y1="162" x2="1344" y2="324"/>
-      <line class="conn-line" x1="288" y1="648" x2="1344" y2="324"/>
-      <line class="conn-line" x1="1344" y1="324" x2="1440" y2="810"/>
-      <line class="conn-line" x1="288" y1="648" x2="768" y2="486"/>
-      <line class="conn-line" x1="768" y1="486" x2="1344" y2="324"/>
-      <line class="conn-line" x1="768" y1="486" x2="1440" y2="810"/>
-      <line class="conn-line" x1="960" y1="216" x2="768" y2="486"/>
-      <line class="conn-line" x1="1632" y1="108" x2="1344" y2="324"/>
-      <line class="conn-line" x1="480" y1="972" x2="288" y2="648"/>
-    </svg>
-
-    <!-- 3D Floating Shapes -->
-    <div class="shape shape-cube"></div>
-    <div class="shape shape-tetra"></div>
-    <div class="shape shape-ring"></div>
-    <div class="shape shape-triangle"></div>
-    <div class="shape shape-cube"></div>
-    <div class="shape shape-ring"></div>
-
-    <!-- AI Bots Playing -->
-    <div class="ai-bot">
-      <div class="bot-eyes"><div class="bot-eye"></div><div class="bot-eye"></div></div>
-      <div class="bot-body">🤖</div>
-    </div>
-    <div class="ai-bot">
-      <div class="bot-eyes"><div class="bot-eye"></div><div class="bot-eye"></div></div>
-      <div class="bot-body">🧠</div>
-    </div>
-    <div class="ai-bot">
-      <div class="bot-eyes"><div class="bot-eye"></div><div class="bot-eye"></div></div>
-      <div class="bot-body">⚡</div>
-    </div>
-    <div class="ai-bot">
-      <div class="bot-eyes"><div class="bot-eye"></div><div class="bot-eye"></div></div>
-      <div class="bot-body">🔮</div>
-    </div>
-    <div class="ai-bot">
-      <div class="bot-eyes"><div class="bot-eye"></div><div class="bot-eye"></div></div>
-      <div class="bot-body">🚀</div>
-    </div>
-  </div>
-
-  <!-- CENTER TEXT -->
-  <div class="center-content">
+  <div class="content">
     <h1>Something is Coming</h1>
     <p class="sub">On Base</p>
-    <div class="base-tag">
+    <div class="tag">
       <i class="fas fa-rocket"></i>
       <span>Stay Tuned</span>
     </div>
   </div>
-
 </body>
 </html>
