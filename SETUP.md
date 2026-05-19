@@ -58,14 +58,37 @@ exort setup
 
 ```bash
 # Start chatting
-exort chat
+exort shell
 
 # Ask a single question
-exort chat "What is Python?"
+exort ask "What is Python?"
 
 # Use a specific provider
-exort chat -p ollama "Hello!"
+exort shell -p ollama "Hello!"
 ```
+
+## Step 5: Add More API Providers (Optional)
+
+You can add any OpenAI-compatible API as a custom provider:
+
+```bash
+# 1. Edit ~/.exort/config.yaml — add under "providers:":
+cat >> ~/.exort/config.yaml << 'EOF'
+providers:
+  together:
+    key_var: TOGETHER_API_KEY
+    endpoint: https://api.together.xyz/v1
+    model: meta-llama/Llama-3-70b-chat-hf
+EOF
+
+# 2. Add the API key to ~/.exort/.env:
+echo "TOGETHER_API_KEY=your_key" >> ~/.exort/.env
+
+# 3. Use it:
+exort shell -p together
+```
+
+See the [README](README.md#api-setup--management) for full details.
 
 ## Optional: Telegram Bot
 
@@ -78,7 +101,7 @@ exort chat -p ollama "Hello!"
    ```
 5. Run:
    ```bash
-   exort serve
+   exort bot
    ```
 
 ## Optional: Docker

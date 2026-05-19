@@ -186,12 +186,140 @@ on what the user needs. Some questions need zero tools. Others need five.
 | **Ollama** | Free (local) | Depends on hardware | [ollama.ai](https://ollama.ai) |
 | **OpenAI** | Pay-per-token | Fast | [platform.openai.com](https://platform.openai.com) |
 | **Anthropic** | Pay-per-token | Fast | [console.anthropic.com](https://console.anthropic.com) |
+| **Custom** | Varies | Varies | Any OpenAI-compatible API |
 
 Switch at runtime:
 ```
 exort ▸ :switch ollama
 exort ▸ :model llama3.1
 ```
+
+---
+
+## API Setup & Management
+
+### Add an API Key
+
+All API keys are stored in `~/.exort/.env` (one `KEY=value` per line).
+
+```bash
+# Built-in providers — just add the key:
+echo "GROQ_API_KEY=gsk_your_key" > ~/.exort/.env
+echo "OPENAI_API_KEY=sk-your_key" >> ~/.exort/.env
+echo "ANTHROPIC_API_KEY=sk-ant-your_key" >> ~/.exort/.env
+
+# Multiple providers at once:
+cat > ~/.exort/.env << 'EOF'
+GROQ_API_KEY=gsk_your_groq_key
+OPENAI_API_KEY=sk-your_openai_key
+ANTHROPIC_API_KEY=sk-ant-your_anthropic_key
+TELEGRAM_BOT_TOKEN=your_telegram_token
+EOF
+```
+
+Or use the interactive wizard:
+```bash
+exort setup
+```
+
+### Edit / Update an API Key
+
+```bash
+# View current keys (values are masked)
+cat ~/.exort/.env
+
+# Update a specific key — edit the file directly:
+# On Linux/Mac:
+sed -i 's/GROQ_API_KEY=.*/GROQ_API_KEY=gsk_new_key/' ~/.exort/.env
+
+# On Windows (PowerShell):
+(Get-Content ~/.exort/.env) -replace 'GROQ_API_KEY=.*', 'GROQ_API_KEY=gsk_new_key' | Set-Content ~/.exort/.env
+
+# Or just open it in any text editor:
+nano ~/.exort/.env        # Linux
+notepad ~/.exort/.env     # Windows
+```
+
+### Add a Custom API Provider
+
+Exort works with **any OpenAI-compatible API** — Together AI, Fireworks, DeepSeek, Mistral, OpenRouter, LM Studio, vLLM, etc.
+
+Add a custom provider in `~/.exort/config.yaml`:
+
+```yaml
+providers:
+  together:
+    key_var: TOGETHER_API_KEY
+    endpoint: https://api.together.xyz/v1
+    model: meta-llama/Llama-3-70b-chat-hf
+
+  openrouter:
+    key_var: OPENROUTER_API_KEY
+    endpoint: https://openrouter.ai/api/v1
+    model: meta-llama/llama-3-70b-instruct
+
+  deepseek:
+    key_var: DEEPSEEK_API_KEY
+    endpoint: https://api.deepseek.com/v1
+    model: deepseek-chat
+
+  lmstudio:
+    key_var: null                    # local, no key needed
+    endpoint: http://localhost:1234/v1
+    model: local-model
+```
+
+Then add the API key to `~/.exort/.env`:
+```bash
+echo "TOGETHER_API_KEY=your_key" >> ~/.exort/.env
+echo "OPENROUTER_API_KEY=your_key" >> ~/.exort/.env
+echo "DEEPSEEK_API_KEY=your_key" >> ~/.exort/.env
+```
+
+Use it:
+```bash
+exort shell -p together
+exort shell -p openrouter
+# or inside the shell:
+exort ▸ :switch together
+```
+
+### View Current Configuration
+
+```bash
+exort config show                    # all settings
+exort config get engine.provider     # current provider
+exort config get engine.model        # current model
+exort providers                      # list available providers
+```
+
+### Change Provider / Model via CLI
+
+```bash
+# Via config commands (persists to config.yaml):
+exort config set engine.provider openai
+exort config set engine.model gpt-4o
+exort config set engine.temperature 0.3
+
+# Via shell commands (session only):
+exort ▸ :switch ollama
+exort ▸ :model llama3.1
+```
+
+### Config Priority
+
+```
+runtime args (--provider, --model)  >  env vars  >  config.yaml  >  built-in defaults
+```
+
+### Custom Provider Requirements
+
+Any API that implements the **OpenAI Chat Completions format** works:
+- `POST /v1/chat/completions` with `messages`, `model`, `temperature`, `max_tokens`
+- Returns `choices[0].message.content` and optional `tool_calls`
+- Streaming via `stream: true` with SSE chunks
+
+Examples of compatible APIs: Together AI, Fireworks AI, DeepSeek, Mistral, OpenRouter, Groq, LM Studio, Ollama, vLLM, text-generation-inference, LiteLLM, and many more.
 
 ---
 
