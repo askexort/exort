@@ -447,7 +447,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
     <div class="hero-content">
       <div class="hero-subtitle">THE OPEN AGENT ENGINE</div>
       <h1><span class="gradient-text">Build Your AI Assistant</span></h1>
-      <p class="hero-desc">Exort is a self-hosted AI agent with full tool use, persistent memory, and multi-provider support. Run powerful AI locally or in the cloud — your data, your rules, completely free and open source.</p>
+      <p class="hero-desc">Exort is a free, open-source AI agent that runs on your machine or in the cloud. It can write code, browse the web, manage files, and remember context across conversations. Connect it to Telegram for 24/7 access, or use it directly from your terminal. No subscriptions, no data collection — just powerful AI that works for you.</p>
       <div class="hero-buttons">
         <a href="https://github.com/askexort/exort" target="_blank" class="btn-primary"><i class="fab fa-github"></i> Get Started</a>
           <a href="https://t.me/askexort_bot" target="_blank" class="btn-secondary"><i class="fab fa-telegram"></i> Try Bot</a>
@@ -482,28 +482,28 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
         <div class="step-num">1</div>
         <div class="step-icon"><i class="fas fa-download"></i></div>
         <h4>Install</h4>
-        <p>One command is all it takes. No cloning repos, no config files, no dependencies to wrangle.</p>
+        <p>One command is all it takes. No cloning repos, no config files, no dependencies to wrangle. Works on Windows, Mac, and Linux.</p>
         <code>pip install exort-agent</code>
       </div>
       <div class="card step-card">
         <div class="step-num">2</div>
         <div class="step-icon"><i class="fas fa-cog"></i></div>
         <h4>Configure</h4>
-        <p>Interactive setup walks you through choosing an AI provider and adding your API key.</p>
+        <p>Interactive setup walks you through choosing an AI provider and adding your API key. Free providers like Groq work instantly with no credit card.</p>
         <code>exort setup</code>
       </div>
       <div class="card step-card">
         <div class="step-num">3</div>
         <div class="step-icon"><i class="fas fa-comments"></i></div>
         <h4>Chat</h4>
-        <p>Use the terminal shell for local development or deploy a Telegram bot for 24/7 access anywhere.</p>
+        <p>Use the terminal shell for local development or deploy a Telegram bot for 24/7 access from anywhere. Send text, images, files, and voice messages.</p>
         <code>exort shell / exort bot</code>
       </div>
       <div class="card step-card">
         <div class="step-num">4</div>
         <div class="step-icon"><i class="fas fa-puzzle-piece"></i></div>
         <h4>Extend</h4>
-        <p>Skills, memory, and tools grow over time. The more you use Exort, the smarter it becomes.</p>
+        <p>Skills, memory, and tools grow over time. Create reusable procedures, build custom workflows, and watch your AI assistant become more capable with every conversation.</p>
         <code>Skills + Memory + Tools</code>
       </div>
     </div>
@@ -831,6 +831,49 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
 </footer>
 
 <script>
+
+// Mobile Menu
+var hamburger = document.getElementById('hamburger');
+var mobileMenu = document.getElementById('mobileMenu');
+var closeMenu = document.getElementById('closeMenu');
+
+if (hamburger) {
+  hamburger.addEventListener('click', function() {
+    mobileMenu.classList.add('active');
+  });
+}
+
+if (closeMenu) {
+  closeMenu.addEventListener('click', function() {
+    mobileMenu.classList.remove('active');
+  });
+}
+
+function closeMobile() {
+  if (mobileMenu) mobileMenu.classList.remove('active');
+}
+
+// Close mobile menu on outside click
+document.addEventListener('click', function(e) {
+  if (mobileMenu && mobileMenu.classList.contains('active') && 
+      !mobileMenu.contains(e.target) && e.target !== hamburger && !hamburger.contains(e.target)) {
+    mobileMenu.classList.remove('active');
+  }
+});
+
+// Header scroll effect
+window.addEventListener('scroll', function() {
+  var header = document.getElementById('header');
+  if (header) {
+    if (window.scrollY > 50) {
+      header.style.background = 'rgba(0,0,0,0.95)';
+      header.style.backdropFilter = 'blur(20px)';
+    } else {
+      header.style.background = 'rgba(0,0,0,0.8)';
+      header.style.backdropFilter = 'blur(10px)';
+    }
+  }
+});
 
 // Copy Wallet
 function copyWallet() {

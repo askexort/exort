@@ -462,6 +462,17 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
 .faq-body p{padding:0 24px 20px 80px;color:var(--text-secondary);font-size:0.95rem;line-height:1.7}
 .faq-body code{background:rgba(249,227,131,0.15);color:#F9E383;padding:2px 8px;border-radius:6px;font-size:0.85rem}
 
+/* ---- DONATE ---- */
+.donate{padding:100px 0}
+.donate .section-title{margin-bottom:40px}
+.donate-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius);padding:48px;max-width:600px;margin:0 auto;text-align:center}
+.donate-card .donate-icon{font-size:2.5rem;margin-bottom:20px}
+.donate-card h3{font-size:1.4rem;color:#F9E383;margin-bottom:16px}
+.donate-card p{color:#F9E383;font-size:1.05rem;margin-bottom:28px;line-height:1.7}
+.wallet-box{background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.wallet-addr{font-family:'Courier New',monospace;font-size:.85rem;color:#F9E383;word-break:break-all;text-align:left;flex:1}
+.copy-btn{padding:10px 18px;background:var(--grad);border:none;border-radius:8px;color:#F9E383;font-weight:600;font-size:.85rem;cursor:pointer;white-space:nowrap;font-family:inherit;transition:opacity .2s}
+
 </style>
     <link rel="icon" href="favicon.jpg" type="image/jpeg">
 </head>
@@ -506,7 +517,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
     <div class="hero-content">
       <div class="hero-subtitle">THE OPEN AGENT ENGINE</div>
       <h1><span class="gradient-text">Free AI for Everyone</span></h1>
-      <p class="hero-desc">Exort is a self-hosted AI agent with tool use, persistent memory, and multi-provider support. Run powerful AI locally or in the cloud — completely free and open source.</p>
+      <p class="hero-desc">Exort is a free, open-source AI agent that runs on your machine or in the cloud. It can write code, browse the web, manage files, and remember context across conversations. Connect it to Telegram for 24/7 access, or use it directly from your terminal. No subscriptions, no data collection — just powerful AI that works for you.</p>
       <div class="hero-buttons">
           <a href="https://t.me/askexort_bot" target="_blank" class="btn-primary"><i class="fab fa-telegram"></i> Try Bot</a>
         <a href="https://github.com/askexort/exort" target="_blank" class="btn-secondary"><i class="fab fa-github"></i> GitHub</a>
@@ -540,7 +551,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
       <div class="card feature-card">
         <div class="feature-icon"><i class="fas fa-wrench"></i></div>
         <h4>Tool Use</h4>
-        <p>Execute code, browse the web, manage files, and call APIs — all through natural language commands.</p>
+        <p>Write and execute Python code, browse websites, manage files, run shell commands, and call external APIs — all through simple natural language. Exort handles complex multi-step tasks automatically.</p>
         <div class="feature-tags">
           <span class="feature-tag">Process Automation</span>
           <span class="feature-tag">Web Browsing</span>
@@ -550,7 +561,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
       <div class="card feature-card">
         <div class="feature-icon"><i class="fas fa-brain"></i></div>
         <h4>Persistent Memory</h4>
-        <p>Remembers context across conversations. Builds understanding of your preferences, environment, and goals over time.</p>
+        <p>Exort remembers your preferences, project details, and conversation history across sessions. It builds context over time, so you never have to repeat yourself. Memory survives restarts and works across all your devices.</p>
         <div class="feature-tags">
           <span class="feature-tag">Cross-Session Memory</span>
           <span class="feature-tag">Context Building</span>
@@ -560,7 +571,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
       <div class="card feature-card">
         <div class="feature-icon"><i class="fas fa-plug"></i></div>
         <h4>Multi-Provider</h4>
-        <p>Switch between Groq, OpenAI, Anthropic, Ollama, and more. Use free providers or bring your own API keys.</p>
+        <p>Choose from 9+ AI providers including free options like Groq and Cerebras. Switch between OpenAI, Anthropic, Ollama, and more with a single command. Mix and match providers for different tasks.</p>
         <div class="feature-tags">
           <span class="feature-tag">Free Providers</span>
           <span class="feature-tag">API Keys</span>
@@ -570,7 +581,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
       <div class="card feature-card">
         <div class="feature-icon"><i class="fab fa-telegram"></i></div>
         <h4>Telegram Bot</h4>
-        <p>Chat with your AI from Telegram anywhere, anytime. Runs 24/7, handles groups, media, and complex tasks.</p>
+        <p>Chat with your AI assistant from anywhere using Telegram. Send text, images, files, and voice messages. The bot runs 24/7 on any server, handles group chats, and can execute complex tasks while you're away.</p>
         <div class="feature-tags">
           <span class="feature-tag">24/7 Access</span>
           <span class="feature-tag">Group Support</span>
@@ -580,7 +591,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
       <div class="card feature-card">
         <div class="feature-icon"><i class="fas fa-terminal"></i></div>
         <h4>CLI Interface</h4>
-        <p>Full terminal experience with shell mode. Scriptable, local-first, and designed for developers who love the command line.</p>
+        <p>Full terminal experience with interactive shell mode. Perfect for developers who prefer the command line. Scriptable, local-first, and integrates seamlessly into your existing workflow.</p>
         <div class="feature-tags">
           <span class="feature-tag">Local Execution</span>
           <span class="feature-tag">Scriptable</span>
@@ -590,7 +601,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
       <div class="card feature-card">
         <div class="feature-icon"><i class="fas fa-code-branch"></i></div>
         <h4>Open Source</h4>
-        <p>MIT licensed and fully transparent. Inspect the code, modify it for your needs, and contribute back to the community.</p>
+        <p>MIT licensed and fully transparent. Inspect every line of code, modify it for your needs, and contribute back to the community. No vendor lock-in, no hidden agendas — just honest software.</p>
         <div class="feature-tags">
           <span class="feature-tag">Transparent</span>
           <span class="feature-tag">Community-Driven</span>
@@ -753,37 +764,37 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
       <div class="card benefit-card">
         <div class="benefit-icon"><i class="fas fa-gift"></i></div>
         <h3>100% Free</h3>
-        <p>No subscriptions, no API fees with free providers. Use Groq and Cerebras at zero cost.</p>
+        <p>No subscriptions, no API fees with free providers. Use Groq, Cerebras, and SambaNova at zero cost. Paid providers like OpenAI and Anthropic are optional — you choose what works for your budget.</p>
         <span class="benefit-stat">$0 / month</span>
       </div>
       <div class="card benefit-card">
         <div class="benefit-icon"><i class="fas fa-shield-alt"></i></div>
         <h3>Full Privacy</h3>
-        <p>Data stays on your machine, never leaves. Your conversations and files remain local.</p>
+        <p>Your data stays on your machine. Conversations, memory, and files never leave your computer unless you explicitly use a cloud AI provider. For maximum privacy, run Ollama locally with zero data leaving your network.</p>
         <span class="benefit-stat">100% Local</span>
       </div>
       <div class="card benefit-card">
         <div class="benefit-icon"><i class="fas fa-clock"></i></div>
         <h3>24/7 Always On</h3>
-        <p>Telegram bot runs continuously, even when your PC is off. Deploy to any cloud server.</p>
+        <p>Your Telegram bot runs continuously, even when your PC is off. Deploy to Render, Railway, or any VPS for uninterrupted AI assistance. Respond to messages, execute tasks, and manage workflows around the clock.</p>
         <span class="benefit-stat">99.9% Uptime</span>
       </div>
       <div class="card benefit-card">
         <div class="benefit-icon"><i class="fas fa-laptop-code"></i></div>
         <h3>Multi-Platform</h3>
-        <p>CLI, Telegram, Slack — one agent everywhere. Use it wherever you work.</p>
+        <p>Use Exort from the CLI, Telegram, Slack, or any platform you prefer. One agent, multiple interfaces. Switch between them seamlessly without losing context or memory.</p>
         <span class="benefit-stat">5+ Platforms</span>
       </div>
       <div class="card benefit-card">
         <div class="benefit-icon"><i class="fas fa-brain"></i></div>
         <h3>Smart Memory</h3>
-        <p>Remembers context, builds understanding over time. Gets smarter the more you use it.</p>
+        <p>Exort learns from every conversation. It remembers your coding style, project structure, preferences, and past decisions. The more you use it, the more helpful it becomes — like a personal AI that truly knows you.</p>
         <span class="benefit-stat">∞ Memory</span>
       </div>
       <div class="card benefit-card">
         <div class="benefit-icon"><i class="fas fa-lock-open"></i></div>
         <h3>Open Source</h3>
-        <p>MIT licensed, community-driven, fully transparent. Inspect, modify, and contribute.</p>
+        <p>MIT licensed, community-driven, and fully transparent. Inspect every line of code, modify it for your needs, and contribute back. No vendor lock-in, no hidden costs — just honest, open software built by developers for developers.</p>
         <span class="benefit-stat">MIT License</span>
       </div>
     </div>
@@ -913,6 +924,26 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
   </div>
 </section>
 
+<!-- DONATE -->
+<section class="donate" id="donate">
+  <div class="container">
+    <div class="section-title">
+      <h2>Support <span class="gradient-text">Exort</span></h2>
+      <p>Help us keep Exort free and open source for everyone</p>
+    </div>
+    <div class="donate-card">
+      <div class="donate-icon">💜</div>
+      <h3>Back the Project</h3>
+      <p>Exort is built by the community, for the community. Your donations help us maintain servers, add new features, and keep everything free forever. Every contribution counts — no matter how small.</p>
+      <div class="wallet-box">
+        <span class="wallet-addr" id="walletAddr">0x9637EDad27c93F40b505F6478445530f58fF1501</span>
+        <button class="copy-btn" id="copyBtn" onclick="copyWallet()"><i class="fas fa-copy"></i> Copy</button>
+      </div>
+      <p style="font-size:.85rem;opacity:.7">Ethereum / EVM compatible chains</p>
+    </div>
+  </div>
+</section>
+
 <!-- FOOTER -->
 <footer class="footer">
   <div class="container">
@@ -951,6 +982,49 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
 </footer>
 
 <script>
+
+// Mobile Menu
+var hamburger = document.getElementById('hamburger');
+var mobileMenu = document.getElementById('mobileMenu');
+var closeMenu = document.getElementById('closeMenu');
+
+if (hamburger) {
+  hamburger.addEventListener('click', function() {
+    mobileMenu.classList.add('active');
+  });
+}
+
+if (closeMenu) {
+  closeMenu.addEventListener('click', function() {
+    mobileMenu.classList.remove('active');
+  });
+}
+
+function closeMobile() {
+  if (mobileMenu) mobileMenu.classList.remove('active');
+}
+
+// Close mobile menu on outside click
+document.addEventListener('click', function(e) {
+  if (mobileMenu && mobileMenu.classList.contains('active') && 
+      !mobileMenu.contains(e.target) && e.target !== hamburger && !hamburger.contains(e.target)) {
+    mobileMenu.classList.remove('active');
+  }
+});
+
+// Header scroll effect
+window.addEventListener('scroll', function() {
+  var header = document.getElementById('header');
+  if (header) {
+    if (window.scrollY > 50) {
+      header.style.background = 'rgba(0,0,0,0.95)';
+      header.style.backdropFilter = 'blur(20px)';
+    } else {
+      header.style.background = 'rgba(0,0,0,0.8)';
+      header.style.backdropFilter = 'blur(10px)';
+    }
+  }
+});
 
 // Copy Wallet
 function copyWallet() {
