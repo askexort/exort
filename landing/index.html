@@ -399,7 +399,18 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
 .faq-card.open .faq-arrow{transform:rotate(180deg);color:#F9E383}
 .faq-card.open{border-color:rgba(99,102,241,0.3);background:rgba(99,102,241,0.03)}
 .faq-body p{padding:0 24px 20px 80px;color:var(--text-secondary);font-size:0.95rem;line-height:1.7}
-.faq-body code{background:rgba(99,102,241,0.15);color:#F9E383;padding:2px 8px;border-radius:6px;font-size:0.85rem}
+.faq-body code{background:rgba(99,102,241,0.15);color:#a78bfa;padding:2px 8px;border-radius:6px;font-size:0.85rem}
+
+/* ---- DONATE ---- */
+.donate{padding:100px 0}
+.donate .section-title{margin-bottom:40px}
+.donate-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius);padding:48px;max-width:600px;margin:0 auto;text-align:center}
+.donate-card .donate-icon{font-size:2.5rem;margin-bottom:20px}
+.donate-card h3{font-size:1.4rem;color:#F9E383;margin-bottom:16px}
+.donate-card p{color:#F9E383;font-size:1.05rem;margin-bottom:28px;line-height:1.7}
+.wallet-box{background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.wallet-addr{font-family:'Courier New',monospace;font-size:.85rem;color:#F9E383;word-break:break-all;text-align:left;flex:1}
+.copy-btn{padding:10px 18px;background:var(--grad);border:none;border-radius:8px;color:#F9E383;font-weight:600;font-size:.85rem;cursor:pointer;white-space:nowrap;font-family:inherit;transition:opacity .2s}
 
 </style>
     <link rel="icon" href="favicon.jpg" type="image/jpeg">
@@ -789,6 +800,26 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
         </div>
       </div>
 
+    </div>
+  </div>
+</section>
+
+<!-- DONATE -->
+<section class="donate" id="donate">
+  <div class="container">
+    <div class="section-title">
+      <h2>Support <span class="gradient-text">Exort</span></h2>
+      <p>Help us keep Exort free and open source for everyone</p>
+    </div>
+    <div class="donate-card">
+      <div class="donate-icon">💜</div>
+      <h3>Back the Project</h3>
+      <p>Exort is built by the community, for the community. Your donations help us maintain servers, add new features, and keep everything free forever. Every contribution counts — no matter how small.</p>
+      <div class="wallet-box">
+        <span class="wallet-addr" id="walletAddr">0x9637EDad27c93F40b505F6478445530f58fF1501</span>
+        <button class="copy-btn" id="copyBtn" onclick="copyWallet()"><i class="fas fa-copy"></i> Copy</button>
+      </div>
+      <p style="font-size:.85rem;opacity:.7">Ethereum / EVM compatible chains</p>
     </div>
   </div>
 </section>
