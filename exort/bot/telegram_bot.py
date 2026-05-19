@@ -1,10 +1,11 @@
 """
 Exort Telegram Bot — Free AI for Everyone
-Uses Groq (free tier) as default provider. Fully async, no Engine dependency.
+Multi-provider: Gemini (primary, 1M tok/day free) + Groq (fallback, 100K tok/day).
+Fully async, no Engine dependency.
 
 Setup:
   1. @BotFather → /newbot → copy token
-  2. Set env vars: TELEGRAM_BOT_TOKEN, GROQ_API_KEY
+  2. Set env vars: TELEGRAM_BOT_TOKEN, GEMINI_API_KEY (or GROQ_API_KEY)
   3. exort bot
 """
 
@@ -25,11 +26,34 @@ logger = logging.getLogger(__name__)
 # ─── Config ───────────────────────────────────────────────────────────────────
 
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
-DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "llama-3.3-70b-versatile")
+DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "gemini-2.0-flash")
 RATE_LIMIT = int(os.getenv("RATE_LIMIT_PER_MIN", "10"))
 
+# Provider chain: try each in order until one works
+PROVIDERS = []
+if GEMINI_API_KEY:
+    PROVIDERS.append({
+        "name": "Gemini",
+        "url": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+        "key": GEMINI_API_KEY,
+        "model": DEFAULT_MODEL if "gemini" in DEFAULT_MODEL else "gemini-2.0-flash",
+    })
+if GROQ_API_KEY:
+    PROVIDERS.append({
+        "name": "Groq",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "key": GROQ_API_KEY,
+        "model": DEFAULT_MODEL if DEFAULT_MODEL in (
+            "llama-3.3-70b-versatile", "llama-3.1-8b-instant",
+            "mixtral-8x7b-32768", "gemma2-9b-it",
+        ) else "llama-3.3-70b-versatile",
+    })
+
 AVAILABLE_MODELS = {
+    "gemini-2.0-flash": "gemini-2.0-flash",
+    "gemini-2.5-flash": "gemini-2.5-flash-preview-05-20",
     "llama-3.3-70b": "llama-3.3-70b-versatile",
     "llama-3.1-8b": "llama-3.1-8b-instant",
     "mixtral-8x7b": "mixtral-8x7b-32768",
@@ -44,8 +68,6 @@ SYSTEM_PROMPT = (
     "If you don't know something, say so honestly. "
     "Keep responses under 2000 characters for Telegram readability."
 )
-
-GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 
 # ─── Rate Limiter ─────────────────────────────────────────────────────────────
@@ -77,42 +99,56 @@ stats: dict = {
 }
 
 
-# ─── Groq API (sync, to be wrapped with asyncio.to_thread) ───────────────────
+# ─── Multi-Provider AI API (sync, to be wrapped with asyncio.to_thread) ───────
 
-def _groq_chat_sync(message: str, model: str = None) -> str:
-    """Send a message to Groq API and return the response (blocking)."""
+def _ai_chat_sync(message: str, model: str = None) -> str:
+    """Send a message to AI providers with auto-fallback. Tries each provider in order."""
     model = model or DEFAULT_MODEL
+
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": message},
+    ]
 
     payload = json.dumps({
         "model": model,
-        "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": message},
-        ],
+        "messages": messages,
         "temperature": 0.7,
         "max_tokens": 1024,
     }).encode()
 
-    headers = {
-        "Authorization": f"Bearer {GROQ_API_KEY}",
-        "Content-Type": "application/json",
-        "User-Agent": "Exort-Bot/2.0.0",
-    }
+    last_error = None
+    for provider in PROVIDERS:
+        headers = {
+            "Authorization": f"Bearer {provider['key']}",
+            "Content-Type": "application/json",
+            "User-Agent": "Exort-Bot/2.0.0",
+        }
+        # Use provider's default model if the requested model doesn't match
+        prov_payload = json.dumps({
+            "model": provider["model"],
+            "messages": messages,
+            "temperature": 0.7,
+            "max_tokens": 1024,
+        }).encode()
 
-    req = urllib.request.Request(GROQ_URL, data=payload, headers=headers)
+        req = urllib.request.Request(provider["url"], data=prov_payload, headers=headers)
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                data = json.loads(resp.read())
+                return data["choices"][0]["message"]["content"]
+        except Exception as e:
+            last_error = e
+            logger.warning(f"{provider['name']} failed: {e}")
+            continue
 
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            data = json.loads(resp.read())
-            return data["choices"][0]["message"]["content"]
-    except Exception as e:
-        logger.error(f"Groq API error: {e}")
-        return f"⚠️ API error: {str(e)[:100]}. Try again in a moment."
+    logger.error(f"All providers failed. Last error: {last_error}")
+    return f"⚠️ All AI providers exhausted. Last error: {str(last_error)[:100]}. Try again later."
 
 
-async def chat_with_groq(message: str, model: str = None) -> str:
-    """Async wrapper for Groq API call."""
-    return await asyncio.to_thread(_groq_chat_sync, message, model)
+async def chat_with_ai(message: str, model: str = None) -> str:
+    """Async wrapper for AI API call with fallback."""
+    return await asyncio.to_thread(_ai_chat_sync, message, model)
 
 
 # ─── Health Check Server ─────────────────────────────────────────────────────
@@ -182,7 +218,8 @@ async def cmd_help(update, context):
         "• `/new` — Fresh conversation\n"
         "• `/help` — This message\n\n"
         f"**Rate Limit:** {RATE_LIMIT} messages/min\n"
-        f"**Current Model:** `{DEFAULT_MODEL}`"
+        f"**Current Model:** `{DEFAULT_MODEL}`\n"
+        f"**Providers:** {' → '.join(p['name'] for p in PROVIDERS) or 'none'}"
     )
 
     await update.message.reply_text(help_text, parse_mode=ParseMode.MARKDOWN)
@@ -221,8 +258,12 @@ async def cmd_models(update, context):
 
     await update.message.reply_text(
         "🤖 **Available Models:**\n\n"
-        "• **llama-3.3-70b** — Best quality (recommended)\n"
-        "• **llama-3.1-8b** — Fastest responses\n"
+        "**Gemini (free, 1M tok/day):**\n"
+        "• **gemini-2.0-flash** — Fast & capable ✅\n"
+        "• **gemini-2.5-flash** — Latest, with reasoning\n\n"
+        "**Groq (free, 100K tok/day):**\n"
+        "• **llama-3.3-70b** — Best quality\n"
+        "• **llama-3.1-8b** — Fastest\n"
         "• **mixtral-8x7b** — Great for coding\n"
         "• **gemma2-9b** — Balanced\n\n"
         f"Current: `{DEFAULT_MODEL}`",
@@ -323,9 +364,9 @@ async def handle_message(update, context, explicit_msg: str = None):
         return
 
     # Check API key
-    if not GROQ_API_KEY:
+    if not PROVIDERS:
         await update.message.reply_text(
-            "⚠️ API key not configured. Set GROQ_API_KEY environment variable."
+            "⚠️ No AI provider configured. Set GEMINI_API_KEY or GROQ_API_KEY environment variable."
         )
         return
 
@@ -340,7 +381,7 @@ async def handle_message(update, context, explicit_msg: str = None):
     logger.info(f"User {username} ({user_id}): {message[:80]}...")
 
     # Get AI response (async — doesn't block the event loop)
-    response = await chat_with_groq(message)
+    response = await chat_with_ai(message)
 
     # Telegram has 4096 char limit
     if len(response) > 4000:
@@ -437,9 +478,10 @@ def run_bot(token: str, cfg=None):
         print("❌ TELEGRAM_BOT_TOKEN not set!")
         return
 
-    if not GROQ_API_KEY:
-        print("⚠️  GROQ_API_KEY not set — bot will respond with error messages.")
-        print("   Get a free key at: https://console.groq.com")
+    if not PROVIDERS:
+        print("⚠️  No AI provider configured!")
+        print("   Set GEMINI_API_KEY (free, 1M tok/day): https://aistudio.google.com/apikey")
+        print("   Or set GROQ_API_KEY (free, 100K tok/day): https://console.groq.com")
 
     # Start health check server (keeps Render/Fly free tier alive)
     port = int(os.environ.get("PORT", "8080"))
@@ -447,7 +489,9 @@ def run_bot(token: str, cfg=None):
     Thread(target=httpd.serve_forever, daemon=True).start()
     logger.info(f"Health check server on port {port}")
 
+    prov_names = " → ".join(p["name"] for p in PROVIDERS) or "none"
     print(f"⚡ Exort bot starting... send /start on Telegram to begin.")
+    print(f"   Providers: {prov_names}")
     print(f"   Model: {DEFAULT_MODEL}")
     print(f"   Rate limit: {RATE_LIMIT}/min")
 
