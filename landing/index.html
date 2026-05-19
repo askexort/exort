@@ -57,16 +57,16 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
 .btn-primary{
   display:inline-flex;align-items:center;gap:8px;
   padding:14px 28px;
-  background:var(--grad);
+  background:transparent;
   color:#F9E383;
-  border:none;
+  border:1px solid rgba(249,227,131,0.3);
   border-radius:var(--btn-radius);
   font-size:1rem;font-weight:600;
   cursor:pointer;
-  transition:transform .2s,box-shadow .2s;
+  transition:transform .2s,border-color .3s;
   font-family:inherit;
 }
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(99,102,241,.35)}
+.btn-primary:hover{transform:translateY(-2px);border-color:rgba(249,227,131,0.6)}
 .btn-secondary{
   display:inline-flex;align-items:center;gap:8px;
   padding:14px 28px;
@@ -308,8 +308,8 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
 }
 .copy-btn{
   padding:10px 18px;
-  background:var(--grad);
-  border:none;
+  background:transparent;
+  border:1px solid rgba(249,227,131,0.3);
   border-radius:8px;
   color:#F9E383;
   font-weight:600;
@@ -410,7 +410,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
 .donate-card p{color:#F9E383;font-size:1.05rem;margin-bottom:28px;line-height:1.7}
 .wallet-box{background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
 .wallet-addr{font-family:'Courier New',monospace;font-size:.85rem;color:#F9E383;word-break:break-all;text-align:left;flex:1}
-.copy-btn{padding:10px 18px;background:var(--grad);border:none;border-radius:8px;color:#F9E383;font-weight:600;font-size:.85rem;cursor:pointer;white-space:nowrap;font-family:inherit;transition:opacity .2s}
+.copy-btn{padding:10px 18px;background:transparent;border:1px solid rgba(249,227,131,0.3);border-radius:8px;color:#F9E383;font-weight:600;font-size:.85rem;cursor:pointer;white-space:nowrap;font-family:inherit;transition:opacity .2s}
 
 </style>
     <link rel="icon" href="favicon.jpg" type="image/jpeg">
