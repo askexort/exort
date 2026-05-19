@@ -13,8 +13,9 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#000000;
-  --text:#ffffff;
-  --secondary:#94a3b8;
+  --text:#F9E383;
+  --text-secondary:#F9E383;
+  --secondary:#F9E383;
   --card-bg:rgba(255,255,255,0.03);
   --card-border:rgba(255,255,255,0.06);
   --radius:16px;
@@ -45,22 +46,20 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
   margin-bottom:16px;
 }
 .section-title p{
-  color:var(--secondary);
+  color:#F9E383;
   font-size:1.1rem;
   max-width:600px;
   margin:0 auto;
 }
 .gradient-text{
-  background:var(--grad);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  background-clip:text;
+  color:#F9E383;
+  -webkit-text-fill-color:#F9E383;
 }
 .btn-primary{
   display:inline-flex;align-items:center;gap:8px;
   padding:14px 28px;
   background:var(--grad);
-  color:#fff;
+  color:#F9E383;
   border:none;
   border-radius:var(--btn-radius);
   font-size:1rem;font-weight:600;
@@ -73,15 +72,15 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
   display:inline-flex;align-items:center;gap:8px;
   padding:14px 28px;
   background:transparent;
-  color:#fff;
-  border:1px solid rgba(255,255,255,0.15);
+  color:#F9E383;
+  border:1px solid rgba(249,227,131,0.3);
   border-radius:var(--btn-radius);
   font-size:1rem;font-weight:600;
   cursor:pointer;
   transition:transform .2s,border-color .3s;
   font-family:inherit;
 }
-.btn-secondary:hover{transform:translateY(-2px);border-color:rgba(255,255,255,0.35)}
+.btn-secondary:hover{transform:translateY(-2px);border-color:rgba(249,227,131,0.6)}
 .btn-sm{padding:10px 20px;font-size:.9rem}
 .card{
   background:var(--card-bg);
@@ -111,9 +110,9 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
 .logo{display:flex;align-items:center;gap:10px;font-size:1.4rem;font-weight:700}
 .logo img{width:36px;height:36px;border-radius:8px}
 .nav{display:flex;align-items:center;gap:32px}
-.nav a{font-size:.95rem;color:var(--secondary);transition:color .2s;font-weight:500}
-.nav a:hover{color:#fff}
-.hamburger{display:none;background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer}
+.nav a{font-size:.95rem;color:#F9E383;transition:color .2s;font-weight:500}
+.nav a:hover{color:#F9E383}
+.hamburger{display:none;background:none;border:none;color:#F9E383;font-size:1.5rem;cursor:pointer}
 .mobile-menu{
   display:none;
   position:fixed;top:0;left:0;right:0;bottom:0;
@@ -125,10 +124,10 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
   gap:28px;
 }
 .mobile-menu.active{display:flex}
-.mobile-menu a{font-size:1.3rem;color:#fff;font-weight:500}
+.mobile-menu a{font-size:1.3rem;color:#F9E383;font-weight:500}
 .mobile-menu .close-menu{
   position:absolute;top:20px;right:24px;
-  background:none;border:none;color:#fff;font-size:2rem;cursor:pointer;
+  background:none;border:none;color:#F9E383;font-size:2rem;cursor:pointer;
 }
 
 /* ---- HERO ---- */
@@ -144,7 +143,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
   font-size:.85rem;
   font-weight:600;
   letter-spacing:4px;
-  color:var(--secondary);
+  color:#F9E383;
   margin-bottom:20px;
   text-transform:uppercase;
 }
@@ -156,7 +155,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
 }
 .hero-desc{
   font-size:1.15rem;
-  color:var(--secondary);
+  color:#F9E383;
   max-width:600px;
   margin:0 auto 36px;
   line-height:1.7;
@@ -164,8 +163,8 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
 .hero-buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:60px}
 .stats-row{display:flex;justify-content:center;gap:48px;flex-wrap:wrap}
 .stat{text-align:center}
-.stat .stat-number{font-size:2.5rem;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.stat .stat-label{font-size:.9rem;color:var(--secondary);margin-top:4px}
+.stat .stat-number{font-size:2.5rem;font-weight:700;color:#F9E383}
+.stat .stat-label{font-size:.9rem;color:#F9E383;margin-top:4px}
 
 /* ---- 3D TORNADO ---- */
 
@@ -185,18 +184,18 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
   display:flex;align-items:center;justify-content:center;
   margin-bottom:20px;
   font-size:1.3rem;
-  color:#a78bfa;
+  color:#F9E383;
 }
 .feature-card h4{font-size:1.15rem;margin-bottom:10px}
-.feature-card p{color:var(--secondary);font-size:.95rem;margin-bottom:16px}
+.feature-card p{color:#F9E383;font-size:.95rem;margin-bottom:16px}
 .feature-tags{display:flex;flex-wrap:wrap;gap:8px}
 .feature-tag{
   padding:5px 12px;
   font-size:.8rem;
   background:rgba(99,102,241,0.08);
-  border:1px solid rgba(99,102,241,0.15);
+  border:1px solid rgba(249,227,131,0.2);
   border-radius:20px;
-  color:#c4b5fd;
+  color:#F9E383;
 }
 
 /* ---- QUICK START ---- */
@@ -205,7 +204,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
 .path-card{text-align:center;padding:40px 32px}
 .path-card .path-icon{font-size:2.5rem;margin-bottom:20px}
 .path-card h3{font-size:1.3rem;margin-bottom:10px}
-.path-card p{color:var(--secondary);font-size:.95rem;margin-bottom:20px}
+.path-card p{color:#F9E383;font-size:.95rem;margin-bottom:20px}
 .path-card code{
   display:block;
   background:rgba(255,255,255,0.05);
@@ -214,7 +213,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
   padding:12px 20px;
   font-family:'Courier New',monospace;
   font-size:.9rem;
-  color:#c4b5fd;
+  color:#F9E383;
   margin-bottom:24px;
 }
 .recommended{
@@ -241,7 +240,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
   margin-bottom:12px;
 }
 .step h4{font-size:1rem;margin-bottom:6px}
-.step code{font-size:.85rem;color:#a78bfa;font-family:'Courier New',monospace}
+.step code{font-size:.85rem;color:#F9E383;font-family:'Courier New',monospace}
 .cta-row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
 
 /* ---- PROVIDERS ---- */
@@ -267,7 +266,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
   background:rgba(168,85,247,0.1);
   border-radius:12px;
   display:flex;align-items:center;justify-content:center;
-  font-size:1.2rem;color:#c084fc;
+  font-size:1.2rem;color:#F9E383;
   margin-bottom:20px;
 }
 .tutorial-card h3{font-size:1.2rem;margin-bottom:16px}
@@ -281,11 +280,11 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
 .tutorial-card .code-block p{
   font-family:'Courier New',monospace;
   font-size:.85rem;
-  color:#c4b5fd;
+  color:#F9E383;
   padding:4px 0;
   line-height:1.8;
 }
-.tutorial-card .code-block p .comment{color:#64748b}
+.tutorial-card .code-block p .comment{color:#F9E383;opacity:0.6}
 
 /* ---- BENEFITS ---- */
 .benefits{padding:var(--section-pad);position:relative;z-index:2}
@@ -297,19 +296,19 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
   background:rgba(236,72,153,0.1);
   border-radius:14px;
   display:flex;align-items:center;justify-content:center;
-  font-size:1.4rem;color:#f472b6;
+  font-size:1.4rem;color:#F9E383;
 }
 .benefit-card h3{font-size:1.15rem;margin-bottom:8px}
-.benefit-card p{color:var(--secondary);font-size:.9rem;margin-bottom:16px}
+.benefit-card p{color:#F9E383;font-size:.9rem;margin-bottom:16px}
 .benefit-stat{
   display:inline-block;
   padding:6px 16px;
   background:rgba(99,102,241,0.1);
-  border:1px solid rgba(99,102,241,0.15);
+  border:1px solid rgba(249,227,131,0.2);
   border-radius:20px;
   font-size:.8rem;
   font-weight:600;
-  color:#a78bfa;
+  color:#F9E383;
 }
 
 /* ---- FAQ ---- */
@@ -334,16 +333,16 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
   scroll-snap-align:start;
   flex-shrink:0;
 }
-.test-card .stars{color:#eab308;font-size:.85rem;margin-bottom:16px;letter-spacing:2px}
+.test-card .stars{color:#F9E383;font-size:.85rem;margin-bottom:16px;letter-spacing:2px}
 .test-card blockquote{
   font-size:1rem;
-  color:var(--secondary);
+  color:#F9E383;
   line-height:1.7;
   margin-bottom:20px;
   font-style:italic;
 }
 .test-author{font-weight:600;font-size:.95rem}
-.test-role{color:var(--secondary);font-size:.85rem;margin-top:2px}
+.test-role{color:#F9E383;font-size:.85rem;margin-top:2px}
 
 /* ---- DONATE ---- */
 .donate{padding:var(--section-pad);position:relative;z-index:2}
@@ -353,7 +352,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
   text-align:center;
   padding:48px 40px;
 }
-.donate-card p{color:var(--secondary);font-size:1.05rem;margin-bottom:28px}
+.donate-card p{color:#F9E383;font-size:1.05rem;margin-bottom:28px}
 .wallet-box{
   display:flex;align-items:center;gap:12px;
   background:rgba(255,255,255,0.04);
@@ -367,7 +366,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
   flex:1;
   font-family:'Courier New',monospace;
   font-size:.85rem;
-  color:#c4b5fd;
+  color:#F9E383;
   text-align:left;
 }
 .copy-btn{
@@ -375,7 +374,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
   background:var(--grad);
   border:none;
   border-radius:8px;
-  color:#fff;
+  color:#F9E383;
   font-weight:600;
   font-size:.85rem;
   cursor:pointer;
@@ -402,10 +401,10 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
 }
 .footer-brand{max-width:300px}
 .footer-brand .logo{margin-bottom:16px}
-.footer-brand p{color:var(--secondary);font-size:.9rem;line-height:1.7}
-.footer-links h4{font-size:.95rem;margin-bottom:16px;color:#fff}
-.footer-links a{display:block;color:var(--secondary);font-size:.9rem;padding:4px 0;transition:color .2s}
-.footer-links a:hover{color:#fff}
+.footer-brand p{color:#F9E383;font-size:.9rem;line-height:1.7}
+.footer-links h4{font-size:.95rem;margin-bottom:16px;color:#F9E383}
+.footer-links a{display:block;color:#F9E383;font-size:.9rem;padding:4px 0;transition:color .2s}
+.footer-links a:hover{color:#F9E383}
 .socials{display:flex;gap:12px;margin-top:20px}
 .socials a{
   width:40px;height:40px;
@@ -413,16 +412,16 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
   border:1px solid rgba(255,255,255,0.08);
   border-radius:10px;
   display:flex;align-items:center;justify-content:center;
-  color:var(--secondary);
+  color:#F9E383;
   font-size:1rem;
   transition:all .2s;
 }
-.socials a:hover{color:#fff;border-color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.08)}
+.socials a:hover{color:#F9E383;border-color:rgba(249,227,131,0.3);background:rgba(249,227,131,0.08)}
 .footer-bottom{
   text-align:center;
   padding-top:30px;
   border-top:1px solid var(--card-border);
-  color:var(--secondary);
+  color:#F9E383;
   font-size:.85rem;
 }
 
@@ -454,15 +453,15 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
 .faq-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .3s}
 .faq-card:hover{border-color:rgba(99,102,241,0.3);background:rgba(99,102,241,0.03)}
 .faq-head{display:flex;align-items:center;gap:16px;padding:20px 24px}
-.faq-icon{width:40px;height:40px;background:rgba(99,102,241,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#6366f1;font-size:1rem;flex-shrink:0}
-.faq-head h3{flex:1;font-size:1rem;font-weight:600;color:#fff}
-.faq-arrow{color:#64748b;font-size:0.8rem;transition:transform .3s ease;flex-shrink:0}
+.faq-icon{width:40px;height:40px;background:rgba(249,227,131,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#F9E383;font-size:1rem;flex-shrink:0}
+.faq-head h3{flex:1;font-size:1rem;font-weight:600;color:#F9E383}
+.faq-arrow{color:#F9E383;opacity:0.5;font-size:0.8rem;transition:transform .3s ease;flex-shrink:0}
 .faq-body{max-height:0;overflow:hidden;transition:max-height .4s ease}
 .faq-card.open .faq-body{max-height:300px}
-.faq-card.open .faq-arrow{transform:rotate(180deg);color:#6366f1}
+.faq-card.open .faq-arrow{transform:rotate(180deg);color:#F9E383;opacity:1}
 .faq-card.open{border-color:rgba(99,102,241,0.3);background:rgba(99,102,241,0.03)}
 .faq-body p{padding:0 24px 20px 80px;color:var(--text-secondary);font-size:0.95rem;line-height:1.7}
-.faq-body code{background:rgba(99,102,241,0.15);color:#a78bfa;padding:2px 8px;border-radius:6px;font-size:0.85rem}
+.faq-body code{background:rgba(249,227,131,0.15);color:#F9E383;padding:2px 8px;border-radius:6px;font-size:0.85rem}
 
 </style>
     <link rel="icon" href="favicon.jpg" type="image/jpeg">
@@ -685,7 +684,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
       <div class="card tutorial-card">
         <div class="tut-icon"><i class="fas fa-download"></i></div>
         <h3>Install &amp; Setup</h3>
-        <p style="color:var(--secondary);font-size:.9rem;margin-bottom:12px">Get Exort running on your machine in under a minute.</p>
+        <p style="color:#F9E383;font-size:.9rem;margin-bottom:12px">Get Exort running on your machine in under a minute.</p>
         <div class="code-block">
           <p><span class="comment"># Install Exort</span></p>
           <p>pip install exort-agent</p>
@@ -700,7 +699,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
       <div class="card tutorial-card">
         <div class="tut-icon"><i class="fab fa-telegram"></i></div>
         <h3>Telegram Bot Setup</h3>
-        <p style="color:var(--secondary);font-size:.9rem;margin-bottom:12px">Create and connect your own Telegram bot in minutes.</p>
+        <p style="color:#F9E383;font-size:.9rem;margin-bottom:12px">Create and connect your own Telegram bot in minutes.</p>
         <div class="code-block">
           <p><span class="comment"># 1. Message @BotFather on Telegram</span></p>
           <p><span class="comment"># 2. /newbot → name it → get token</span></p>
@@ -715,7 +714,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
       <div class="card tutorial-card">
         <div class="tut-icon"><i class="fas fa-exchange-alt"></i></div>
         <h3>Switch AI Providers</h3>
-        <p style="color:var(--secondary);font-size:.9rem;margin-bottom:12px">Use different AI backends for different needs.</p>
+        <p style="color:#F9E383;font-size:.9rem;margin-bottom:12px">Use different AI backends for different needs.</p>
         <div class="code-block">
           <p><span class="comment"># Free: Groq (get key at console.groq.com)</span></p>
           <p><span class="comment"># Paid: OpenAI, Anthropic</span></p>
@@ -728,7 +727,7 @@ h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
       <div class="card tutorial-card">
         <div class="tut-icon"><i class="fas fa-memory"></i></div>
         <h3>Memory &amp; Skills</h3>
-        <p style="color:var(--secondary);font-size:.9rem;margin-bottom:12px">How Exort learns and remembers across sessions.</p>
+        <p style="color:#F9E383;font-size:.9rem;margin-bottom:12px">How Exort learns and remembers across sessions.</p>
         <div class="code-block">
           <p><span class="comment"># Automatic: Exort saves facts to memory</span></p>
           <p><span class="comment"># across sessions</span></p>
