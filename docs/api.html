@@ -83,6 +83,23 @@ body::before{
 .api-tab:hover{opacity:0.8}
 .api-tab.active{opacity:1;background:rgba(249,227,131,0.1);border-color:rgba(249,227,131,0.3)}
 
+/* Provider cards */
+.provider-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.provider-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;transition:all .3s;position:relative;overflow:hidden}
+.provider-card:hover{border-color:rgba(249,227,131,0.15);transform:translateY(-2px);box-shadow:0 8px 32px rgba(249,227,131,0.05)}
+.provider-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(249,227,131,0.2),transparent);opacity:0;transition:opacity .3s}
+.provider-card:hover::before{opacity:1}
+
+.provider-top{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.provider-logo{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;font-weight:700}
+.provider-name{font-size:1.1rem;font-weight:700}
+.provider-free{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:600;background:rgba(249,227,131,0.1);color:var(--gold);border:1px solid rgba(249,227,131,0.2);margin-left:8px}
+.provider-desc{color:var(--gold);opacity:0.55;font-size:.88rem;margin-bottom:16px;line-height:1.5;min-height:40px}
+.provider-models{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.model-tag{padding:4px 10px;border-radius:6px;font-size:.72rem;font-weight:500;background:rgba(249,227,131,0.06);color:var(--gold);opacity:0.6;border:1px solid rgba(255,255,255,0.04)}
+.provider-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;background:transparent;color:var(--gold);border:1px solid rgba(249,227,131,0.25);border-radius:10px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .3s;text-decoration:none}
+.provider-btn:hover{background:rgba(249,227,131,0.08);border-color:rgba(249,227,131,0.4)}
+
 /* Footer */
 .footer{padding:40px 0;border-top:1px solid var(--border);text-align:center;color:var(--gold);opacity:0.4;font-size:.85rem}
 
@@ -91,6 +108,7 @@ body::before{
   .nav{display:none}
   .hamburger{display:block}
   .api-grid{grid-template-columns:1fr}
+  .provider-grid{grid-template-columns:1fr}
   .option-row{flex-direction:column;gap:4px}
   .option-flag{min-width:auto}
 }
@@ -118,21 +136,328 @@ body::before{
 <section class="api-hero">
   <div class="container">
     <h1><span class="gradient-text">API Reference</span></h1>
-    <p>CLI commands, Python API, and everything you need to build with Exort.</p>
+    <p>CLI commands, Python API, free LLM providers, and everything you need to build with Exort.</p>
   </div>
 </section>
 
 <!-- Tabs -->
 <div class="container">
   <div class="api-tabs">
-    <div class="api-tab active" onclick="showSection('cli')">CLI Commands</div>
+    <div class="api-tab active" onclick="showSection('free')">Free APIs</div>
+    <div class="api-tab" onclick="showSection('cli')">CLI Commands</div>
     <div class="api-tab" onclick="showSection('python')">Python API</div>
     <div class="api-tab" onclick="showSection('tools')">Tools &amp; Memory</div>
   </div>
 </div>
 
+<!-- Free API Providers -->
+<section class="api-section" id="sec-free">
+  <div class="container">
+    <div class="section-title">
+      <h2>Free LLM API Providers</h2>
+      <p>Sign up with email, get an API key, and start building — no credit card needed</p>
+    </div>
+    <div class="provider-grid">
+
+      <!-- Groq -->
+      <div class="provider-card">
+        <div class="provider-top">
+          <div class="provider-logo" style="background:rgba(249,133,65,0.12);color:#f98541">G</div>
+          <div>
+            <div class="provider-name">Groq <span class="provider-free">FREE</span></div>
+          </div>
+        </div>
+        <div class="provider-desc">Ultra-fast inference on LPU hardware. Free tier includes generous daily token limits.</div>
+        <div class="provider-models">
+          <span class="model-tag">Llama 3.3 70B</span>
+          <span class="model-tag">Llama 3.1 8B</span>
+          <span class="model-tag">Mixtral 8x7B</span>
+          <span class="model-tag">Gemma 2 9B</span>
+        </div>
+        <a href="https://console.groq.com" target="_blank" class="provider-btn">Get API Key →</a>
+      </div>
+
+      <!-- Google Gemini -->
+      <div class="provider-card">
+        <div class="provider-top">
+          <div class="provider-logo" style="background:rgba(66,133,244,0.12);color:#4285f4">✦</div>
+          <div>
+            <div class="provider-name">Google Gemini <span class="provider-free">FREE</span></div>
+          </div>
+        </div>
+        <div class="provider-desc">Google's multimodal AI. Free tier with 15 RPM and 1M tokens/day on Gemini 2.0 Flash.</div>
+        <div class="provider-models">
+          <span class="model-tag">Gemini 2.0 Flash</span>
+          <span class="model-tag">Gemini 1.5 Pro</span>
+          <span class="model-tag">Gemini 1.5 Flash</span>
+        </div>
+        <a href="https://aistudio.google.com/apikey" target="_blank" class="provider-btn">Get API Key →</a>
+      </div>
+
+      <!-- OpenRouter -->
+      <div class="provider-card">
+        <div class="provider-top">
+          <div class="provider-logo" style="background:rgba(139,92,246,0.12);color:#8b5cf6">OR</div>
+          <div>
+            <div class="provider-name">OpenRouter <span class="provider-free">FREE</span></div>
+          </div>
+        </div>
+        <div class="provider-desc">Access 100+ models through one API. Many models available completely free.</div>
+        <div class="provider-models">
+          <span class="model-tag">Llama 3.3 70B</span>
+          <span class="model-tag">Mistral 7B</span>
+          <span class="model-tag">Qwen 2.5 72B</span>
+          <span class="model-tag">DeepSeek V3</span>
+        </div>
+        <a href="https://openrouter.ai/keys" target="_blank" class="provider-btn">Get API Key →</a>
+      </div>
+
+      <!-- Cerebras -->
+      <div class="provider-card">
+        <div class="provider-top">
+          <div class="provider-logo" style="background:rgba(16,185,129,0.12);color:#10b981">C</div>
+          <div>
+            <div class="provider-name">Cerebras <span class="provider-free">FREE</span></div>
+          </div>
+        </div>
+        <div class="provider-desc">Fastest inference in the world on wafer-scale chips. Free tier available.</div>
+        <div class="provider-models">
+          <span class="model-tag">Llama 3.3 70B</span>
+          <span class="model-tag">Llama 3.1 8B</span>
+        </div>
+        <a href="https://cloud.cerebras.ai" target="_blank" class="provider-btn">Get API Key →</a>
+      </div>
+
+      <!-- Together AI -->
+      <div class="provider-card">
+        <div class="provider-top">
+          <div class="provider-logo" style="background:rgba(99,102,241,0.12);color:#6366f1">T</div>
+          <div>
+            <div class="provider-name">Together AI <span class="provider-free">FREE</span></div>
+          </div>
+        </div>
+        <div class="provider-desc">$1 free credit on signup. Wide model selection with fast inference.</div>
+        <div class="provider-models">
+          <span class="model-tag">Llama 3.3 70B</span>
+          <span class="model-tag">Qwen 2.5 72B</span>
+          <span class="model-tag">Mixtral 8x7B</span>
+          <span class="model-tag">DeepSeek V3</span>
+        </div>
+        <a href="https://api.together.xyz" target="_blank" class="provider-btn">Get API Key →</a>
+      </div>
+
+      <!-- Hugging Face -->
+      <div class="provider-card">
+        <div class="provider-top">
+          <div class="provider-logo" style="background:rgba(255,213,0,0.12);color:#ffd500">🤗</div>
+          <div>
+            <div class="provider-name">Hugging Face <span class="provider-free">FREE</span></div>
+          </div>
+        </div>
+        <div class="provider-desc">Free Inference API for thousands of models. Rate-limited but no cost.</div>
+        <div class="provider-models">
+          <span class="model-tag">Llama 3.3 70B</span>
+          <span class="model-tag">Mistral 7B</span>
+          <span class="model-tag">Phi-3</span>
+          <span class="model-tag">Zephyr</span>
+        </div>
+        <a href="https://huggingface.co/settings/tokens" target="_blank" class="provider-btn">Get API Key →</a>
+      </div>
+
+      <!-- Cloudflare Workers AI -->
+      <div class="provider-card">
+        <div class="provider-top">
+          <div class="provider-logo" style="background:rgba(245,158,11,0.12);color:#f59e0b">☁</div>
+          <div>
+            <div class="provider-name">Cloudflare AI <span class="provider-free">FREE</span></div>
+          </div>
+        </div>
+        <div class="provider-desc">10K neurons/day free. Run AI at the edge with zero cold starts.</div>
+        <div class="provider-models">
+          <span class="model-tag">Llama 3.1 8B</span>
+          <span class="model-tag">Mistral 7B</span>
+          <span class="model-tag">Phi-2</span>
+          <span class="model-tag">CodeLlama</span>
+        </div>
+        <a href="https://dash.cloudflare.com" target="_blank" class="provider-btn">Get API Key →</a>
+      </div>
+
+      <!-- SambaNova -->
+      <div class="provider-card">
+        <div class="provider-top">
+          <div class="provider-logo" style="background:rgba(220,38,38,0.12);color:#dc2626">S</div>
+          <div>
+            <div class="provider-name">SambaNova <span class="provider-free">FREE</span></div>
+          </div>
+        </div>
+        <div class="provider-desc">Free tier with fast inference on custom RDU chips. No credit card needed.</div>
+        <div class="provider-models">
+          <span class="model-tag">Llama 3.1 70B</span>
+          <span class="model-tag">Llama 3.1 8B</span>
+          <span class="model-tag">DeepSeek V3</span>
+        </div>
+        <a href="https://cloud.sambanova.ai" target="_blank" class="provider-btn">Get API Key →</a>
+      </div>
+
+      <!-- Mistral -->
+      <div class="provider-card">
+        <div class="provider-top">
+          <div class="provider-logo" style="background:rgba(255,136,0,0.12);color:#ff8800">M</div>
+          <div>
+            <div class="provider-name">Mistral AI <span class="provider-free">FREE</span></div>
+          </div>
+        </div>
+        <div class="provider-desc">European AI lab. Free tier on La Plateforme with Mistral and Codestral models.</div>
+        <div class="provider-models">
+          <span class="model-tag">Mistral Small</span>
+          <span class="model-tag">Mistral Nemo</span>
+          <span class="model-tag">Codestral</span>
+          <span class="model-tag">Pixtral</span>
+        </div>
+        <a href="https://console.mistral.ai" target="_blank" class="provider-btn">Get API Key →</a>
+      </div>
+
+      <!-- Cohere -->
+      <div class="provider-card">
+        <div class="provider-top">
+          <div class="provider-logo" style="background:rgba(34,197,94,0.12);color:#22c55e">Co</div>
+          <div>
+            <div class="provider-name">Cohere <span class="provider-free">FREE</span></div>
+          </div>
+        </div>
+        <div class="provider-desc">Free trial with 100 calls/min. Great for RAG, search, and embeddings.</div>
+        <div class="provider-models">
+          <span class="model-tag">Command R+</span>
+          <span class="model-tag">Command R</span>
+          <span class="model-tag">Embed v3</span>
+        </div>
+        <a href="https://dashboard.cohere.com" target="_blank" class="provider-btn">Get API Key →</a>
+      </div>
+
+      <!-- DeepSeek -->
+      <div class="provider-card">
+        <div class="provider-top">
+          <div class="provider-logo" style="background:rgba(59,130,246,0.12);color:#3b82f6">DS</div>
+          <div>
+            <div class="provider-name">DeepSeek <span class="provider-free">FREE</span></div>
+          </div>
+        </div>
+        <div class="provider-desc">Top coding models. Free tier with 500K tokens on signup, then very cheap.</div>
+        <div class="provider-models">
+          <span class="model-tag">DeepSeek V3</span>
+          <span class="model-tag">DeepSeek R1</span>
+          <span class="model-tag">DeepSeek Coder</span>
+        </div>
+        <a href="https://platform.deepseek.com" target="_blank" class="provider-btn">Get API Key →</a>
+      </div>
+
+      <!-- Novita AI -->
+      <div class="provider-card">
+        <div class="provider-top">
+          <div class="provider-logo" style="background:rgba(168,85,247,0.12);color:#a855f7">N</div>
+          <div>
+            <div class="provider-name">Novita AI <span class="provider-free">FREE</span></div>
+          </div>
+        </div>
+        <div class="provider-desc">Free credits on signup. Wide model selection with competitive pricing.</div>
+        <div class="provider-models">
+          <span class="model-tag">Llama 3.3 70B</span>
+          <span class="model-tag">DeepSeek V3</span>
+          <span class="model-tag">Qwen 2.5 72B</span>
+        </div>
+        <a href="https://novita.ai" target="_blank" class="provider-btn">Get API Key →</a>
+      </div>
+
+      <!-- Nebius -->
+      <div class="provider-card">
+        <div class="provider-top">
+          <div class="provider-logo" style="background:rgba(14,165,233,0.12);color:#0ea5e9">Nb</div>
+          <div>
+            <div class="provider-name">Nebius AI <span class="provider-free">FREE</span></div>
+          </div>
+        </div>
+        <div class="provider-desc">$1 free credit. Cloud platform with fast GPU inference.</div>
+        <div class="provider-models">
+          <span class="model-tag">Llama 3.3 70B</span>
+          <span class="model-tag">Mistral 7B</span>
+          <span class="model-tag">Qwen 2.5</span>
+        </div>
+        <a href="https://studio.nebius.com" target="_blank" class="provider-btn">Get API Key →</a>
+      </div>
+
+      <!-- SiliconFlow -->
+      <div class="provider-card">
+        <div class="provider-top">
+          <div class="provider-logo" style="background:rgba(236,72,153,0.12);color:#ec4899">SF</div>
+          <div>
+            <div class="provider-name">SiliconFlow <span class="provider-free">FREE</span></div>
+          </div>
+        </div>
+        <div class="provider-desc">Free tier with many open-source models. Popular in Asia.</div>
+        <div class="provider-models">
+          <span class="model-tag">Qwen 2.5 72B</span>
+          <span class="model-tag">DeepSeek V3</span>
+          <span class="model-tag">Yi 1.5 34B</span>
+        </div>
+        <a href="https://cloud.siliconflow.cn" target="_blank" class="provider-btn">Get API Key →</a>
+      </div>
+
+      <!-- Fireworks AI -->
+      <div class="provider-card">
+        <div class="provider-top">
+          <div class="provider-logo" style="background:rgba(251,146,60,0.12);color:#fb923c">🔥</div>
+          <div>
+            <div class="provider-name">Fireworks AI <span class="provider-free">FREE</span></div>
+          </div>
+        </div>
+        <div class="provider-desc">$1 free credit. Fast inference with function calling support.</div>
+        <div class="provider-models">
+          <span class="model-tag">Llama 3.3 70B</span>
+          <span class="model-tag">Mixtral 8x7B</span>
+          <span class="model-tag">DeepSeek V3</span>
+        </div>
+        <a href="https://fireworks.ai" target="_blank" class="provider-btn">Get API Key →</a>
+      </div>
+
+      <!-- NVIDIA NIM -->
+      <div class="provider-card">
+        <div class="provider-top">
+          <div class="provider-logo" style="background:rgba(118,185,0,0.12);color:#76b900">Nv</div>
+          <div>
+            <div class="provider-name">NVIDIA NIM <span class="provider-free">FREE</span></div>
+          </div>
+        </div>
+        <div class="provider-desc">1000 free API calls. NVIDIA's optimized inference endpoints.</div>
+        <div class="provider-models">
+          <span class="model-tag">Llama 3.1 70B</span>
+          <span class="model-tag">Mistral 7B</span>
+          <span class="model-tag">Phi-3</span>
+        </div>
+        <a href="https://build.nvidia.com" target="_blank" class="provider-btn">Get API Key →</a>
+      </div>
+
+      <!-- Upstage -->
+      <div class="provider-card">
+        <div class="provider-top">
+          <div class="provider-logo" style="background:rgba(79,70,229,0.12);color:#4f46e5">↑</div>
+          <div>
+            <div class="provider-name">Upstage <span class="provider-free">FREE</span></div>
+          </div>
+        </div>
+        <div class="provider-desc">Free tier with Solar models. Strong reasoning and instruction following.</div>
+        <div class="provider-models">
+          <span class="model-tag">Solar Mini</span>
+          <span class="model-tag">Solar Pro</span>
+        </div>
+        <a href="https://console.upstage.ai" target="_blank" class="provider-btn">Get API Key →</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
 <!-- CLI Commands -->
-<section class="api-section" id="sec-cli">
+<section class="api-section" id="sec-cli" style="display:none">
   <div class="container">
     <div class="section-title">
       <h2>CLI Commands</h2>
