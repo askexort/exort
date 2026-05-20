@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "exort-agent"
-version = "2.0.0"
+version = "2.1.0"
 description = "Exort — The Open Agent Engine. Free AI for Everyone. An autonomous AI agent with tool use, memory, and multi-provider support."
 readme = "README.md"
 license = {text = "MIT"}
@@ -34,9 +34,21 @@ dependencies = [
 
 [project.optional-dependencies]
 anthropic = ["anthropic>=0.30"]
+gemini = ["google-genai>=1.0"]
+cohere = ["cohere>=5.0"]
+replicate = ["replicate>=0.25"]
 telegram = ["python-telegram-bot>=21.0"]
+providers = [
+    "anthropic>=0.30",
+    "google-genai>=1.0",
+    "cohere>=5.0",
+    "replicate>=0.25",
+]
 full = [
     "anthropic>=0.30",
+    "google-genai>=1.0",
+    "cohere>=5.0",
+    "replicate>=0.25",
     "python-telegram-bot>=21.0",
 ]
 dev = [

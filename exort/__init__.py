@@ -19,7 +19,7 @@ Or from the terminal:
     exort bot                # start Telegram bot
 """
 
-__version__ = "2.0.0"
+__version__ = "2.1.0"
 __author__ = "Exort Contributors"
 __license__ = "MIT"
 

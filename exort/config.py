@@ -35,10 +35,12 @@ BUILT_IN_DEFAULTS = {
 
     # Provider credentials and endpoints
     "providers": {
+        # ── Core Providers ──
         "groq": {
             "key_var": "GROQ_API_KEY",
             "endpoint": "https://api.groq.com/openai/v1",
             "model": "llama-3.3-70b-versatile",
+            "free": True,
         },
         "openai": {
             "key_var": "OPENAI_API_KEY",
@@ -49,11 +51,93 @@ BUILT_IN_DEFAULTS = {
             "key_var": None,
             "endpoint": "http://localhost:11434/v1",
             "model": "llama3.1",
+            "free": True,
         },
         "anthropic": {
             "key_var": "ANTHROPIC_API_KEY",
             "endpoint": "https://api.anthropic.com/v1",
             "model": "claude-sonnet-4-20250514",
+        },
+        # ── Open-Source Friendly ──
+        "together": {
+            "key_var": "TOGETHER_API_KEY",
+            "endpoint": "https://api.together.xyz/v1",
+            "model": "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
+        },
+        "fireworks": {
+            "key_var": "FIREWORKS_API_KEY",
+            "endpoint": "https://api.fireworks.ai/inference/v1",
+            "model": "accounts/fireworks/models/llama-v3p3-70b-instruct",
+        },
+        "huggingface": {
+            "key_var": "HF_TOKEN",
+            "endpoint": "https://api-inference.huggingface.co/v1",
+            "model": "meta-llama/Meta-Llama-3.1-70B-Instruct",
+        },
+        # ── Search-Augmented ──
+        "perplexity": {
+            "key_var": "PERPLEXITY_API_KEY",
+            "endpoint": "https://api.perplexity.ai",
+            "model": "sonar-pro",
+        },
+        # ── Gateway / Aggregator ──
+        "openrouter": {
+            "key_var": "OPENROUTER_API_KEY",
+            "endpoint": "https://openrouter.ai/api/v1",
+            "model": "meta-llama/llama-3.3-70b-instruct:free",
+            "free": True,
+        },
+        # ── Chinese / Asian Providers ──
+        "deepseek": {
+            "key_var": "DEEPSEEK_API_KEY",
+            "endpoint": "https://api.deepseek.com/v1",
+            "model": "deepseek-chat",
+        },
+        "moonshot": {
+            "key_var": "MOONSHOT_API_KEY",
+            "endpoint": "https://api.moonshot.cn/v1",
+            "model": "moonshot-v1-128k",
+        },
+        "siliconflow": {
+            "key_var": "SILICONFLOW_API_KEY",
+            "endpoint": "https://api.siliconflow.cn/v1",
+            "model": "Qwen/Qwen2.5-72B-Instruct",
+        },
+        # ── European ──
+        "mistral": {
+            "key_var": "MISTRAL_API_KEY",
+            "endpoint": "https://api.mistral.ai/v1",
+            "model": "mistral-large-latest",
+        },
+        # ── Multimodal / Specialized ──
+        "gemini": {
+            "key_var": "GEMINI_API_KEY",
+            "endpoint": None,
+            "model": "gemini-2.0-flash",
+            "free": True,
+        },
+        "cohere": {
+            "key_var": "COHERE_API_KEY",
+            "endpoint": None,
+            "model": "command-r-plus",
+        },
+        # ── Cloud Inference ──
+        "replicate": {
+            "key_var": "REPLICATE_API_TOKEN",
+            "endpoint": None,
+            "model": "meta/meta-llama-3.1-405b-instruct",
+        },
+        # ── Xiaomi ──
+        "mimo": {
+            "key_var": "MIMO_API_KEY",
+            "endpoint": "https://api.xiaomimimo.com/v1",
+            "model": "mimo-v2.5-pro",
+        },
+        # ── Other ──
+        "xai": {
+            "key_var": "XAI_API_KEY",
+            "endpoint": "https://api.x.ai/v1",
+            "model": "grok-3",
         },
     },
 

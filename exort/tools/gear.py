@@ -56,11 +56,25 @@ class Gear:
 
 # Modules to scan for gear on startup
 _BUILTIN_MODULES = [
+    # Core tools
     "exort.tools.web",
     "exort.tools.file_ops",
     "exort.tools.shell",
     "exort.tools.code",
     "exort.tools.vision",
+    # New tools
+    "exort.tools.calculator",
+    "exort.tools.datetime_tool",
+    "exort.tools.json_tool",
+    "exort.tools.http_tool",
+    "exort.tools.csv_tool",
+    "exort.tools.hash_tool",
+    "exort.tools.uuid_tool",
+    "exort.tools.text_utils",
+    "exort.tools.regex_tool",
+    "exort.tools.url_tool",
+    "exort.tools.diff_tool",
+    "exort.tools.color_tool",
 ]
 
 
@@ -108,7 +122,7 @@ class GearBox:
         return [g.spec.to_schema() for g in self._gear.values()]
 
     def names(self) -> list[str]:
-        return list(self._gear.keys())
+        return sorted(self._gear.keys())
 
     def has(self, name: str) -> bool:
         return name in self._gear
@@ -116,6 +130,32 @@ class GearBox:
     def is_unsafe(self, name: str) -> bool:
         g = self._gear.get(name)
         return g.unsafe if g else False
+
+    def categories(self) -> dict[str, list[str]]:
+        """Group gear by category for display."""
+        cats = {
+            "web": [], "file": [], "code": [], "data": [],
+            "text": [], "math": [], "crypto": [], "other": [],
+        }
+        for name, g in self._gear.items():
+            if name in ("web_search", "fetch_url", "http_request"):
+                cats["web"].append(name)
+            elif name in ("read_file", "write_file", "list_directory", "search_files"):
+                cats["file"].append(name)
+            elif name in ("run_shell", "exec_python"):
+                cats["code"].append(name)
+            elif name in ("csv_read", "csv_parse", "csv_from_json", "json_parse", "json_format", "json_query", "json_merge"):
+                cats["data"].append(name)
+            elif name in ("word_count", "case_convert", "extract_emails", "extract_urls", "word_frequency",
+                          "regex_match", "regex_replace", "regex_split", "text_diff", "text_similarity"):
+                cats["text"].append(name)
+            elif name in ("calculator", "datetime_now", "datetime_convert", "datetime_diff"):
+                cats["math"].append(name)
+            elif name in ("hash", "base64_encode", "base64_decode", "uuid_generate", "uuid_validate"):
+                cats["crypto"].append(name)
+            else:
+                cats["other"].append(name)
+        return {k: v for k, v in cats.items() if v}
 
     # ── Execution ─────────────────────────────────────────
 

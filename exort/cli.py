@@ -17,6 +17,7 @@ Commands use a colon-prefix convention (Exort-native):
     :sessions       List saved sessions
     :load <id>      Resume a session
     :clear          Clear screen
+    :skills         List available skills/playbooks
     :quit           Exit
 
 Everything else is sent to the engine as a message.
@@ -51,6 +52,7 @@ def _show_help():
   {C.CYN}:history{C.RST}         Show current conversation
   {C.CYN}:sessions{C.RST}        List saved sessions
   {C.CYN}:load <id>{C.RST}       Resume a session
+  {C.CYN}:skills{C.RST}          List available skills/playbooks
   {C.CYN}:clear{C.RST}           Clear screen
   {C.CYN}:quit{C.RST}            Exit
 
@@ -128,22 +130,26 @@ class ExortShell:
 
         elif cmd == ":gear":
             names = self.engine.gear.names()
-            print(f"\n{C.B}  Gear ({len(names)}){C.RST}")
-            for n in names:
-                g = self.engine.gear._gear[n]
-                warn = f" {C.RED}⚠ unsafe{C.RST}" if g.unsafe else ""
-                desc = g.spec.info[:70]
-                print(f"  {C.CYN}{n}{C.RST}{warn}")
-                print(f"    {C.DIM}{desc}{C.RST}")
+            cats = self.engine.gear.categories()
+            print(f"\n{C.B}  Gear ({len(names)} total){C.RST}")
+            for cat, items in cats.items():
+                print(f"\n  {C.ACC}{cat.upper()}{C.RST}")
+                for n in items:
+                    g = self.engine.gear._gear[n]
+                    warn = f" {C.RED}⚠ unsafe{C.RST}" if g.unsafe else ""
+                    desc = g.spec.info[:70]
+                    print(f"    {C.CYN}{n}{C.RST}{warn}")
+                    print(f"      {C.DIM}{desc}{C.RST}")
             print()
 
         elif cmd == ":providers":
-            from exort.providers import list_providers
-            ps = list_providers()
-            print(f"\n{C.B}  Providers{C.RST}")
+            from exort.providers import list_providers, provider_info
+            ps = provider_info()
+            print(f"\n{C.B}  Providers ({len(ps)}){C.RST}")
             for p in ps:
-                cur = f" {C.ACC}← current{C.RST}" if p == self.engine._prov_name else ""
-                print(f"  {C.CYN}{p}{C.RST}{cur}")
+                cur = f" {C.ACC}← current{C.RST}" if p["name"] == self.engine._prov_name else ""
+                free = f" {C.GRN}free{C.RST}" if p.get("needs_key") is False else ""
+                print(f"  {C.CYN}{p['name']}{C.RST}{free}{cur}")
             print()
 
         elif cmd == ":switch":
@@ -195,6 +201,18 @@ class ExortShell:
                 except Exception as e:
                     print(f"{C.RED}✗ {e}{C.RST}")
 
+        elif cmd == ":skills":
+            from exort.playbooks.library import PlaybookLibrary
+            lib = PlaybookLibrary()
+            lib.load()
+            books = lib.list_all()
+            print(f"\n{C.B}  Skills & Playbooks ({len(books)}){C.RST}")
+            for b in books:
+                origin_tag = f" {C.GRN}built-in{C.RST}" if b["origin"] == "builtin" else f" {C.DIM}user{C.RST}"
+                print(f"  {C.CYN}{b['name']}{C.RST}{origin_tag}")
+            print(f"\n  {C.DIM}Load: exort config set playbooks.autoload ['skill-name']{C.RST}")
+            print()
+
         elif cmd == ":clear":
             os.system("cls" if os.name == "nt" else "clear")
 
@@ -235,7 +253,7 @@ class ExortShell:
 # ══════════════════════════════════════════════════════════
 
 @click.group()
-@click.version_option(version="2.0.0", prog_name="exort")
+@click.version_option(version="2.1.0", prog_name="exort")
 def cli():
     """Exort — The Open Agent Engine. Free AI for Everyone."""
     ensure_exort_dir()
@@ -243,7 +261,7 @@ def cli():
 
 @cli.command()
 @click.argument("question", required=False)
-@click.option("--provider", "-p", help="LLM provider (groq, openai, ollama, anthropic)")
+@click.option("--provider", "-p", help="LLM provider (groq, openai, ollama, anthropic, ...)")
 @click.option("--model", "-m", help="Model name")
 @click.option("--verbose", "-v", is_flag=True, help="Show gear calls")
 def shell(question, provider, model, verbose):
@@ -326,12 +344,150 @@ def config(action, key, value):
         print("Usage: exort config [show|set|get] [key] [value]")
 
 
-@cli.command()
+@cli.group()
 def providers():
-    """List available LLM providers."""
+    """Manage LLM providers."""
+    pass
+
+
+@providers.command("list")
+def providers_list():
+    """List all available providers."""
+    from exort.providers import provider_info
+    cfg = Config()
+    current = cfg.get("engine.provider")
+    ps = provider_info()
+    print(f"\n{C.B}  Available Providers ({len(ps)}){C.RST}\n")
+    for p in ps:
+        cur = f" {C.ACC}← current{C.RST}" if p["name"] == current else ""
+        key = "no key needed" if not p["needs_key"] else "API key required"
+        print(f"  {C.CYN}{p['name']}{C.RST}  {C.DIM}{key}{C.RST}{cur}")
+    print()
+
+
+@providers.command("add")
+@click.argument("name")
+@click.option("--key", "-k", help="API key to save")
+@click.option("--endpoint", "-e", help="Custom endpoint URL")
+@click.option("--model", "-m", help="Default model")
+def providers_add(name, key, endpoint, model):
+    """Add or configure a provider.
+
+    \b
+    Examples:
+        exort providers add groq --key gsk_xxx
+        exort providers add together --key sk-xxx
+        exort providers add custom --endpoint http://localhost:8000/v1 --model my-model
+    """
     from exort.providers import list_providers
-    for p in list_providers():
-        print(f"  • {p}")
+    cfg = Config()
+
+    available = list_providers()
+
+    # For custom provider, allow any name
+    if name == "custom":
+        if not endpoint:
+            print(f"{C.RED}✗ Custom provider requires --endpoint{C.RST}")
+            return
+        cfg.set(f"providers.custom.endpoint", endpoint)
+        if model:
+            cfg.set(f"providers.custom.model", model)
+        if key:
+            cfg.set(f"providers.custom.key_var", f"CUSTOM_API_KEY")
+            _save_env_key("CUSTOM_API_KEY", key)
+        cfg.save()
+        print(f"{C.GRN}✓ Custom provider configured{C.RST}")
+        return
+
+    if name not in available:
+        print(f"{C.RED}✗ Unknown provider: {name}{C.RST}")
+        print(f"  Available: {', '.join(available)}")
+        print(f"  For custom endpoints: exort providers add custom --endpoint <url>")
+        return
+
+    # Update existing provider
+    if endpoint:
+        cfg.set(f"providers.{name}.endpoint", endpoint)
+    if model:
+        cfg.set(f"providers.{name}.model", model)
+    if key:
+        key_var = cfg.get(f"providers.{name}.key_var", f"{name.upper()}_API_KEY")
+        _save_env_key(key_var, key)
+        print(f"{C.GRN}✓ API key saved to .env as {key_var}{C.RST}")
+
+    cfg.save()
+    print(f"{C.GRN}✓ Provider '{name}' configured{C.RST}")
+
+
+@providers.command("remove")
+@click.argument("name")
+def providers_remove(name):
+    """Remove a provider configuration."""
+    cfg = Config()
+    if name not in cfg.get("providers", {}):
+        print(f"{C.RED}✗ Provider '{name}' not in config{C.RST}")
+        return
+    cfg.data["providers"].pop(name, None)
+    cfg.save()
+    print(f"{C.GRN}✓ Provider '{name}' removed from config{C.RST}")
+
+
+@providers.command("test")
+@click.argument("name", required=False)
+def providers_test(name):
+    """Test a provider connection (or test all).
+
+    \b
+    Examples:
+        exort providers test groq
+        exort providers test
+    """
+    from exort.providers import list_providers, get_provider
+    import os
+    cfg = Config()
+
+    def _test(prov_name):
+        try:
+            pcfg = cfg.provider_conf(prov_name)
+            key = cfg.api_key(prov_name)
+            if pcfg.get("key_var") and not key:
+                return None  # no key configured
+            p = get_provider(prov_name, api_key=key,
+                           base_url=pcfg.get("endpoint"),
+                           default_model=pcfg.get("model"))
+            if not p.ok():
+                return False
+            resp = p.chat([{"role": "user", "content": "Say 'ok' in one word."}],
+                         max_tokens=10, stream=False)
+            return bool(resp.content)
+        except Exception as e:
+            return str(e)
+
+    if name:
+        result = _test(name)
+        if result is True:
+            print(f"{C.GRN}✓ {name}: OK{C.RST}")
+        elif result is None:
+            print(f"{C.YEL}? {name}: No API key configured{C.RST}")
+        elif result is False:
+            print(f"{C.RED}✗ {name}: Connection failed{C.RST}")
+        else:
+            print(f"{C.RED}✗ {name}: {result}{C.RST}")
+    else:
+        print(f"\n{C.B}  Testing All Providers{C.RST}\n")
+        for p in list_providers():
+            if p == "custom":
+                continue
+            result = _test(p)
+            if result is True:
+                print(f"  {C.GRN}✓{C.RST} {p}")
+            elif result is None:
+                print(f"  {C.DIM}○ {p} (no key){C.RST}")
+            elif result is False:
+                print(f"  {C.RED}✗ {p} (failed){C.RST}")
+            else:
+                print(f"  {C.RED}✗ {p} ({result[:50]}){C.RST}")
+        print()
 
 
 @cli.command()
@@ -340,12 +496,43 @@ def gear():
     from exort.tools.gear import GearBox
     gb = GearBox()
     gb.discover()
-    print(f"\n{C.B}Gear ({len(gb)}){C.RST}")
-    for n in gb.names():
-        g = gb._gear[n]
-        warn = " ⚠" if g.unsafe else ""
-        print(f"  {C.CYN}{n}{C.RST}{warn}")
-        print(f"    {C.DIM}{g.spec.info[:90]}{C.RST}")
+    cats = gb.categories()
+    print(f"\n{C.B}Gear ({len(gb)} total){C.RST}")
+    for cat, items in cats.items():
+        print(f"\n  {C.ACC}{cat.upper()}{C.RST}")
+        for n in items:
+            g = gb._gear[n]
+            warn = " ⚠" if g.unsafe else ""
+            print(f"    {C.CYN}{n}{C.RST}{warn}")
+            print(f"      {C.DIM}{g.spec.info[:80]}{C.RST}")
+    print()
+
+
+@cli.command()
+def skills():
+    """List available skills/playbooks."""
+    from exort.playbooks.library import PlaybookLibrary
+    lib = PlaybookLibrary()
+    lib.load()
+    books = lib.list_all()
+
+    builtin = [b for b in books if b["origin"] == "builtin"]
+    user = [b for b in books if b["origin"] == "user"]
+
+    print(f"\n{C.B}  Skills & Playbooks ({len(books)} total){C.RST}")
+
+    if builtin:
+        print(f"\n  {C.GRN}Built-in ({len(builtin)}){C.RST}")
+        for b in builtin:
+            print(f"    {C.CYN}{b['name']}{C.RST}")
+
+    if user:
+        print(f"\n  {C.ACC}User-created ({len(user)}){C.RST}")
+        for b in user:
+            print(f"    {C.CYN}{b['name']}{C.RST}  {C.DIM}{b['path']}{C.RST}")
+
+    print(f"\n  {C.DIM}To create: save .md files to ~/.exort/playbooks/{C.RST}")
+    print(f"  {C.DIM}To load: exort config set playbooks.autoload ['name']{C.RST}")
     print()
 
 
@@ -373,25 +560,47 @@ def setup():
     print(f"  data dir: {d}\n")
 
     print("  Which provider?")
-    print(f"    {C.CYN}1{C.RST}. Groq    (free, fast — recommended)")
-    print(f"    {C.CYN}2{C.RST}. OpenAI  (GPT-4, paid)")
-    print(f"    {C.CYN}3{C.RST}. Ollama  (local, free)")
-    print(f"    {C.CYN}4{C.RST}. Anthropic (Claude, paid)")
+    providers_list = [
+        ("1", "groq", "Groq (free, fast — recommended)"),
+        ("2", "openai", "OpenAI (GPT-4, paid)"),
+        ("3", "ollama", "Ollama (local, free)"),
+        ("4", "anthropic", "Anthropic (Claude, paid)"),
+        ("5", "together", "Together AI (open models, cheap)"),
+        ("6", "deepseek", "DeepSeek (strong reasoning, cheap)"),
+        ("7", "openrouter", "OpenRouter (200+ models, some free)"),
+        ("8", "mistral", "Mistral (European AI)"),
+        ("9", "gemini", "Google Gemini (free tier)"),
+        ("10", "perplexity", "Perplexity (search-augmented)"),
+    ]
+    for num, name, desc in providers_list:
+        print(f"    {C.CYN}{num}{C.RST}. {desc}")
 
     try:
         choice = input(f"\n  choice [1]: ").strip() or "1"
     except (EOFError, KeyboardInterrupt):
         return
 
-    prov = {"1": "groq", "2": "openai", "3": "ollama", "4": "anthropic"}.get(choice, "groq")
+    prov_map = {num: name for num, name, _ in providers_list}
+    prov = prov_map.get(choice, "groq")
     cfg.set("engine.provider", prov)
 
     key_var = cfg.get(f"providers.{prov}.key_var")
     if key_var:
         print(f"\n  To use {prov}, you need {key_var}.")
         print(f"  Get a key and paste it below (or press Enter to skip).")
-        if prov == "groq":
-            print(f"  {C.DIM}→ https://console.groq.com (free, no credit card){C.RST}")
+        urls = {
+            "groq": "https://console.groq.com (free, no credit card)",
+            "openai": "https://platform.openai.com",
+            "anthropic": "https://console.anthropic.com",
+            "together": "https://api.together.xyz",
+            "deepseek": "https://platform.deepseek.com",
+            "openrouter": "https://openrouter.ai (free models available)",
+            "mistral": "https://console.mistral.ai (free tier)",
+            "gemini": "https://aistudio.google.com (free)",
+            "perplexity": "https://www.perplexity.ai",
+        }
+        if prov in urls:
+            print(f"  {C.DIM}→ {urls[prov]}{C.RST}")
 
         try:
             key = input(f"  {key_var}: ").strip()
@@ -407,6 +616,452 @@ def setup():
 
     cfg.save()
     print(f"\n  {C.GRN}✓ Setup complete! Run 'exort shell' to start.{C.RST}\n")
+
+
+def _save_env_key(key_var: str, key: str):
+    """Save an API key to ~/.exort/.env"""
+    from exort.config import exort_dir
+    d = exort_dir()
+    d.mkdir(parents=True, exist_ok=True)
+    env = d / ".env"
+
+    # Read existing, remove old key if present
+    lines = []
+    if env.exists():
+        with open(env, "r") as f:
+            lines = f.readlines()
+    lines = [l for l in lines if not l.strip().startswith(f"{key_var}=")]
+    lines.append(f"{key_var}={key}\n")
+
+    with open(env, "w") as f:
+        f.writelines(lines)
+    os.environ[key_var] = key
+
+
+# ══════════════════════════════════════════════════════════
+# Additional CLI Commands
+# ══════════════════════════════════════════════════════════
+
+@cli.command()
+@click.argument("name")
+@click.argument("body", required=False)
+@click.option("--file", "-f", help="Load playbook from file")
+def playbook(name, body, file):
+    """Create or view a playbook (skill).
+
+    \b
+    Examples:
+        exort playbook my-skill "# My Skill\\nInstructions here..."
+        exort playbook my-skill --file skill.md
+        exort playbook list
+    """
+    from exort.playbooks.library import PlaybookLibrary
+    lib = PlaybookLibrary()
+    lib.load()
+
+    if name == "list":
+        books = lib.list_all()
+        print(f"\\n{C.B}Playbooks ({len(books)}){C.RST}")
+        for b in books:
+            tag = f"{C.GRN}built-in{C.RST}" if b["origin"] == "builtin" else f"{C.ACC}user{C.RST}"
+            print(f"  {C.CYN}{b['name']}{C.RST}  [{tag}]")
+        print()
+        return
+
+    if name == "delete":
+        if body:
+            from exort.config import exort_dir
+            p = exort_dir() / "playbooks" / f"{body}.md"
+            if p.exists():
+                p.unlink()
+                print(f"{C.GRN}✓ Deleted playbook: {body}{C.RST}")
+            else:
+                print(f"{C.RED}✗ Playbook not found: {body}{C.RST}")
+        else:
+            print("Usage: exort playbook delete <name>")
+        return
+
+    if file:
+        import pathlib
+        p = pathlib.Path(file)
+        if not p.exists():
+            print(f"{C.RED}✗ File not found: {file}{C.RST}")
+            return
+        body = p.read_text(encoding="utf-8")
+
+    if not body:
+        # Show existing playbook
+        matches = lib.find(name)
+        if matches:
+            pb = matches[0]
+            print(f"\\n{C.B}Playbook: {pb.name}{C.RST} [{pb.origin}]")
+            print(f"{C.DIM}{pb.path}{C.RST}\\n")
+            print(pb.body[:3000])
+        else:
+            print(f"{C.RED}✗ Playbook not found: {name}{C.RST}")
+        return
+
+    path = lib.save(name, body)
+    print(f"{C.GRN}✓ Saved playbook: {name}{C.RST}")
+    print(f"  {C.DIM}{path}{C.RST}")
+
+
+@cli.command()
+@click.option("--days", "-d", type=int, default=7, help="Show sessions from last N days")
+@click.option("--limit", "-n", type=int, default=20, help="Max sessions to show")
+def sessions(days, limit):
+    """List conversation sessions."""
+    from exort.memory.store import ConversationStore
+    mem = ConversationStore()
+    recent = mem.recent(limit)
+    if recent:
+        print(f"\\n{C.B}Recent Sessions ({len(recent)}){C.RST}\\n")
+        for s in recent:
+            print(f"  {C.CYN}{s['id']}{C.RST}  {s['title']}  {C.DIM}({s['updated'][:10]}){C.RST}")
+        print()
+    else:
+        print(f"  {C.DIM}no sessions found{C.RST}")
+
+
+@cli.command()
+@click.argument("session_id")
+def resume(session_id):
+    """Resume a previous conversation session.
+
+    \b
+    Examples:
+        exort resume abc123
+    """
+    cfg = Config()
+    engine = _make_engine(cfg)
+    try:
+        engine.resume(session_id)
+        title = engine.mem.title(session_id)
+        print(f"{C.GRN}✓ Resumed: {title}{C.RST}\\n")
+        ExortShell(engine, cfg).run()
+    except Exception as e:
+        print(f"{C.RED}✗ {e}{C.RST}")
+
+
+@cli.command()
+@click.argument("text")
+@click.option("--provider", "-p")
+@click.option("--model", "-m")
+def translate(text, provider, model):
+    """Translate text to English (or ask the AI).
+
+    \b
+    Examples:
+        exort translate "Bonjour le monde"
+        exort translate "你好世界" -p groq
+    """
+    cfg = Config()
+    engine = _make_engine(cfg, provider=provider, model=model)
+    prompt = f"Translate the following text to English. Output ONLY the translation, nothing else:\\n\\n{text}"
+    for chunk in engine.talk(prompt, stream=True):
+        print(chunk, end="", flush=True)
+    print()
+
+
+@cli.command()
+@click.argument("code")
+@click.option("--language", "-l", default="python", help="Language")
+@click.option("--provider", "-p")
+def explain(code, language, provider):
+    """Explain a piece of code.
+
+    \b
+    Examples:
+        exort explain "def fib(n): return n if n < 2 else fib(n-1) + fib(n-2)"
+        exort explain --language javascript "const x = [...arr].sort()"
+    """
+    cfg = Config()
+    engine = _make_engine(cfg, provider=provider)
+    prompt = f"Explain this {language} code in plain English. Be concise but thorough:\\n\\n```{language}\\n{code}\\n```"
+    for chunk in engine.talk(prompt, stream=True):
+        print(chunk, end="", flush=True)
+    print()
+
+
+@cli.command()
+@click.argument("description")
+@click.option("--language", "-l", default="python", help="Language")
+@click.option("--provider", "-p")
+def generate(description, language, provider):
+    """Generate code from a description.
+
+    \b
+    Examples:
+        exort generate "function that sorts a list of dicts by key"
+        exort generate "REST API with flask" -l python
+        exort generate "binary search" -l javascript
+    """
+    cfg = Config()
+    engine = _make_engine(cfg, provider=provider)
+    prompt = f"Write {language} code for: {description}. Output ONLY the code with brief comments. No explanation."
+    for chunk in engine.talk(prompt, stream=True):
+        print(chunk, end="", flush=True)
+    print()
+
+
+@cli.command()
+@click.argument("text")
+@click.option("--style", "-s", default="professional", help="Style: professional, casual, friendly, formal")
+@click.option("--provider", "-p")
+def rewrite(text, style, provider):
+    """Rewrite text in a different style.
+
+    \b
+    Examples:
+        exort rewrite "hey can u send me the docs asap"
+        exort rewrite "Dear Sir/Madam, I am writing to inquire..." -s casual
+    """
+    cfg = Config()
+    engine = _make_engine(cfg, provider=provider)
+    prompt = f"Rewrite the following text in a {style} style. Output ONLY the rewritten text:\\n\\n{text}"
+    for chunk in engine.talk(prompt, stream=True):
+        print(chunk, end="", flush=True)
+    print()
+
+
+@cli.command()
+@click.argument("topic")
+@click.option("--provider", "-p")
+def summarize(topic, provider):
+    """Summarize a topic, URL, or file content.
+
+    \b
+    Examples:
+        exort summarize "https://example.com/article"
+        exort summarize "quantum computing"
+        exort summarize "./README.md"
+    """
+    import os
+    cfg = Config()
+    engine = _make_engine(cfg, provider=provider)
+
+    # Check if it's a file
+    if os.path.isfile(topic):
+        with open(topic, "r", encoding="utf-8", errors="replace") as f:
+            content = f.read()[:10000]
+        prompt = f"Summarize the following document concisely:\\n\\n{content}"
+    elif topic.startswith("http"):
+        prompt = f"Fetch and summarize the content at this URL: {topic}"
+    else:
+        prompt = f"Provide a concise summary of: {topic}"
+
+    for chunk in engine.talk(prompt, stream=True):
+        print(chunk, end="", flush=True)
+    print()
+
+
+@cli.command()
+@click.argument("code")
+@click.option("--language", "-l", default="python")
+@click.option("--provider", "-p")
+def review(code, language, provider):
+    """Review code for bugs, security issues, and improvements.
+
+    \b
+    Examples:
+        exort review "def login(user, pwd): db.query(f'SELECT * FROM users WHERE name={user}')"
+        exort review --file app.py
+    """
+    cfg = Config()
+    engine = _make_engine(cfg, provider=provider)
+    prompt = f"""Review this {language} code. Check for:
+1. Bugs and logic errors
+2. Security vulnerabilities
+3. Performance issues
+4. Code style improvements
+
+Be concise. Format as a numbered list of findings.
+
+```{language}
+{code}
+```"""
+    for chunk in engine.talk(prompt, stream=True):
+        print(chunk, end="", flush=True)
+    print()
+
+
+@cli.command()
+@click.argument("query")
+@click.option("--max-results", "-n", type=int, default=5)
+def search(query, max_results):
+    """Search the web (DuckDuckGo).
+
+    \b
+    Examples:
+        exort search "python async best practices"
+        exort search "latest AI news" -n 10
+    """
+    from exort.tools.web import _search
+    results = _search(query, max_results)
+    print(f"\\n{C.B}Search: {query}{C.RST}\\n")
+    for i, r in enumerate(results, 1):
+        if "error" in r:
+            print(f"  {C.RED}Error: {r['error']}{C.RST}")
+            continue
+        if "note" in r:
+            print(f"  {C.DIM}{r['note']}{C.RST}")
+            continue
+        print(f"  {C.CYN}{i}. {r.get('title', 'No title')}{C.RST}")
+        print(f"     {C.DIM}{r.get('url', '')}{C.RST}")
+        print(f"     {r.get('snippet', '')[:120]}")
+        print()
+
+
+@cli.command()
+@click.argument("url")
+@click.option("--max-chars", "-c", type=int, default=5000)
+def fetch(url, max_chars):
+    """Fetch a URL and display its text content.
+
+    \b
+    Examples:
+        exort fetch "https://example.com"
+        exort fetch "https://news.ycombinator.com" -c 3000
+    """
+    from exort.tools.web import _fetch
+    content = _fetch(url, max_chars)
+    print(f"\\n{C.B}Fetched: {url}{C.RST}\\n")
+    print(content)
+    print()
+
+
+@cli.command()
+@click.option("--json-format", "-j", is_flag=True, help="Output as JSON")
+def status(json_format):
+    """Show Exort system status."""
+    import json as json_mod
+    cfg = Config()
+    from exort.providers import list_providers
+    from exort.tools.gear import GearBox
+
+    gb = GearBox()
+    gb.discover()
+
+    info = {
+        "version": "2.1.0",
+        "provider": cfg.get("engine.provider"),
+        "model": cfg.get("engine.model"),
+        "providers": list_providers(),
+        "provider_count": len(list_providers()),
+        "gear_count": len(gb),
+        "gear": gb.names(),
+        "config_path": str(cfg._path),
+    }
+
+    if json_format:
+        print(json_mod.dumps(info, indent=2))
+    else:
+        print(f"\\n{C.B}Exort System Status{C.RST}")
+        print(f"  {'─' * 40}")
+        print(f"  version     {C.ACC}{info['version']}{C.RST}")
+        print(f"  provider    {info['provider']}")
+        print(f"  model       {info['model']}")
+        print(f"  providers   {info['provider_count']} available")
+        print(f"  gear        {info['gear_count']} tools")
+        print(f"  config      {C.DIM}{info['config_path']}{C.RST}")
+        print()
+
+
+@cli.command()
+@click.argument("key")
+@click.argument("value")
+def set(key, value):
+    """Set a configuration value.
+
+    \b
+    Examples:
+        exort set engine.provider groq
+        exort set engine.temperature 0.3
+        exort set engine.model llama-3.3-70b-versatile
+    """
+    cfg = Config()
+    try:
+        import json
+        value = json.loads(value)
+    except Exception:
+        pass
+    cfg.set(key, value)
+    cfg.save()
+    print(f"{C.GRN}✓ {key} = {value}{C.RST}")
+
+
+@cli.command()
+@click.argument("key")
+def get(key):
+    """Get a configuration value.
+
+    \b
+    Examples:
+        exort get engine.provider
+        exort get providers.groq.model
+    """
+    cfg = Config()
+    val = cfg.get(key)
+    if val is not None:
+        print(f"{key} = {val}")
+    else:
+        print(f"{C.DIM}{key} is not set{C.RST}")
+
+
+@cli.command()
+@click.option("--count", "-n", type=int, default=5, help="Number of history entries")
+def history(count):
+    """Show recent conversation history."""
+    from exort.memory.store import ConversationStore
+    mem = ConversationStore()
+    recent = mem.recent(count)
+    if not recent:
+        print(f"  {C.DIM}no conversation history{C.RST}")
+        return
+    print(f"\\n{C.B}Recent Conversations{C.RST}\\n")
+    for s in recent:
+        msgs = mem.messages(s["id"])
+        print(f"  {C.CYN}{s['id']}{C.RST} — {s['title']}  {C.DIM}({len(msgs)} msgs){C.RST}")
+        # Show last 2 exchanges
+        for m in msgs[-4:]:
+            role = m["role"]
+            txt = m.get("content", "")[:80]
+            if role == "user":
+                print(f"    {C.CYN}▸{C.RST} {txt}")
+            elif role == "assistant":
+                print(f"    {C.GRN}▸{C.RST} {txt}")
+        print()
+
+
+@cli.command()
+@click.argument("prompt_text")
+@click.option("--system", "-s", help="System prompt")
+@click.option("--provider", "-p")
+@click.option("--model", "-m")
+@click.option("--max-tokens", "-t", type=int, default=4096)
+def complete(prompt_text, system, provider, model, max_tokens):
+    """Raw completion (no tools, no memory).
+
+    \b
+    Examples:
+        exort complete "Write a haiku about coding"
+        exort complete "Explain quantum physics" -s "You are a physics teacher"
+    """
+    cfg = Config()
+    engine = _make_engine(cfg, provider=provider, model=model)
+
+    if system:
+        engine._system = system
+
+    # Disable tools for raw completion
+    old_gear_enabled = cfg.get("gear.enabled")
+    cfg.set("gear.enabled", False)
+
+    for chunk in engine.talk(prompt_text, stream=True):
+        print(chunk, end="", flush=True)
+    print()
+
+    cfg.set("gear.enabled", old_gear_enabled)
 
 
 def main():

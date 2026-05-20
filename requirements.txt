@@ -1,15 +1,26 @@
-# Core dependencies
+# Core dependencies (required)
 click>=8.0
 pyyaml>=6.0
 openai>=1.0
 python-dotenv>=1.0
 
-# Optional: Anthropic provider
+# ── Optional Providers ──
+# Anthropic (Claude)
 # anthropic>=0.30
 
-# Optional: Telegram bot
+# Google Gemini
+# google-genai>=1.0
+
+# Cohere
+# cohere>=5.0
+
+# Replicate
+# replicate>=0.25
+
+# ── Optional Features ──
+# Telegram bot
 # python-telegram-bot>=21.0
 
-# Development
+# ── Development ──
 # pytest>=7.0
 # ruff>=0.4

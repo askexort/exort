@@ -1,13 +1,20 @@
 """
 Exort Telegram Bot — Free AI for Everyone
-Multi-provider: Groq (primary) + Cerebras (optional fallback, 1M tok/day free).
-Auto-fallback when one provider hits rate limits.
+Self-healing multi-provider with auto-failover, key rotation, and admin alerts.
+
+Features:
+  - Multi-key rotation per provider (survive rate limits)
+  - Auto-failover chain (never return errors to users)
+  - Health monitoring with admin Telegram alerts
+  - Usage dashboard at /dashboard
+  - Provider health tracking
 
 Setup:
   1. @BotFather → /newbot → copy token
-  2. Set env vars: TELEGRAM_BOT_TOKEN, GROQ_API_KEY
-  3. Optional: CEREBRAS_API_KEY for extra capacity
-  4. exort bot
+  2. Set env vars: TELEGRAM_BOT_TOKEN, GROQ_API_KEY (or OPENROUTER_API_KEY)
+  3. Optional: CEREBRAS_API_KEY, MIMO_API_KEY for extra capacity
+  4. Optional: ADMIN_IDS=your_telegram_id for alerts
+  5. exort bot
 """
 
 import asyncio
@@ -21,60 +28,21 @@ from datetime import datetime
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from threading import Thread
 
+from dotenv import load_dotenv
+
+# Load .env from ~/.exort/.env
+load_dotenv(os.path.expanduser('~/.exort/.env'))
+
+from exort.resilience import get_chain, start_dashboard
+
 logger = logging.getLogger(__name__)
 
 
 # ─── Config ───────────────────────────────────────────────────────────────────
 
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
-MIMO_API_KEY = os.getenv("MIMO_API_KEY", "")
-CEREBRAS_API_KEY = os.getenv("CEREBRAS_API_KEY", "")
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "google/gemma-4-26b-a4b-it:free")
 RATE_LIMIT = int(os.getenv("RATE_LIMIT_PER_MIN", "10"))
-
-# Provider chain: try each in order until one works
-# OpenRouter free models (multiple for resilience against rate limits)
-OPENROUTER_FREE_MODELS = [
-    "google/gemma-4-26b-a4b-it:free",
-    "google/gemma-4-31b-it:free",
-    "deepseek/deepseek-v4-flash:free",
-    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
-]
-PROVIDERS = []
-if OPENROUTER_API_KEY:
-    for model in OPENROUTER_FREE_MODELS:
-        PROVIDERS.append({
-            "name": f"OpenRouter/{model.split('/')[1].split(':')[0]}",
-            "url": "https://openrouter.ai/api/v1/chat/completions",
-            "key": OPENROUTER_API_KEY,
-            "model": model,
-        })
-if GROQ_API_KEY:
-    PROVIDERS.append({
-        "name": "Groq",
-        "url": "https://api.groq.com/openai/v1/chat/completions",
-        "key": GROQ_API_KEY,
-        "model": DEFAULT_MODEL if DEFAULT_MODEL in (
-            "llama-3.3-70b-versatile", "llama-3.1-8b-instant",
-            "mixtral-8x7b-32768", "gemma2-9b-it",
-        ) else "llama-3.3-70b-versatile",
-    })
-if MIMO_API_KEY:
-    PROVIDERS.append({
-        "name": "MiMo",
-        "url": "https://api.xiaomimimo.com/v1/chat/completions",
-        "key": MIMO_API_KEY,
-        "model": "mimo-v2.5-pro",
-    })
-if CEREBRAS_API_KEY:
-    PROVIDERS.append({
-        "name": "Cerebras",
-        "url": "https://api.cerebras.ai/v1/chat/completions",
-        "key": CEREBRAS_API_KEY,
-        "model": "llama-3.3-70b",
-    })
 
 AVAILABLE_MODELS = {
     "deepseek-v4-flash": "deepseek/deepseek-v4-flash:free",
@@ -126,79 +94,12 @@ stats: dict = {
 }
 
 
-# ─── Multi-Provider AI API (sync, to be wrapped with asyncio.to_thread) ───────
-
-def _ai_chat_sync(message: str, model: str = None) -> str:
-    """Send a message to AI providers with auto-fallback. Tries each provider in order."""
-    model = model or DEFAULT_MODEL
-
-    messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": message},
-    ]
-
-    payload = json.dumps({
-        "model": model,
-        "messages": messages,
-        "temperature": 0.7,
-        "max_tokens": 1024,
-    }).encode()
-
-    last_error = None
-    for provider in PROVIDERS:
-        headers = {
-            "Authorization": f"Bearer {provider['key']}",
-            "Content-Type": "application/json",
-            "User-Agent": "Exort-Bot/2.0.0",
-        }
-        # Use provider's default model if the requested model doesn't match
-        prov_payload = json.dumps({
-            "model": provider["model"],
-            "messages": messages,
-            "temperature": 0.7,
-            "max_tokens": 1024,
-        }).encode()
-
-        req = urllib.request.Request(provider["url"], data=prov_payload, headers=headers)
-        try:
-            with urllib.request.urlopen(req, timeout=30) as resp:
-                data = json.loads(resp.read())
-                return data["choices"][0]["message"]["content"]
-        except urllib.error.HTTPError as e:
-            body = e.read().decode("utf-8", errors="replace")
-            if e.code == 429:
-                # Rate limit — try next provider
-                logger.warning(f"{provider['name']} rate limited (429)")
-                last_error = f"{provider['name']} rate limited"
-                continue
-            last_error = f"{provider['name']}: HTTP {e.code}"
-            logger.warning(f"{provider['name']} HTTP error {e.code}: {body[:200]}")
-            continue
-        except Exception as e:
-            last_error = e
-            logger.warning(f"{provider['name']} failed: {e}")
-            continue
-
-    logger.error(f"All providers failed. Last error: {last_error}")
-    return f"⚠️ All AI providers exhausted ({last_error}). Try again in a few minutes."
-
+# ─── AI Chat (uses resilient chain) ───────────────────────────────────────────
 
 async def chat_with_ai(message: str, model: str = None) -> str:
-    """Async wrapper for AI API call with fallback."""
-    return await asyncio.to_thread(_ai_chat_sync, message, model)
-
-
-# ─── Health Check Server ─────────────────────────────────────────────────────
-
-class _HealthHandler(BaseHTTPRequestHandler):
-    """Minimal health check for cloud platforms (Render, Fly, etc)."""
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header("Content-Type", "text/plain")
-        self.end_headers()
-        self.wfile.write(b"ok")
-    def log_message(self, *_):
-        pass  # silence request logs
+    """Send message to AI with automatic failover and key rotation."""
+    chain = get_chain()
+    return await chain.chat(message, SYSTEM_PROMPT)
 
 
 # ─── Command Handlers ────────────────────────────────────────────────────────
@@ -216,18 +117,22 @@ async def cmd_start(update, context):
             InlineKeyboardButton("🤖 Models", callback_data="models"),
         ],
         [
+            InlineKeyboardButton("📊 Health", callback_data="health"),
             InlineKeyboardButton("🌐 Website", url="https://askexort.github.io/exort"),
+        ],
+        [
             InlineKeyboardButton("📦 GitHub", url="https://github.com/askexort/exort"),
         ],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     welcome = (
-        "⚡ **Exort Engine** — AI Agent\n\n"
+        "⚡ **Exort Engine** — Self-Healing AI Agent\n\n"
         "I can help with coding, analysis, writing, math, and more.\n\n"
         "**Quick Start:**\n"
         "• Just send me any message to chat\n"
-        "• `/help` — All commands\n\n"
+        "• `/help` — All commands\n"
+        "• `/health` — Provider status\n\n"
         "🆓 **100% Free** • 🔓 **Open Source** • 🌍 **For Everyone**\n\n"
         "_Built by the Exort community_"
     )
@@ -249,21 +154,22 @@ async def cmd_help(update, context):
         "**Settings:**\n"
         "• `/models` — View/switch AI models\n"
         "• `/model <name>` — Set model directly\n\n"
+        "**Monitoring:**\n"
+        "• `/health` — Provider health report\n"
+        "• `/stats` — Usage statistics\n\n"
         "**Info:**\n"
-        "• `/stats` — Usage statistics\n"
         "• `/about` — About Exort\n"
         "• `/new` — Fresh conversation\n"
         "• `/help` — This message\n\n"
         f"**Rate Limit:** {RATE_LIMIT} messages/min\n"
-        f"**Current Model:** `{DEFAULT_MODEL}`\n"
-        f"**Providers:** {' → '.join(p['name'] for p in PROVIDERS) or 'none'}"
+        f"**Current Model:** `{DEFAULT_MODEL}`"
     )
 
     await update.message.reply_text(help_text, parse_mode=ParseMode.MARKDOWN)
 
 
 async def cmd_new(update, context):
-    """Fresh conversation (no-op for stateless bot, but user expects it)."""
+    """Fresh conversation."""
     await update.message.reply_text("✅ Fresh session started. Send me a message!")
 
 
@@ -300,6 +206,10 @@ async def cmd_models(update, context):
         "• **llama-3.1-8b** — Fastest\n"
         "• **mixtral-8x7b** — Great for coding\n"
         "• **gemma2-9b** — Balanced\n\n"
+        "**OpenRouter (free models):**\n"
+        "• **gemma-4-26b** — Google's latest\n"
+        "• **gemma-4-31b** — Larger variant\n"
+        "• **deepseek-v4-flash** — Fast reasoning\n\n"
         "**MiMo (Xiaomi):**\n"
         "• **mimo-v2.5-pro** — Top reasoning\n\n"
         f"Current: `{DEFAULT_MODEL}`",
@@ -335,20 +245,41 @@ async def cmd_model(update, context):
         await update.message.reply_text(f"❌ Unknown model. Available: {models_list}")
 
 
+async def cmd_health(update, context):
+    """Show provider health report."""
+    from telegram.constants import ParseMode
+
+    chain = get_chain()
+    report = await chain.health_check()
+    await update.message.reply_text(report, parse_mode=ParseMode.MARKDOWN)
+
+
 async def cmd_stats(update, context):
     """Show usage statistics."""
     from telegram.constants import ParseMode
 
+    chain = get_chain()
+    chain_stats = chain.stats
+
     uptime = datetime.utcnow() - stats["start_time"]
     hours = int(uptime.total_seconds() // 3600)
     minutes = int((uptime.total_seconds() % 3600) // 60)
+
+    success_rate = 0
+    if chain_stats["total_requests"] > 0:
+        success_rate = round((chain_stats["total_success"] / chain_stats["total_requests"]) * 100)
+
     text = (
         "📊 **Exort Bot Stats**\n\n"
         f"👥 Total Users: `{len(stats['total_users'])}`\n"
         f"💬 Total Messages: `{stats['total_messages']}`\n"
         f"⏱ Uptime: `{hours}h {minutes}m`\n"
         f"🤖 Current Model: `{DEFAULT_MODEL}`\n"
-        f"⚡ Rate Limit: `{RATE_LIMIT}/min`"
+        f"⚡ Rate Limit: `{RATE_LIMIT}/min`\n\n"
+        f"**Provider Stats:**\n"
+        f"📡 Total Requests: `{chain_stats['total_requests']}`\n"
+        f"✅ Success Rate: `{success_rate}%`\n"
+        f"❌ Failures: `{chain_stats['total_failures']}`"
     )
 
     await update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
@@ -366,11 +297,15 @@ async def cmd_about(update, context):
         "**Features:**\n"
         "• Free AI chat (no paywalls)\n"
         "• Open-source code (MIT license)\n"
-        "• Multi-provider support\n"
+        "• Self-healing provider chain\n"
+        "• Multi-key rotation (survive rate limits)\n"
+        "• Auto-failover (never go down)\n"
+        "• Health monitoring dashboard\n"
         "• Community driven\n\n"
         "**Links:**\n"
         "• [GitHub](https://github.com/askexort/exort)\n"
         "• [Website](https://askexort.github.io/exort)\n"
+        "• [Dashboard](https://exort-bot.onrender.com/dashboard)\n"
         "• [Telegram](https://t.me/Exortai)\n"
     )
 
@@ -396,13 +331,6 @@ async def handle_message(update, context, explicit_msg: str = None):
     if not rate_limiter.is_allowed(user_id):
         await update.message.reply_text(
             f"⏳ Rate limit: max {RATE_LIMIT} messages per minute. Please wait."
-        )
-        return
-
-    # Check API key
-    if not PROVIDERS:
-        await update.message.reply_text(
-            "⚠️ No AI provider configured. Set GEMINI_API_KEY or GROQ_API_KEY environment variable."
         )
         return
 
@@ -475,16 +403,30 @@ async def handle_callback(update, context):
             f"✅ Model set to `{model_id}`", parse_mode=ParseMode.MARKDOWN
         )
 
+    elif query.data == "health":
+        chain = get_chain()
+        report = await chain.health_check()
+        await query.edit_message_text(report, parse_mode=ParseMode.MARKDOWN)
+
     elif query.data == "stats":
+        chain = get_chain()
+        chain_stats = chain.stats
+
         uptime = datetime.utcnow() - stats["start_time"]
         hours = int(uptime.total_seconds() // 3600)
         minutes = int((uptime.total_seconds() % 3600) // 60)
+
+        success_rate = 0
+        if chain_stats["total_requests"] > 0:
+            success_rate = round((chain_stats["total_success"] / chain_stats["total_requests"]) * 100)
+
         await query.edit_message_text(
             f"📊 **Stats**\n\n"
             f"👥 Users: `{len(stats['total_users'])}`\n"
             f"💬 Messages: `{stats['total_messages']}`\n"
             f"⏱ Uptime: `{hours}h {minutes}m`\n"
-            f"🤖 Model: `{DEFAULT_MODEL}`",
+            f"🤖 Model: `{DEFAULT_MODEL}`\n"
+            f"✅ Success Rate: `{success_rate}%`",
             parse_mode=ParseMode.MARKDOWN,
         )
 
@@ -514,22 +456,26 @@ def run_bot(token: str, cfg=None):
         print("❌ TELEGRAM_BOT_TOKEN not set!")
         return
 
-    if not PROVIDERS:
+    # Initialize the resilient provider chain
+    chain = get_chain()
+    if not chain.providers:
         print("⚠️  No AI provider configured!")
-        print("   Set GEMINI_API_KEY (free, 1M tok/day): https://aistudio.google.com/apikey")
+        print("   Set OPENROUTER_API_KEY (free models): https://openrouter.ai/keys")
         print("   Or set GROQ_API_KEY (free, 100K tok/day): https://console.groq.com")
+        print("   Or set CEREBRAS_API_KEY (free, 1M tok/day): https://cloud.cerebras.ai")
 
-    # Start health check server (keeps Render/Fly free tier alive)
+    # Start dashboard server (health check + monitoring UI)
     port = int(os.environ.get("PORT", "8080"))
-    httpd = HTTPServer(("0.0.0.0", port), _HealthHandler)
-    Thread(target=httpd.serve_forever, daemon=True).start()
-    logger.info(f"Health check server on port {port}")
+    start_dashboard(port)
+    logger.info(f"Dashboard server on port {port}")
 
-    prov_names = " → ".join(p["name"] for p in PROVIDERS) or "none"
+    # Print startup info
+    active_providers = [p.name for p in chain.providers if p.has_available_key]
     print(f"⚡ Exort bot starting... send /start on Telegram to begin.")
-    print(f"   Providers: {prov_names}")
+    print(f"   Providers: {' → '.join(active_providers) or 'none'}")
     print(f"   Model: {DEFAULT_MODEL}")
     print(f"   Rate limit: {RATE_LIMIT}/min")
+    print(f"   Dashboard: http://localhost:{port}/dashboard")
 
     app = ApplicationBuilder().token(token).build()
 
@@ -540,6 +486,7 @@ def run_bot(token: str, cfg=None):
     app.add_handler(CommandHandler("chat", cmd_chat))
     app.add_handler(CommandHandler("models", cmd_models))
     app.add_handler(CommandHandler("model", cmd_model))
+    app.add_handler(CommandHandler("health", cmd_health))
     app.add_handler(CommandHandler("stats", cmd_stats))
     app.add_handler(CommandHandler("about", cmd_about))
 
