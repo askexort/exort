@@ -183,8 +183,8 @@ class ResilientProviderChain:
                 priority=1,
             ))
 
-        # MiMo
-        mimo_keys = self._split_keys(os.getenv("MIMO_API_KEY", ""))
+        # MiMo (Xiaomi) — accepts MIMO_API_KEY or XIAOMI_API_KEY
+        mimo_keys = self._split_keys(os.getenv("MIMO_API_KEY", "") or os.getenv("XIAOMI_API_KEY", ""))
         if mimo_keys:
             self.providers.append(ProviderConfig(
                 name="MiMo/v2.5-pro",

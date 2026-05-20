@@ -77,5 +77,28 @@ def _boot():
 
 _boot()
 
+# ── Aliases (provider name → canonical name) ──────────────────────
+_aliases = {
+    "xiaomi": "mimo",
+    "xiaomi-mimo": "mimo",
+}
+
+
+def resolve_provider(name: str) -> str:
+    """Resolve alias to canonical provider name."""
+    return _aliases.get(name, name)
+
+
+def get_provider(name: str, **kwargs) -> BaseProvider:
+    name = resolve_provider(name)
+    if name not in _registry:
+        raise ValueError(f"Unknown provider: {name}. Available: {list(_registry.keys())}")
+    return _registry[name](**kwargs)
+
+
+# Override get_provider in module scope
+import exort.providers as _self
+_self.get_provider = get_provider
+
 __all__ = ["BaseProvider", "ProviderResponse", "get_provider", "register",
-           "list_providers", "provider_info"]
+           "list_providers", "provider_info", "resolve_provider"]

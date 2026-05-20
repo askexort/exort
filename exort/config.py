@@ -127,11 +127,12 @@ BUILT_IN_DEFAULTS = {
             "endpoint": None,
             "model": "meta/meta-llama-3.1-405b-instruct",
         },
-        # ── Xiaomi ──
+        # ── Xiaomi MiMo (aliases: xiaomi, xiaomi-mimo) ──
         "mimo": {
-            "key_var": "MIMO_API_KEY",
+            "key_var": "MIMO_API_KEY",  # also accepts XIAOMI_API_KEY
             "endpoint": "https://api.xiaomimimo.com/v1",
             "model": "mimo-v2.5-pro",
+            "free": True,
         },
         # ── Other ──
         "xai": {

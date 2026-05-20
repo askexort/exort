@@ -2,9 +2,14 @@
 Xiaomi MiMo provider — fast inference, strong reasoning.
 
 Sign up: https://mimo.xiaomi.com
+Endpoint: https://api.xiaomimimo.com/v1
+Env vars: MIMO_API_KEY or XIAOMI_API_KEY
+Aliases: mimo, xiaomi, xiaomi-mimo
+Note: /v1/models returns 401 even with valid key — health check disabled.
 """
 
 import json
+import os
 from exort.providers.base import BaseProvider, ProviderResponse
 from exort.providers import register
 
@@ -13,6 +18,9 @@ class MiMoProvider(BaseProvider):
     name = "mimo"
 
     def __init__(self, **kw):
+        # Accept XIAOMI_API_KEY as fallback
+        if not kw.get("api_key"):
+            kw["api_key"] = os.getenv("XIAOMI_API_KEY", "")
         super().__init__(**kw)
         self.base_url = self.base_url or "https://api.xiaomimimo.com/v1"
         try:
