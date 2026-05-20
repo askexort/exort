@@ -3,930 +3,486 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Exort — The Open Agent Engine | Build Your AI Assistant</title>
-<meta name="description" content="Exort is a free, open-source AI agent with tool use, persistent memory, and multi-provider support. Self-hosted, privacy-first, MIT licensed.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<title>Exort — The Open Agent Engine | Free AI for Everyone</title>
+<link rel="icon" href="assets/favicon.jpg">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#000000;
-  --text:#F9E383;
-  --text-secondary:#F9E383;
-  --secondary:#F9E383;
-  --card-bg:rgba(255,255,255,0.03);
-  --card-border:rgba(255,255,255,0.06);
-  --radius:16px;
-  --btn-radius:12px;
-  --grad:#F9E383;
-  --max-w:1200px;
-  --section-pad:100px 0;
-}
+:root{--bg:#000;--gold:#F9E383;--card:rgba(255,255,255,0.03);--border:rgba(255,255,255,0.06);--radius:16px;--max:1200px}
 html{scroll-behavior:smooth;scroll-padding-top:80px}
-body{
-  font-family:'Inter',sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  line-height:1.6;
-  overflow-x:hidden;
-  -webkit-font-smoothing:antialiased;
-}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--gold);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 a{text-decoration:none;color:inherit}
-ul{list-style:none}
-.container{max-width:var(--max-w);margin:0 auto;padding:0 24px}
-h1,h2,h3,h4,h5,h6{line-height:1.2;font-weight:600}
-.section-title{
-  text-align:center;
-  margin-bottom:60px;
-}
-.section-title h2{
-  font-size:clamp(2rem,4vw,2.75rem);
-  margin-bottom:16px;
-}
-.section-title p{
-  color:var(--secondary);
-  font-size:1.1rem;
-  max-width:600px;
-  margin:0 auto;
-}
-.gradient-text{
-  color:#F9E383;
-}
-.btn-primary{
-  display:inline-flex;align-items:center;gap:8px;
-  padding:14px 28px;
-  background:transparent;
-  color:#F9E383;
-  border:1px solid rgba(249,227,131,0.3);
-  border-radius:var(--btn-radius);
-  font-size:1rem;font-weight:600;
-  cursor:pointer;
-  transition:transform .2s,border-color .3s;
-  font-family:inherit;
-}
-.btn-primary:hover{transform:translateY(-2px);border-color:rgba(249,227,131,0.6)}
-.btn-secondary{
-  display:inline-flex;align-items:center;gap:8px;
-  padding:14px 28px;
-  background:transparent;
-  color:#F9E383;
-  border:1px solid rgba(255,255,255,0.15);
-  border-radius:var(--btn-radius);
-  font-size:1rem;font-weight:600;
-  cursor:pointer;
-  transition:transform .2s,border-color .3s;
-  font-family:inherit;
-}
-.btn-secondary:hover{transform:translateY(-2px);border-color:rgba(249,227,131,0.35)}
-.btn-sm{padding:10px 20px;font-size:.9rem}
-.card{
-  background:var(--card-bg);
-  border:1px solid var(--card-border);
-  border-radius:var(--radius);
-  padding:32px;
-  transition:transform .3s,border-color .3s,box-shadow .3s;
-}
-.card:hover{
-  transform:translateY(-4px);
-  border-color:rgba(249,227,131,0.12);
-  box-shadow:0 20px 60px rgba(0,0,0,0.5);
-}
-
-/* ---- HEADER ---- */
-.header{
-  position:fixed;top:0;left:0;right:0;z-index:1000;
-  padding:16px 0;
-  background:rgba(0,0,0,0.7);
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
-  border-bottom:1px solid rgba(255,255,255,0.05);
-  transition:padding .3s;
-}
+.container{max-width:var(--max);margin:0 auto;padding:0 24px}
+.gradient-text{background:linear-gradient(135deg,#F9E383 0%,#f5d76e 50%,#F9E383 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.section-title{text-align:center;margin-bottom:60px}
+.section-title h2{font-size:clamp(2rem,4vw,2.75rem);margin-bottom:16px;font-weight:700}
+.section-title p{color:var(--gold);font-size:1.1rem;max-width:600px;margin:0 auto;opacity:0.7}
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.header{position:fixed;top:0;left:0;right:0;z-index:1000;padding:16px 0;background:rgba(0,0,0,0.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.05);transition:padding .3s}
 .header.scrolled{padding:10px 0}
 .header .container{display:flex;align-items:center;justify-content:space-between}
 .logo{display:flex;align-items:center;gap:10px;font-size:1.4rem;font-weight:700}
 .logo img{width:36px;height:36px;border-radius:8px}
 .nav{display:flex;align-items:center;gap:32px}
-.nav a{font-size:.95rem;color:var(--secondary);transition:color .2s;font-weight:500}
-.nav a:hover{color:#F9E383}
-.hamburger{display:none;background:none;border:none;color:#F9E383;font-size:1.5rem;cursor:pointer}
-.mobile-menu{
-  display:none;
-  position:fixed;top:0;left:0;right:0;bottom:0;
-  background:rgba(0,0,0,0.97);
-  z-index:999;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:28px;
-}
-.mobile-menu.active{display:flex}
-.mobile-menu a{font-size:1.3rem;color:#F9E383;font-weight:500}
-.mobile-menu .close-menu{
-  position:absolute;top:20px;right:24px;
-  background:none;border:none;color:#F9E383;font-size:2rem;cursor:pointer;
-}
-
-/* ---- HERO ---- */
-.hero{
-  position:relative;
-  padding:180px 0 120px;
-  text-align:center;
-  min-height:100vh;
-  display:flex;align-items:center;
-}
+.nav a{font-size:.95rem;color:var(--gold);transition:color .2s;font-weight:500;opacity:0.7}
+.nav a:hover{opacity:1}
+.hamburger{display:none;background:none;border:none;color:var(--gold);font-size:1.5rem;cursor:pointer}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:transparent;color:var(--gold);border:1px solid rgba(249,227,131,0.3);border-radius:12px;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary:hover{transform:translateY(-2px);border-color:rgba(249,227,131,0.6);box-shadow:0 0 20px rgba(249,227,131,0.15)}
+.btn-sm{padding:10px 20px;font-size:.85rem}
+.mobile-menu{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.97);backdrop-filter:blur(20px);flex-direction:column;align-items:center;justify-content:center;gap:28px;z-index:999}
+.mobile-menu.open{display:flex}
+.mobile-menu a{font-size:1.3rem;color:var(--gold);font-weight:500}
+.mobile-close{position:absolute;top:20px;right:24px;background:none;border:none;color:var(--gold);font-size:2rem;cursor:pointer}
+@media(max-width:768px){.nav{display:none}.hamburger{display:block}}
+.hero{position:relative;padding:180px 0 120px;text-align:center;min-height:100vh;display:flex;align-items:center;overflow:hidden}
+.hero::before{content:'';position:absolute;top:50%;left:50%;width:600px;height:600px;background:radial-gradient(circle,rgba(249,227,131,0.08) 0%,transparent 70%);transform:translate(-50%,-50%);pointer-events:none}
 .hero-content{position:relative;z-index:2;max-width:800px;margin:0 auto}
-.hero-subtitle{
-  font-size:.85rem;
-  font-weight:600;
-  letter-spacing:4px;
-  color:var(--secondary);
-  margin-bottom:20px;
-  text-transform:uppercase;
-}
-.hero h1{
-  font-size:clamp(2.5rem,6vw,4.5rem);
-  font-weight:700;
-  margin-bottom:24px;
-  letter-spacing:-1px;
-}
-.hero-desc{
-  font-size:1.15rem;
-  color:var(--secondary);
-  max-width:600px;
-  margin:0 auto 36px;
-  line-height:1.7;
-}
+.hero-subtitle{font-size:.85rem;font-weight:600;letter-spacing:4px;color:var(--gold);margin-bottom:20px;text-transform:uppercase}
+.hero h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;margin-bottom:24px;letter-spacing:-1px}
+.hero-desc{font-size:1.15rem;color:var(--gold);max-width:600px;margin:0 auto 36px;line-height:1.7;opacity:0.7}
 .hero-buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:60px}
 .stats-row{display:flex;justify-content:center;gap:48px;flex-wrap:wrap}
 .stat{text-align:center}
-.stat .stat-number{font-size:2.5rem;font-weight:700;color:#F9E383}
-.stat .stat-label{font-size:.9rem;color:var(--secondary);margin-top:4px}
-
-/* ---- 3D TORNADO ---- */
-
-100%{transform:rotateY(360deg)}}
-
-  20%{opacity:1;transform:translateY(-30px) scale(1)}
-  100%{opacity:0;transform:translateY(-200px) scale(0)}
-}
-
-/* ---- HOW IT WORKS ---- */
-.how-it-works{padding:var(--section-pad);position:relative;z-index:2}
-.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
-.step-card{text-align:center;padding:36px 24px}
-.step-card .step-num{
-  width:48px;height:48px;
-  background:transparent;
-  border:1px solid rgba(249,227,131,0.3);
-  border-radius:50%;
-  display:inline-flex;align-items:center;justify-content:center;
-  font-weight:700;font-size:1.1rem;
-  margin-bottom:20px;
-}
-.step-card .step-icon{
-  width:52px;height:52px;
-  background:rgba(99,102,241,0.1);
-  border-radius:14px;
-  display:flex;align-items:center;justify-content:center;
-  margin:0 auto 16px;
-  font-size:1.3rem;
-  color:#F9E383;
-}
-.step-card h4{font-size:1.15rem;margin-bottom:10px}
-.step-card p{color:var(--secondary);font-size:.9rem;margin-bottom:12px}
-.step-card code{
-  display:inline-block;
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:8px;
-  padding:8px 16px;
-  font-family:'Courier New',monospace;
-  font-size:.85rem;
-  color:#F9E383;
-}
-
-/* ---- FEATURES DEEP DIVE ---- */
-.features-deep{padding:var(--section-pad);position:relative;z-index:2}
-.feature-large{margin-bottom:24px}
-.feature-large .card{padding:40px 36px}
-.feature-large .feature-header{display:flex;align-items:center;gap:16px;margin-bottom:16px}
-.feature-large .feature-header .feature-icon{
-  width:52px;height:52px;
-  background:rgba(99,102,241,0.1);
-  border-radius:14px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:1.3rem;
-  color:#F9E383;
-  flex-shrink:0;
-}
-.feature-large h4{font-size:1.25rem}
-.feature-large p{color:var(--secondary);font-size:1rem;line-height:1.8;margin-bottom:20px}
+.stat-number{font-size:2.5rem;font-weight:700;color:var(--gold)}
+.stat-label{font-size:.9rem;color:var(--gold);margin-top:4px;opacity:0.6}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:32px;transition:transform .3s,border-color .3s,box-shadow .3s}
+.card:hover{transform:translateY(-4px);border-color:rgba(249,227,131,0.12);box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.features{padding:100px 0;position:relative;z-index:2}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.feature-icon{width:52px;height:52px;background:rgba(249,227,131,0.08);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:1.3rem;color:var(--gold)}
+.feature-card h4{font-size:1.15rem;margin-bottom:10px}
+.feature-card p{color:var(--gold);font-size:.95rem;margin-bottom:16px;opacity:0.7}
 .feature-tags{display:flex;flex-wrap:wrap;gap:8px}
-.feature-tag{
-  padding:5px 12px;
-  font-size:.8rem;
-  background:rgba(99,102,241,0.08);
-  border:1px solid rgba(99,102,241,0.15);
-  border-radius:20px;
-  color:#F9E383;
-}
-
-/* ---- USE CASES ---- */
-.use-cases{padding:var(--section-pad);position:relative;z-index:2}
-.usecases-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-.usecase-card .usecase-icon{
-  width:52px;height:52px;
-  background:rgba(236,72,153,0.1);
-  border-radius:14px;
-  display:flex;align-items:center;justify-content:center;
-  margin-bottom:20px;
-  font-size:1.3rem;
-  color:#F9E383;
-}
-.usecase-card h4{font-size:1.15rem;margin-bottom:10px}
-.usecase-card p{color:var(--secondary);font-size:.95rem}
-
-/* ---- PROVIDERS ---- */
-.providers{padding:var(--section-pad);position:relative;z-index:2}
-.pill-grid{display:flex;flex-wrap:wrap;gap:14px;justify-content:center}
-.pill{
-  padding:12px 28px;
-  background:var(--card-bg);
-  border:1px solid var(--card-border);
-  border-radius:40px;
-  font-size:.95rem;font-weight:500;
-  transition:border-color .3s,transform .3s;
-  cursor:default;
-}
-.pill:hover{border-color:rgba(249,227,131,0.15);transform:translateY(-2px)}
-
-/* ---- SOCIALS ---- */
-.socials-section{padding:var(--section-pad);position:relative;z-index:2}
-.socials-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:24px}
-.social-card{text-align:center;padding:32px 20px}
-.social-card .social-icon{
-  width:56px;height:56px;
-  margin:0 auto 16px;
-  background:rgba(99,102,241,0.1);
-  border-radius:14px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:1.5rem;
-  color:#F9E383;
-}
-.social-card h4{font-size:1.05rem;margin-bottom:6px}
-.social-card .social-url{color:#F9E383;font-size:.8rem;font-family:'Courier New',monospace;margin-bottom:8px}
-.social-card p{color:var(--secondary);font-size:.85rem}
-
-/* ---- FAQ ---- */
-
-/* ---- DONATE ---- */
-.donate{padding:var(--section-pad);position:relative;z-index:2}
-.donate-card{
-  max-width:600px;
-  margin:0 auto;
-  text-align:center;
-  padding:48px 40px;
-}
-.donate-card p{color:var(--secondary);font-size:1.05rem;margin-bottom:28px}
-.wallet-box{
-  display:flex;align-items:center;gap:12px;
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:10px;
-  padding:14px 20px;
-  margin-bottom:24px;
-  word-break:break-all;
-}
-.wallet-box code{
-  flex:1;
-  font-family:'Courier New',monospace;
-  font-size:.85rem;
-  color:#F9E383;
-  text-align:left;
-}
-.copy-btn{
-  padding:10px 18px;
-  background:transparent;
-  border:1px solid rgba(249,227,131,0.3);
-  border-radius:8px;
-  color:#F9E383;
-  font-weight:600;
-  font-size:.85rem;
-  cursor:pointer;
-  white-space:nowrap;
-  font-family:inherit;
-  transition:opacity .2s;
-}
-.copy-btn:hover{opacity:.85}
-.copy-btn.copied{background:#22c55e}
-
-/* ---- FOOTER ---- */
-.footer{
-  padding:60px 0 40px;
-  border-top:1px solid var(--card-border);
-  position:relative;z-index:2;
-}
-.footer-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:start;
-  flex-wrap:wrap;
-  gap:40px;
-  margin-bottom:40px;
-}
-.footer-brand{max-width:300px}
-.footer-brand .logo{margin-bottom:16px}
-.footer-brand p{color:var(--secondary);font-size:.9rem;line-height:1.7}
-.footer-links h4{font-size:.95rem;margin-bottom:16px;color:#F9E383}
-.footer-links a{display:block;color:var(--secondary);font-size:.9rem;padding:4px 0;transition:color .2s}
-.footer-links a:hover{color:#F9E383}
-.socials{display:flex;gap:12px;margin-top:20px}
-.socials a{
-  width:40px;height:40px;
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:10px;
-  display:flex;align-items:center;justify-content:center;
-  color:var(--secondary);
-  font-size:1rem;
-  transition:all .2s;
-}
-.socials a:hover{color:#F9E383;border-color:rgba(249,227,131,0.2);background:rgba(249,227,131,0.08)}
-.footer-bottom{
-  text-align:center;
-  padding-top:30px;
-  border-top:1px solid var(--card-border);
-  color:var(--secondary);
-  font-size:.85rem;
-}
-
-/* ---- RESPONSIVE ---- */
-@media(max-width:1024px){
-  .steps-grid{grid-template-columns:repeat(2,1fr)}
-  .socials-grid{grid-template-columns:repeat(3,1fr)}
-}
-@media(max-width:768px){
-  :root{--section-pad:70px 0}
-  .nav{display:none}
-  .hamburger{display:block}
-  .steps-grid{grid-template-columns:1fr}
-  .usecases-grid{grid-template-columns:1fr 1fr}
-  .socials-grid{grid-template-columns:1fr 1fr}
-  .hero{padding:140px 0 80px;min-height:auto}
-    .stats-row{gap:28px}
-  .stat .stat-number{font-size:2rem}
-  .footer-top{flex-direction:column}
-}
-@media(max-width:480px){
-  .usecases-grid,.socials-grid{grid-template-columns:1fr}
-  .hero h1{font-size:2.2rem}
-  .hero-buttons{flex-direction:column;align-items:center}
-}
-
-/* FAQ */
+.feature-tag{padding:5px 12px;font-size:.8rem;background:rgba(249,227,131,0.06);border:1px solid rgba(249,227,131,0.15);border-radius:20px;color:var(--gold)}
+@media(max-width:1024px){.features-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){.features-grid{grid-template-columns:1fr}}
+.resilience{padding:100px 0}
+.resilience-inner{max-width:800px;margin:0 auto}
+.resilience-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:40px;margin-bottom:40px}
+.resilience-card h3{text-align:center;margin-bottom:30px;color:var(--gold)}
+.flow{font-family:'Courier New',monospace;font-size:.9rem;line-height:1.8;color:var(--gold)}
+.flow-step{text-align:center;margin-bottom:20px}
+.flow-box{border:1px solid rgba(249,227,131,0.3);border-radius:12px;padding:20px;margin-bottom:20px}
+.flow-title{text-align:center;font-weight:600;margin-bottom:15px}
+.flow-content{padding-left:20px}
+.flow-result{text-align:center;margin-top:15px;font-weight:600}
+.resilience-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:24px;margin-top:40px}
+.resilience-feature{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:28px;text-align:center}
+.resilience-feature h4{margin-bottom:15px}
+.resilience-feature .icon-lg{font-size:1.5rem;margin-bottom:12px;color:var(--gold)}
+.resilience-feature p{font-size:.9rem;color:var(--gold);opacity:0.7}
+.quick-start{padding:100px 0}
+.paths-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:48px}
+.path-card{text-align:center;padding:40px 32px}
+.path-icon{font-size:2.5rem;margin-bottom:20px;color:var(--gold)}
+.path-card h3{font-size:1.3rem;margin-bottom:10px}
+.path-card p{color:var(--gold);font-size:.95rem;margin-bottom:20px;opacity:0.7}
+.code-block{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:20px;text-align:left;font-family:'Courier New',monospace;font-size:.85rem;line-height:1.8;color:var(--gold)}
+.code-block .comment{color:rgba(249,227,131,0.4)}
+@media(max-width:768px){.paths-grid{grid-template-columns:1fr}}
+.providers{padding:100px 0}
+.pill-grid{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.pill{padding:10px 24px;border-radius:30px;border:1px solid rgba(255,255,255,0.1);font-size:.95rem;font-weight:500;transition:all .2s;cursor:default}
+.pill:hover{border-color:rgba(249,227,131,0.3);transform:translateY(-2px)}
+.tutorials{padding:100px 0}
+.tutorials-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
+.tut-icon{width:44px;height:44px;background:rgba(249,227,131,0.08);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:1.1rem;color:var(--gold)}
+.tutorial-card h3{font-size:1.15rem;margin-bottom:12px}
+.tutorial-desc{color:var(--gold);font-size:.9rem;margin-bottom:12px;opacity:0.7}
+.tutorial-code{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:16px;font-family:'Courier New',monospace;font-size:.82rem;line-height:1.8;color:var(--gold)}
+.tutorial-code .comment{color:rgba(249,227,131,0.4)}
+@media(max-width:768px){.tutorials-grid{grid-template-columns:1fr}}
+.benefits{padding:100px 0}
+.benefits-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.benefit-icon{font-size:2rem;margin-bottom:16px;color:var(--gold)}
+.benefit-card h3{font-size:1.1rem;margin-bottom:8px}
+.benefit-card p{color:var(--gold);font-size:.9rem;opacity:0.7}
+@media(max-width:1024px){.benefits-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){.benefits-grid{grid-template-columns:1fr}}
 .faq{padding:100px 0}
 .faq-grid{display:flex;flex-direction:column;gap:12px;max-width:800px;margin:0 auto}
-.faq-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .3s}
-.faq-card:hover{border-color:rgba(99,102,241,0.3);background:rgba(99,102,241,0.03)}
+.faq-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .3s}
+.faq-card:hover{border-color:rgba(249,227,131,0.2)}
 .faq-head{display:flex;align-items:center;gap:16px;padding:20px 24px}
-.faq-icon{width:40px;height:40px;background:rgba(99,102,241,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#F9E383;font-size:1rem;flex-shrink:0}
-.faq-head h3{flex:1;font-size:1rem;font-weight:600;color:#F9E383}
-.faq-arrow{color:#F9E383;font-size:0.8rem;transition:transform .3s ease;flex-shrink:0}
+.faq-icon{width:40px;height:40px;background:rgba(249,227,131,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:1rem;flex-shrink:0}
+.faq-head h3{flex:1;font-size:1rem;font-weight:600}
+.faq-arrow{color:var(--gold);opacity:0.5;font-size:.8rem;transition:transform .3s;flex-shrink:0}
 .faq-body{max-height:0;overflow:hidden;transition:max-height .4s ease}
 .faq-card.open .faq-body{max-height:300px}
-.faq-card.open .faq-arrow{transform:rotate(180deg);color:#F9E383}
-.faq-card.open{border-color:rgba(99,102,241,0.3);background:rgba(99,102,241,0.03)}
-.faq-body p{padding:0 24px 20px 80px;color:var(--text-secondary);font-size:0.95rem;line-height:1.7}
-.faq-body code{background:rgba(99,102,241,0.15);color:#a78bfa;padding:2px 8px;border-radius:6px;font-size:0.85rem}
-
-/* ---- DONATE ---- */
+.faq-card.open .faq-arrow{transform:rotate(180deg);opacity:1}
+.faq-card.open{border-color:rgba(249,227,131,0.2)}
+.faq-body p{padding:0 24px 20px 80px;color:var(--gold);font-size:.95rem;line-height:1.7;opacity:0.7}
+.faq-body code{background:rgba(249,227,131,0.1);color:var(--gold);padding:2px 8px;border-radius:6px;font-size:.85rem}
 .donate{padding:100px 0}
-.donate .section-title{margin-bottom:40px}
-.donate-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius);padding:48px;max-width:600px;margin:0 auto;text-align:center}
-.donate-card .donate-icon{font-size:2.5rem;margin-bottom:20px}
-.donate-card h3{font-size:1.4rem;color:#F9E383;margin-bottom:16px}
-.donate-card p{color:#F9E383;font-size:1.05rem;margin-bottom:28px;line-height:1.7}
-.wallet-box{background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
-.wallet-addr{font-family:'Courier New',monospace;font-size:.85rem;color:#F9E383;word-break:break-all;text-align:left;flex:1}
-.copy-btn{padding:10px 18px;background:transparent;border:1px solid rgba(249,227,131,0.3);border-radius:8px;color:#F9E383;font-weight:600;font-size:.85rem;cursor:pointer;white-space:nowrap;font-family:inherit;transition:opacity .2s}
-
+.donate-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:48px;max-width:600px;margin:0 auto;text-align:center}
+.donate-icon{font-size:2.5rem;margin-bottom:20px}
+.donate-card h3{font-size:1.4rem;margin-bottom:16px}
+.donate-card p{color:var(--gold);font-size:1.05rem;margin-bottom:28px;line-height:1.7;opacity:0.7}
+.wallet-box{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.wallet-addr{font-family:'Courier New',monospace;font-size:.85rem;color:var(--gold);word-break:break-all;text-align:left;flex:1}
+.copy-btn{padding:10px 20px;background:transparent;border:1px solid rgba(249,227,131,0.3);border-radius:8px;color:var(--gold);font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;font-size:.85rem;flex-shrink:0}
+.copy-btn:hover{border-color:rgba(249,227,131,0.6)}
+.copy-btn.copied{border-color:#22c55e;color:#22c55e}
+.footer{padding:60px 0 32px;border-top:1px solid var(--border)}
+.footer-top{display:flex;justify-content:space-between;gap:60px;flex-wrap:wrap;margin-bottom:40px}
+.footer-brand{max-width:300px}
+.footer-brand .logo{margin-bottom:16px}
+.footer-brand p{color:var(--gold);font-size:.9rem;line-height:1.7;opacity:0.6}
+.footer-links h4{font-size:.95rem;margin-bottom:16px;color:var(--gold)}
+.footer-links a{display:block;color:var(--gold);font-size:.9rem;padding:4px 0;transition:color .2s;opacity:0.6}
+.footer-links a:hover{opacity:1}
+.socials{display:flex;gap:12px;margin-top:20px}
+.socials a{width:40px;height:40px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:1rem;transition:all .2s}
+.socials a:hover{border-color:rgba(249,227,131,0.3);background:rgba(249,227,131,0.08)}
+.footer-bottom{text-align:center;padding-top:30px;border-top:1px solid var(--border);color:var(--gold);font-size:.85rem;opacity:0.4}
+@media(max-width:768px){.footer-top{flex-direction:column}}
 </style>
-    <link rel="icon" href="favicon.jpg" type="image/jpeg">
 </head>
 <body>
-
-<!-- MOBILE MENU -->
-<div class="mobile-menu" id="mobileMenu">
-  <button class="close-menu" id="closeMenu"><i class="fas fa-times"></i></button>
-  <a href="#features" onclick="closeMobile()">Features</a>
-  <a href="#how-it-works" onclick="closeMobile()">How It Works</a>
-  <a href="#use-cases" onclick="closeMobile()">Use Cases</a>
-  <a href="#providers" onclick="closeMobile()">Providers</a>
-  <a href="#socials" onclick="closeMobile()">Socials</a>
-  <a href="giant.html" onclick="closeMobile()">Giant</a>
-  <a href="#faq" onclick="closeMobile()">FAQ</a>
-  <a href="#donate" onclick="closeMobile()">Donate</a>
-  <a href="https://github.com/askexort/exort" target="_blank" class="btn-primary btn-sm">Get Started</a>
-</div>
-
-<!-- HEADER -->
 <header class="header" id="header">
   <div class="container">
-    <a href="#" class="logo">
-      <img src="openmindlogo.jpg" alt="Exort Logo">
-      <span>Exort</span>
-    </a>
+    <a href="#" class="logo"><img src="assets/openmindlogo.jpg" alt="Exort"><span>Exort</span></a>
     <nav class="nav">
       <a href="#features">Features</a>
-      <a href="#how-it-works">How It Works</a>
-      <a href="#use-cases">Use Cases</a>
+      <a href="#quick-start">Quick Start</a>
       <a href="#providers">Providers</a>
-      <a href="#socials">Socials</a>
-      <a href="giant.html">Giant</a>
+      <a href="api.html">Free API Keys</a>
       <a href="#faq">FAQ</a>
-      <a href="#donate">Donate</a>
-      <a href="https://github.com/askexort/exort" target="_blank" class="btn-primary btn-sm">Get Started</a>
+      <a href="https://t.me/askexort_bot" target="_blank" class="btn-primary btn-sm">Get Started</a>
     </nav>
     <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
   </div>
 </header>
-
-<!-- HERO -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-close" id="mobileClose"><i class="fas fa-times"></i></button>
+  <a href="#features">Features</a>
+  <a href="#quick-start">Quick Start</a>
+  <a href="#providers">Providers</a>
+  <a href="api.html">Free API Keys</a>
+  <a href="#faq">FAQ</a>
+  <a href="https://t.me/askexort_bot" target="_blank" class="btn-primary">Get Started</a>
+</div>
 <section class="hero" id="hero">
-  
   <div class="container">
     <div class="hero-content">
       <div class="hero-subtitle">THE OPEN AGENT ENGINE</div>
-      <h1><span class="gradient-text">Build Your AI Assistant</span></h1>
-      <p class="hero-desc">Exort is a free, open-source AI agent that runs on your machine or in the cloud. It can write code, browse the web, manage files, and remember context across conversations. Connect it to Telegram for 24/7 access, or use it directly from your terminal. No subscriptions, no data collection — just powerful AI that works for you.</p>
+      <h1><span class="gradient-text">Free AI for Everyone</span></h1>
+      <p class="hero-desc">Exort is a free, open-source AI agent that runs on your machine or in the cloud. It can write code, browse the web, manage files, and remember context across conversations. Connect it to Telegram for 24/7 access, or use it directly from your terminal.</p>
       <div class="hero-buttons">
-        <a href="https://github.com/askexort/exort" target="_blank" class="btn-primary"><i class="fab fa-github"></i> Get Started</a>
-          <a href="https://t.me/askexort_bot" target="_blank" class="btn-secondary"><i class="fab fa-telegram"></i> Try Bot</a>
+        <a href="https://t.me/askexort_bot" target="_blank" class="btn-primary"><i class="fas fa-robot"></i> Try Bot</a>
+        <a href="https://github.com/askexort/exort" target="_blank" class="btn-primary"><i class="fab fa-github"></i> GitHub</a>
       </div>
       <div class="stats-row">
-        <div class="stat">
-          <div class="stat-number">9+</div>
-          <div class="stat-label">Providers</div>
-        </div>
-        <div class="stat">
-          <div class="stat-number">24/7</div>
-          <div class="stat-label">AI Operations</div>
-        </div>
-        <div class="stat">
-          <div class="stat-number">100%</div>
-          <div class="stat-label">Free &amp; Open Source</div>
-        </div>
+        <div class="stat"><div class="stat-number">6+</div><div class="stat-label">Providers</div></div>
+        <div class="stat"><div class="stat-number">100%</div><div class="stat-label">Free</div></div>
+        <div class="stat"><div class="stat-number">MIT</div><div class="stat-label">Licensed</div></div>
       </div>
     </div>
   </div>
 </section>
-
-<!-- HOW IT WORKS -->
-<section class="how-it-works" id="how-it-works">
+<section class="features" id="features">
   <div class="container">
-    <div class="section-title">
-      <h2>How <span class="gradient-text">Exort Works</span></h2>
-      <p>From install to production in four simple steps</p>
+    <div class="section-title reveal">
+      <h2>AI Solutions for <span class="gradient-text">Every Business</span></h2>
+      <p>Everything you need to build, deploy, and manage AI agents</p>
     </div>
-    <div class="steps-grid">
-      <div class="card step-card">
-        <div class="step-num">1</div>
-        <div class="step-icon"><i class="fas fa-download"></i></div>
-        <h4>Install</h4>
-        <p>One command is all it takes. No cloning repos, no config files, no dependencies to wrangle. Works on Windows, Mac, and Linux.</p>
-        <code>pip install exort-agent</code>
+    <div class="features-grid">
+      <div class="card feature-card reveal">
+        <div class="feature-icon"><i class="fas fa-wrench"></i></div>
+        <h4>Tool Use &amp; Execution</h4>
+        <p>Run shell commands, manage files, browse the web, and execute code. Full system access with safety guardrails.</p>
+        <div class="feature-tags"><span class="feature-tag">Shell</span><span class="feature-tag">Files</span><span class="feature-tag">Web</span><span class="feature-tag">Code</span></div>
       </div>
-      <div class="card step-card">
-        <div class="step-num">2</div>
-        <div class="step-icon"><i class="fas fa-cog"></i></div>
-        <h4>Configure</h4>
-        <p>Interactive setup walks you through choosing an AI provider and adding your API key. Free providers like Groq work instantly with no credit card.</p>
-        <code>exort setup</code>
+      <div class="card feature-card reveal">
+        <div class="feature-icon"><i class="fas fa-brain"></i></div>
+        <h4>Persistent Memory</h4>
+        <p>Exort remembers facts, preferences, and context across conversations. Never repeat yourself again.</p>
+        <div class="feature-tags"><span class="feature-tag">Auto-save</span><span class="feature-tag">Cross-session</span><span class="feature-tag">Skills</span></div>
       </div>
-      <div class="card step-card">
-        <div class="step-num">3</div>
-        <div class="step-icon"><i class="fas fa-comments"></i></div>
-        <h4>Chat</h4>
-        <p>Use the terminal shell for local development or deploy a Telegram bot for 24/7 access from anywhere. Send text, images, files, and voice messages.</p>
-        <code>exort shell / exort bot</code>
+      <div class="card feature-card reveal">
+        <div class="feature-icon"><i class="fas fa-rotate"></i></div>
+        <h4>Multi-Provider AI</h4>
+        <p>Switch between Groq, OpenAI, Anthropic, Ollama, and more. Free providers available. One command to switch.</p>
+        <div class="feature-tags"><span class="feature-tag">Groq</span><span class="feature-tag">OpenAI</span><span class="feature-tag">Ollama</span><span class="feature-tag">Free</span></div>
       </div>
-      <div class="card step-card">
-        <div class="step-num">4</div>
-        <div class="step-icon"><i class="fas fa-puzzle-piece"></i></div>
-        <h4>Extend</h4>
-        <p>Skills, memory, and tools grow over time. Create reusable procedures, build custom workflows, and watch your AI assistant become more capable with every conversation.</p>
-        <code>Skills + Memory + Tools</code>
+      <div class="card feature-card reveal">
+        <div class="feature-icon"><i class="fas fa-shield-halved"></i></div>
+        <h4>Self-Healing Providers</h4>
+        <p>Automatic failover between providers. If one goes down, the next takes over. Multi-key rotation built in.</p>
+        <div class="feature-tags"><span class="feature-tag">Failover</span><span class="feature-tag">Rotation</span><span class="feature-tag">Health</span></div>
+      </div>
+      <div class="card feature-card reveal">
+        <div class="feature-icon"><i class="fab fa-telegram"></i></div>
+        <h4>Telegram Bot</h4>
+        <p>Deploy as a Telegram bot for 24/7 access. Send messages, images, files — Exort handles it all.</p>
+        <div class="feature-tags"><span class="feature-tag">24/7</span><span class="feature-tag">Images</span><span class="feature-tag">Files</span><span class="feature-tag">Groups</span></div>
+      </div>
+      <div class="card feature-card reveal">
+        <div class="feature-icon"><i class="fas fa-terminal"></i></div>
+        <h4>CLI Interface</h4>
+        <p>Beautiful terminal interface with syntax highlighting, markdown rendering, and streaming responses.</p>
+        <div class="feature-tags"><span class="feature-tag">Streaming</span><span class="feature-tag">Markdown</span><span class="feature-tag">Colors</span></div>
       </div>
     </div>
   </div>
 </section>
-
-<!-- FEATURES DEEP DIVE -->
-<section class="features-deep" id="features">
+<section class="resilience" id="resilience">
   <div class="container">
-    <div class="section-title">
-      <h2>What <span class="gradient-text">Exort Can Do</span></h2>
-      <p>Deep capabilities that make Exort the most versatile open-source AI agent</p>
+    <div class="section-title reveal">
+      <h2>Self-Healing <span class="gradient-text">Provider Chain</span></h2>
+      <p>Never go down again. Automatic failover, key rotation, and real-time health monitoring.</p>
     </div>
-
-    <div class="feature-large">
-      <div class="card">
-        <div class="feature-header">
-          <div class="feature-icon"><i class="fas fa-wrench"></i></div>
-          <h4>Tool Use &amp; Execution</h4>
+    <div class="resilience-inner reveal">
+      <div class="resilience-card">
+        <h3>How It Works</h3>
+        <div class="flow">
+          <div class="flow-step">User sends message</div>
+          <div class="flow-step">&#8595;</div>
+          <div class="flow-box">
+            <div class="flow-title">ResilientProviderChain</div>
+            <div class="flow-content">
+              1. Try OpenRouter (4 free models)<br>&nbsp;&nbsp;&nbsp;&nbsp;&#8595; fails?<br>
+              2. Try Groq (free, 100K tok/day)<br>&nbsp;&nbsp;&nbsp;&nbsp;&#8595; fails?<br>
+              3. Try Cerebras (free, 1M tok/day)<br>&nbsp;&nbsp;&nbsp;&nbsp;&#8595; fails?<br>
+              4. Try SambaNova (free)
+            </div>
+          </div>
+          <div class="flow-step">&#8595;</div>
+          <div class="flow-result">&#10003; Response delivered</div>
         </div>
-        <p>Exort doesn't just chat — it acts. Run Python code directly, execute shell commands, browse the web, manage files on your system, and make API calls. All through natural language. It can read and write files, install packages, run scripts, fetch web pages, search the internet, and chain multiple tools together to complete complex tasks autonomously.</p>
-        <div class="feature-tags">
-          <span class="feature-tag">Python</span>
-          <span class="feature-tag">Shell</span>
-          <span class="feature-tag">HTTP</span>
-          <span class="feature-tag">Files</span>
-          <span class="feature-tag">Search</span>
+      </div>
+      <div class="resilience-grid">
+        <div class="card resilience-feature">
+          <div class="icon-lg"><i class="fas fa-rotate"></i></div>
+          <h4>Multi-Key Rotation</h4>
+          <p>Rotate between multiple API keys per provider to avoid rate limits</p>
+        </div>
+        <div class="card resilience-feature">
+          <div class="icon-lg"><i class="fas fa-shield-halved"></i></div>
+          <h4>Auto-Failover</h4>
+          <p>If one provider fails, automatically switches to the next in chain</p>
+        </div>
+        <div class="card resilience-feature">
+          <div class="icon-lg"><i class="fas fa-bell"></i></div>
+          <h4>Admin Alerts</h4>
+          <p>Get notified via Telegram when providers fail or keys expire</p>
+        </div>
+        <div class="card resilience-feature">
+          <div class="icon-lg"><i class="fas fa-chart-line"></i></div>
+          <h4>Health Dashboard</h4>
+          <p>Real-time monitoring of all provider health and response times</p>
         </div>
       </div>
     </div>
-
-    <div class="feature-large">
-      <div class="card">
-        <div class="feature-header">
-          <div class="feature-icon"><i class="fas fa-brain"></i></div>
-          <h4>Persistent Memory</h4>
-        </div>
-        <p>Exort remembers. It automatically saves important facts from every conversation to a persistent memory store. It recalls past conversations, builds a growing understanding of your preferences and environment, and uses a skill system to save reusable procedures as markdown files. Session search lets you find anything from your history. Memory persists across restarts, so Exort is always learning.</p>
-        <div class="feature-tags">
-          <span class="feature-tag">Auto-Save</span>
-          <span class="feature-tag">Context</span>
-          <span class="feature-tag">Skills</span>
-          <span class="feature-tag">Sessions</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="feature-large">
-      <div class="card">
-        <div class="feature-header">
-          <div class="feature-icon"><i class="fas fa-plug"></i></div>
-          <h4>Multi-Provider AI</h4>
-        </div>
-        <p>Switch between free providers like Groq and Cerebras at zero cost, or use premium models from OpenAI and Anthropic when you need them. Run everything locally with Ollama for full privacy. Mix and match providers for different tasks. Auto-fallback ensures your agent never goes down. All configured through a single YAML file or the interactive setup wizard.</p>
-        <div class="feature-tags">
-          <span class="feature-tag">Groq</span>
-          <span class="feature-tag">OpenAI</span>
-          <span class="feature-tag">Ollama</span>
-          <span class="feature-tag">Free</span>
-        </div>
-      </div>
-    </div>
-
   </div>
 </section>
-
-<!-- USE CASES -->
-<section class="use-cases" id="use-cases">
+<section class="quick-start" id="quick-start">
   <div class="container">
-    <div class="section-title">
-      <h2>What You Can <span class="gradient-text">Build</span></h2>
-      <p>Real-world applications powered by Exort's flexible agent engine</p>
+    <div class="section-title reveal">
+      <h2>Choose Your <span class="gradient-text">Journey</span></h2>
+      <p>Three ways to get started with Exort</p>
     </div>
-    <div class="usecases-grid">
-      <div class="card usecase-card">
-        <div class="usecase-icon"><i class="fas fa-user-tie"></i></div>
-        <h4>Personal Assistant</h4>
-        <p>Set reminders, research topics, manage your schedule, draft emails, and organize your day — all through natural conversation.</p>
+    <div class="paths-grid">
+      <div class="card path-card reveal">
+        <div class="path-icon"><i class="fas fa-bolt"></i></div>
+        <h3>Quick Install</h3>
+        <p>Get started in seconds with pip. No cloning, no setup hassle.</p>
+        <div class="code-block">
+          <span class="comment"># Install Exort</span><br>
+          pip install exort-agent<br><br>
+          <span class="comment"># Configure (follow prompts)</span><br>
+          exort setup<br><br>
+          <span class="comment"># Start chatting</span><br>
+          exort shell
+        </div>
       </div>
-      <div class="card usecase-card">
-        <div class="usecase-icon"><i class="fas fa-code"></i></div>
-        <h4>Code Helper</h4>
-        <p>Write, debug, and review code. Run scripts directly, manage repos, and get instant feedback on your projects.</p>
+      <div class="card path-card reveal">
+        <div class="path-icon"><i class="fas fa-code-branch"></i></div>
+        <h3>Full Setup</h3>
+        <p>Clone the repo and run locally. Full control over every detail.</p>
+        <div class="code-block">
+          <span class="comment"># Clone repository</span><br>
+          git clone https://github.com/askexort/exort<br><br>
+          <span class="comment"># Install dependencies</span><br>
+          cd exort &amp;&amp; pip install -e .
+        </div>
       </div>
-      <div class="card usecase-card">
-        <div class="usecase-icon"><i class="fas fa-headset"></i></div>
-        <h4>Customer Support Bot</h4>
-        <p>Deploy 24/7 Telegram support with memory of your products, FAQs, and customer history. Always helpful, always available.</p>
-      </div>
-      <div class="card usecase-card">
-        <div class="usecase-icon"><i class="fas fa-search"></i></div>
-        <h4>Research Agent</h4>
-        <p>Search the web, read academic papers, summarize findings, and compile reports. Deep research on autopilot.</p>
-      </div>
-      <div class="card usecase-card">
-        <div class="usecase-icon"><i class="fas fa-chart-line"></i></div>
-        <h4>Trading Signals</h4>
-        <p>Monitor markets, analyze data patterns, and send real-time alerts via Telegram. Data-driven decisions, automated.</p>
-      </div>
-      <div class="card usecase-card">
-        <div class="usecase-icon"><i class="fas fa-pen-fancy"></i></div>
-        <h4>Content Creator</h4>
-        <p>Write posts, threads, and scripts. Generate ideas, plan content calendars, and maintain a consistent voice across platforms.</p>
+      <div class="card path-card reveal">
+        <div class="path-icon"><i class="fas fa-star"></i></div>
+        <h3>Recommended Path</h3>
+        <p>The best way to get started. Install, configure, launch.</p>
+        <div class="code-block">
+          <span class="comment"># Step 1: Install</span><br>
+          pip install exort-agent<br><br>
+          <span class="comment"># Step 2: Configure</span><br>
+          exort setup<br><br>
+          <span class="comment"># Step 3: Launch</span><br>
+          exort shell
+        </div>
       </div>
     </div>
   </div>
 </section>
-
-<!-- PROVIDERS -->
 <section class="providers" id="providers">
   <div class="container">
-    <div class="section-title">
+    <div class="section-title reveal">
       <h2>Works With <span class="gradient-text">Free AI</span></h2>
       <p>Connect to the best AI providers — many completely free</p>
     </div>
-    <div class="pill-grid">
-      <div class="pill">Groq</div>
-      <div class="pill">OpenAI</div>
-      <div class="pill">Anthropic</div>
-      <div class="pill">Ollama</div>
-      <div class="pill">OpenRouter</div>
-      <div class="pill">Cerebras</div>
-      <div class="pill">SambaNova</div>
-      <div class="pill">HuggingFace</div>
-      <div class="pill">Google AI Studio</div>
+    <div class="pill-grid reveal">
+      <div class="pill">Groq</div><div class="pill">OpenAI</div><div class="pill">Anthropic</div><div class="pill">Ollama</div><div class="pill">OpenRouter</div><div class="pill">Cerebras</div><div class="pill">SambaNova</div><div class="pill">HuggingFace</div><div class="pill">Google AI Studio</div>
     </div>
   </div>
 </section>
-
-<!-- SOCIALS -->
-<section class="socials-section" id="socials">
+<section class="tutorials" id="tutorials">
   <div class="container">
-    <div class="section-title">
-      <h2>Join the <span class="gradient-text">Community</span></h2>
-      <p>Connect with builders, contributors, and users worldwide</p>
+    <div class="section-title reveal">
+      <h2>Getting Started with <span class="gradient-text">Exort</span></h2>
+      <p>Step-by-step guides to set up and master your AI agent</p>
     </div>
-    <div class="socials-grid">
-      <a href="https://github.com/askexort/exort" target="_blank" class="card social-card">
-        <div class="social-icon"><i class="fab fa-github"></i></div>
-        <h4>GitHub</h4>
-        <div class="social-url">github.com/askexort/exort</div>
-        <p>Star, fork, and contribute to the project</p>
-     </a>
-          <a href="https://t.me/askexort_bot" target="_blank" class="card social-card">
-        <div class="social-icon"><i class="fab fa-telegram"></i></div>
-        <h4>Telegram</h4>
-        <div class="social-url">t.me/askexort_bot</div>
-        <p>Try the bot directly on Telegram</p>
-      </a>
-      <a href="https://x.com/exortresearch" target="_blank" class="card social-card">
-        <div class="social-icon"><i class="fab fa-x-twitter"></i></div>
-        <h4>Twitter/X</h4>
-        <div class="social-url">x.com/askexort</div>
-        <p>Updates and announcements</p>
-      </a>
-      <a href="https://www.youtube.com/@Askexort" target="_blank" class="card social-card">
-        <div class="social-icon"><i class="fab fa-youtube"></i></div>
-        <h4>YouTube</h4>
-        <div class="social-url">youtube.com/@askexort</div>
-        <p>Tutorials and demos</p>
-      </a>
-      
+    <div class="tutorials-grid">
+      <div class="card tutorial-card reveal">
+        <div class="tut-icon"><i class="fas fa-download"></i></div>
+        <h3>Install &amp; Setup</h3>
+        <p class="tutorial-desc">Get Exort running on your machine in under a minute.</p>
+        <div class="tutorial-code">
+          <span class="comment"># Install Exort</span><br>pip install exort-agent<br><br>
+          <span class="comment"># Configure (follow prompts for API key)</span><br>exort setup<br><br>
+          <span class="comment"># Start chatting</span><br>exort shell
+        </div>
+      </div>
+      <div class="card tutorial-card reveal">
+        <div class="tut-icon"><i class="fab fa-telegram"></i></div>
+        <h3>Telegram Bot Setup</h3>
+        <p class="tutorial-desc">Deploy Exort as a 24/7 Telegram bot on any server.</p>
+        <div class="tutorial-code">
+          <span class="comment"># Setup Telegram</span><br>exort setup --telegram<br><br>
+          <span class="comment"># Configure bot token from @BotFather</span><br>
+          <span class="comment"># Start the bot</span><br>exort bot
+        </div>
+      </div>
+      <div class="card tutorial-card reveal">
+        <div class="tut-icon"><i class="fas fa-rotate"></i></div>
+        <h3>Switch AI Providers</h3>
+        <p class="tutorial-desc">Change between free and paid AI providers instantly.</p>
+        <div class="tutorial-code">
+          <span class="comment"># List available providers</span><br>exort provider list<br><br>
+          <span class="comment"># Switch to Groq (free)</span><br>exort provider set groq<br><br>
+          <span class="comment"># Or OpenAI, Anthropic, etc.</span><br>exort provider set openai
+        </div>
+      </div>
+      <div class="card tutorial-card reveal">
+        <div class="tut-icon"><i class="fas fa-brain"></i></div>
+        <h3>Memory &amp; Skills</h3>
+        <p class="tutorial-desc">Exort automatically remembers facts and learns from conversations.</p>
+        <div class="tutorial-code">
+          <span class="comment"># Automatic: Exort saves facts to memory</span><br>
+          <span class="comment"># Skills: Reusable procedures saved as</span><br>
+          <span class="comment"># markdown files in ~/.exort/skills/</span><br>
+          <span class="comment"># Session search: Recall past conversations</span><br>exort memory list
+        </div>
+      </div>
     </div>
   </div>
 </section>
-
-<!-- FAQ -->
+<section class="benefits" id="benefits">
+  <div class="container">
+    <div class="section-title reveal">
+      <h2>Why Choose <span class="gradient-text">Exort</span></h2>
+      <p>Built for developers, by developers</p>
+    </div>
+    <div class="benefits-grid">
+      <div class="card benefit-card reveal"><div class="benefit-icon"><i class="fas fa-gift"></i></div><h3>100% Free</h3><p>MIT licensed. Use free AI providers. No subscriptions, no hidden fees.</p></div>
+      <div class="card benefit-card reveal"><div class="benefit-icon"><i class="fas fa-lock"></i></div><h3>Full Privacy</h3><p>Everything runs locally. Your data never leaves your machine unless you choose cloud providers.</p></div>
+      <div class="card benefit-card reveal"><div class="benefit-icon"><i class="fas fa-clock"></i></div><h3>24/7 Always On</h3><p>Deploy as a Telegram bot on any cloud server. Your AI works while you sleep.</p></div>
+      <div class="card benefit-card reveal"><div class="benefit-icon"><i class="fas fa-globe"></i></div><h3>Multi-Platform</h3><p>Works on Windows, Mac, Linux. Run locally, in Docker, or on any cloud provider.</p></div>
+      <div class="card benefit-card reveal"><div class="benefit-icon"><i class="fas fa-database"></i></div><h3>Smart Memory</h3><p>Automatic fact extraction and cross-session memory. Your AI gets smarter over time.</p></div>
+      <div class="card benefit-card reveal"><div class="benefit-icon"><i class="fab fa-github"></i></div><h3>Open Source</h3><p>MIT licensed. Star us on GitHub. Contributions welcome.</p></div>
+    </div>
+  </div>
+</section>
 <section class="faq" id="faq">
   <div class="container">
-    <div class="section-title">
+    <div class="section-title reveal">
       <h2>Frequently Asked <span class="gradient-text">Questions</span></h2>
       <p>Everything you need to know about Exort</p>
     </div>
     <div class="faq-grid">
-
-      <div class="faq-card" onclick="toggleFaq(this)">
-        <div class="faq-head">
-          <div class="faq-icon"><i class="fas fa-gift"></i></div>
-          <h3>Is Exort really free?</h3>
-          <i class="fas fa-chevron-down faq-arrow"></i>
-        </div>
-        <div class="faq-body">
-          <p>Yes. Exort is MIT licensed open source software. You can use free AI providers like Groq, Cerebras, and SambaNova to run AI at zero cost. You can also bring your own API keys for OpenAI, Anthropic, or any other provider. No subscriptions, no hidden fees.</p>
-        </div>
-      </div>
-
-      <div class="faq-card" onclick="toggleFaq(this)">
-        <div class="faq-head">
-          <div class="faq-icon"><i class="fas fa-laptop"></i></div>
-          <h3>Do I need a powerful computer?</h3>
-          <i class="fas fa-chevron-down faq-arrow"></i>
-        </div>
-        <div class="faq-body">
-          <p>No. Exort runs on any machine — even a Raspberry Pi. The AI processing happens on cloud providers (Groq, OpenAI, Anthropic), so your computer just sends and receives messages. If you want to run AI locally with Ollama, you'll need a decent GPU with 8GB+ VRAM.</p>
-        </div>
-      </div>
-
-      <div class="faq-card" onclick="toggleFaq(this)">
-        <div class="faq-head">
-          <div class="faq-icon"><i class="fab fa-telegram"></i></div>
-          <h3>How does the Telegram bot work?</h3>
-          <i class="fas fa-chevron-down faq-arrow"></i>
-        </div>
-        <div class="faq-body">
-          <p>Exort polls Telegram for new messages, processes them with AI, and replies. You need a bot token from @BotFather. Run <code>exort bot</code> and it works 24/7. It handles text, images, files, code execution, web browsing, and more. Deploy to a cloud server to keep it running when your PC is off.</p>
-        </div>
-      </div>
-
-      <div class="faq-card" onclick="toggleFaq(this)">
-        <div class="faq-head">
-          <div class="faq-icon"><i class="fas fa-brain"></i></div>
-          <h3>How does memory work?</h3>
-          <i class="fas fa-chevron-down faq-arrow"></i>
-        </div>
-        <div class="faq-body">
-          <p>Exort automatically saves important facts from your conversations to persistent memory files. This memory is injected into every future conversation, so it remembers your preferences, environment, project details, and context. Memory persists across restarts and sessions. You can also create reusable "skills" — markdown files with step-by-step procedures.</p>
-        </div>
-      </div>
-
-      <div class="faq-card" onclick="toggleFaq(this)">
-        <div class="faq-head">
-          <div class="faq-icon"><i class="fas fa-robot"></i></div>
-          <h3>What AI models does it support?</h3>
-          <i class="fas fa-chevron-down faq-arrow"></i>
-        </div>
-        <div class="faq-body">
-          <p>All major providers: Groq (Llama 3, Mixtral), OpenAI (GPT-4o, GPT-4), Anthropic (Claude), Ollama (any local model like Llama, Mistral, Phi), Cerebras, SambaNova, HuggingFace, Google AI Studio, and OpenRouter. You can switch providers anytime with a single command.</p>
-        </div>
-      </div>
-
-      <div class="faq-card" onclick="toggleFaq(this)">
-        <div class="faq-head">
-          <div class="faq-icon"><i class="fas fa-building"></i></div>
-          <h3>Can I use it for my business?</h3>
-          <i class="fas fa-chevron-down faq-arrow"></i>
-        </div>
-        <div class="faq-body">
-          <p>Yes. Exort is MIT licensed — use it for personal or commercial projects with no restrictions. Self-host for full control over your data. Build customer support bots, automate workflows, create internal tools, or integrate AI into your products.</p>
-        </div>
-      </div>
-
-      <div class="faq-card" onclick="toggleFaq(this)">
-        <div class="faq-head">
-          <div class="faq-icon"><i class="fas fa-server"></i></div>
-          <h3>Can I deploy it on a server?</h3>
-          <i class="fas fa-chevron-down faq-arrow"></i>
-        </div>
-        <div class="faq-body">
-          <p>Yes. Deploy to Render, Railway, Fly.io, or any VPS (DigitalOcean, Hetzner, AWS). The Telegram bot keeps running even when your PC is off. We have deployment guides for all major platforms. Render.com offers a free tier with no credit card required.</p>
-        </div>
-      </div>
-
-      <div class="faq-card" onclick="toggleFaq(this)">
-        <div class="faq-head">
-          <div class="faq-icon"><i class="fas fa-shield-alt"></i></div>
-          <h3>Is my data safe?</h3>
-          <i class="fas fa-chevron-down faq-arrow"></i>
-        </div>
-        <div class="faq-body">
-          <p>Yes. Exort runs locally on your machine. Your conversations, memory, and files stay on your computer. When using cloud AI providers, only the message text is sent to the API — your files and memory stay local. For maximum privacy, use Ollama to run AI entirely on your machine with zero data leaving your network.</p>
-        </div>
-      </div>
-
-      <div class="faq-card" onclick="toggleFaq(this)">
-        <div class="faq-head">
-          <div class="faq-icon"><i class="fas fa-code"></i></div>
-          <h3>Can Exort write and run code?</h3>
-          <i class="fas fa-chevron-down faq-arrow"></i>
-        </div>
-        <div class="faq-body">
-          <p>Yes. Exort has full tool use capabilities. It can write Python scripts, execute them in a sandboxed environment, manage files, browse the web, call APIs, run shell commands, search codebases, and much more. It runs code safely with timeouts and output limits.</p>
-        </div>
-      </div>
-
-      <div class="faq-card" onclick="toggleFaq(this)">
-        <div class="faq-head">
-          <div class="faq-icon"><i class="fas fa-users"></i></div>
-          <h3>How do I contribute?</h3>
-          <i class="fas fa-chevron-down faq-arrow"></i>
-        </div>
-        <div class="faq-body">
-          <p>Exort is open source on GitHub. Fork the repo, make your changes, and submit a pull request. You can contribute code, report bugs, suggest features, write documentation, or share skills. Join our Telegram group or Discord to connect with other contributors.</p>
-        </div>
-      </div>
-
+      <div class="faq-card" onclick="toggleFaq(this)"><div class="faq-head"><div class="faq-icon"><i class="fas fa-gift"></i></div><h3>Is Exort really free?</h3><i class="fas fa-chevron-down faq-arrow"></i></div><div class="faq-body"><p>Yes. Exort is MIT licensed open source software. You can use free AI providers like Groq, Cerebras, and SambaNova to run AI at zero cost. No subscriptions, no hidden fees.</p></div></div>
+      <div class="faq-card" onclick="toggleFaq(this)"><div class="faq-head"><div class="faq-icon"><i class="fas fa-laptop"></i></div><h3>Do I need a powerful computer?</h3><i class="fas fa-chevron-down faq-arrow"></i></div><div class="faq-body"><p>No. Exort runs on any machine. The AI processing happens on cloud providers (Groq, OpenAI, Anthropic), so your computer just sends and receives messages. For local Ollama, you'll need a decent GPU with 8GB+ VRAM.</p></div></div>
+      <div class="faq-card" onclick="toggleFaq(this)"><div class="faq-head"><div class="faq-icon"><i class="fab fa-telegram"></i></div><h3>How does the Telegram bot work?</h3><i class="fas fa-chevron-down faq-arrow"></i></div><div class="faq-body"><p>Exort polls Telegram for new messages, processes them with AI, and replies. You need a bot token from @BotFather. Run <code>exort bot</code> and it works 24/7. It handles text, images, files, code execution, web browsing, and more.</p></div></div>
+      <div class="faq-card" onclick="toggleFaq(this)"><div class="faq-head"><div class="faq-icon"><i class="fas fa-brain"></i></div><h3>How does memory work?</h3><i class="fas fa-chevron-down faq-arrow"></i></div><div class="faq-body"><p>Exort automatically saves important facts from your conversations to persistent memory files. This memory is injected into every future conversation, so it remembers your preferences, environment, project details, and context.</p></div></div>
+      <div class="faq-card" onclick="toggleFaq(this)"><div class="faq-head"><div class="faq-icon"><i class="fas fa-robot"></i></div><h3>What AI models does it support?</h3><i class="fas fa-chevron-down faq-arrow"></i></div><div class="faq-body"><p>All major providers: Groq (Llama 3, Mixtral), OpenAI (GPT-4o, GPT-4), Anthropic (Claude), Ollama (any local model like Llama, Mistral, Phi), Cerebras, SambaNova, HuggingFace, Google AI Studio, and OpenRouter.</p></div></div>
+      <div class="faq-card" onclick="toggleFaq(this)"><div class="faq-head"><div class="faq-icon"><i class="fas fa-building"></i></div><h3>Can I use it for my business?</h3><i class="fas fa-chevron-down faq-arrow"></i></div><div class="faq-body"><p>Yes. MIT licensed for any use. Deploy internally, customize for your needs, integrate into your products. No restrictions.</p></div></div>
+      <div class="faq-card" onclick="toggleFaq(this)"><div class="faq-head"><div class="faq-icon"><i class="fas fa-server"></i></div><h3>Can I deploy it on a server?</h3><i class="fas fa-chevron-down faq-arrow"></i></div><div class="faq-body"><p>Yes. Docker, Fly.io, Railway, any VPS. A <code>render.yaml</code> is included for one-click deploy to Render. Docker Compose support included.</p></div></div>
+      <div class="faq-card" onclick="toggleFaq(this)"><div class="faq-head"><div class="faq-icon"><i class="fas fa-shield-halved"></i></div><h3>Is my data safe?</h3><i class="fas fa-chevron-down faq-arrow"></i></div><div class="faq-body"><p>Yes. Local-first design. No telemetry. Memory files stored on your machine. You control everything.</p></div></div>
+      <div class="faq-card" onclick="toggleFaq(this)"><div class="faq-head"><div class="faq-icon"><i class="fas fa-code"></i></div><h3>Can Exort write and run code?</h3><i class="fas fa-chevron-down faq-arrow"></i></div><div class="faq-body"><p>Yes. Full code execution with safety guardrails. Runs in a sandboxed environment. Supports Python, JavaScript, shell scripts, and more.</p></div></div>
+      <div class="faq-card" onclick="toggleFaq(this)"><div class="faq-head"><div class="faq-icon"><i class="fas fa-hands-helping"></i></div><h3>How do I contribute?</h3><i class="fas fa-chevron-down faq-arrow"></i></div><div class="faq-body"><p>Fork on GitHub, make changes, submit a PR. Issues and feature requests welcome. Check <code>CONTRIBUTING.md</code> for guidelines.</p></div></div>
     </div>
   </div>
 </section>
-
-<!-- DONATE -->
 <section class="donate" id="donate">
   <div class="container">
-    <div class="section-title">
+    <div class="section-title reveal">
       <h2>Support <span class="gradient-text">Exort</span></h2>
-      <p>Help us keep Exort free and open source for everyone</p>
+      <p>Help us keep Exort free and open source</p>
     </div>
-    <div class="donate-card">
-      <div class="donate-icon">💜</div>
+    <div class="card donate-card reveal">
+      <div class="donate-icon">&#10084;&#65039;</div>
       <h3>Back the Project</h3>
-      <p>Exort is built by the community, for the community. Your donations help us maintain servers, add new features, and keep everything free forever. Every contribution counts — no matter how small.</p>
+      <p>Support development with crypto. Every contribution helps us build better AI tools for everyone.</p>
       <div class="wallet-box">
-        <span class="wallet-addr" id="walletAddr">0x9637EDad27c93F40b505F6478445530f58fF1501</span>
-        <button class="copy-btn" id="copyBtn" onclick="copyWallet()"><i class="fas fa-copy"></i> Copy</button>
+        <div class="wallet-addr">0xFe3b8aEB4102e904dFCF80e29711Abeaac711C4e</div>
+        <button class="copy-btn" onclick="copyWallet(this)">Copy</button>
       </div>
-      <p style="font-size:.85rem;opacity:.7">Ethereum / EVM compatible chains</p>
+      <p style="font-size:.85rem;opacity:.5">Polygon Network &middot; USDC / USDT / ETH</p>
     </div>
   </div>
 </section>
-
-<!-- FOOTER -->
 <footer class="footer">
   <div class="container">
     <div class="footer-top">
       <div class="footer-brand">
-        <div class="logo">
-          <img src="openmindlogo.jpg" alt="Exort Logo">
-          <span>Exort</span>
-        </div>
-        <p>The open agent engine. Free, private, and powerful AI for everyone. MIT licensed and community-driven.</p>
+        <div class="logo"><img src="assets/openmindlogo.jpg" alt="Exort"><span>Exort</span></div>
+        <p>The open-source AI agent engine. Free forever.</p>
         <div class="socials">
-          <a href="https://github.com/askexort/exort" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
-          <a href="https://t.me/askexort_bot" target="_blank" title="Telegram"><i class="fab fa-telegram"></i></a>
-          <a href="https://x.com/exortresearch" target="_blank" title="Twitter/X"><i class="fab fa-x-twitter"></i></a>
-          <a href="https://www.youtube.com/@Askexort" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
-          
+          <a href="https://github.com/askexort/exort" target="_blank"><i class="fab fa-github"></i></a>
+          <a href="https://t.me/askexort_bot" target="_blank"><i class="fab fa-telegram"></i></a>
+          <a href="https://x.com/askexort" target="_blank"><i class="fab fa-x-twitter"></i></a>
+          <a href="https://youtube.com/@askexort" target="_blank"><i class="fab fa-youtube"></i></a>
         </div>
       </div>
       <div class="footer-links">
         <h4>Product</h4>
         <a href="#features">Features</a>
-        <a href="#how-it-works">How It Works</a>
+        <a href="#quick-start">Quick Start</a>
+        <a href="#providers">Providers</a>
+        <a href="api.html">Free API Keys</a>
         <a href="#faq">FAQ</a>
       </div>
       <div class="footer-links">
         <h4>Community</h4>
         <a href="https://github.com/askexort/exort" target="_blank">GitHub</a>
-          <a href="https://t.me/askexort_bot" target="_blank">Telegram</a>
-        
+        <a href="https://t.me/askexort_bot" target="_blank">Telegram</a>
+        <a href="https://x.com/askexort" target="_blank">Twitter/X</a>
+        <a href="https://youtube.com/@askexort" target="_blank">YouTube</a>
       </div>
     </div>
-    <div class="footer-bottom">
-      &copy; 2026 Exort Contributors. MIT License.
-    </div>
+    <div class="footer-bottom">&copy; 2025 Exort &middot; Open Source AI Agent Engine &middot; MIT License</div>
   </div>
 </footer>
-
 <script>
-
-// Mobile Menu
-var hamburger = document.getElementById('hamburger');
-var mobileMenu = document.getElementById('mobileMenu');
-var closeMenu = document.getElementById('closeMenu');
-
-if (hamburger) {
-  hamburger.addEventListener('click', function() {
-    mobileMenu.classList.add('active');
-  });
-}
-
-if (closeMenu) {
-  closeMenu.addEventListener('click', function() {
-    mobileMenu.classList.remove('active');
-  });
-}
-
-function closeMobile() {
-  if (mobileMenu) mobileMenu.classList.remove('active');
-}
-
-// Close mobile menu on outside click
-document.addEventListener('click', function(e) {
-  if (mobileMenu && mobileMenu.classList.contains('active') && 
-      !mobileMenu.contains(e.target) && e.target !== hamburger && !hamburger.contains(e.target)) {
-    mobileMenu.classList.remove('active');
-  }
-});
-
-// Header scroll effect
-window.addEventListener('scroll', function() {
-  var header = document.getElementById('header');
-  if (header) {
-    if (window.scrollY > 50) {
-      header.style.background = 'rgba(0,0,0,0.95)';
-      header.style.backdropFilter = 'blur(20px)';
-    } else {
-      header.style.background = 'rgba(0,0,0,0.8)';
-      header.style.backdropFilter = 'blur(10px)';
-    }
-  }
-});
-
-// Copy Wallet
-function copyWallet() {
-  var addr = document.getElementById('walletAddr');
-  if (addr) {
-    navigator.clipboard.writeText(addr.textContent).then(function() {
-      var btn = document.getElementById('copyBtn');
-      if (btn) { btn.innerHTML = '<i class="fas fa-check"></i> Copied!'; setTimeout(function() { btn.innerHTML = '<i class="fas fa-copy"></i> Copy'; }, 2000); }
-    });
-  }
-}
-
-// FAQ Accordion
-function toggleFaq(card) {
-  var wasOpen = card.classList.contains('open');
-  document.querySelectorAll('.faq-card.open').forEach(function(c) { c.classList.remove('open'); });
-  if (!wasOpen) card.classList.add('open');
-}
-
+window.addEventListener('scroll',()=>{document.getElementById('header').classList.toggle('scrolled',window.scrollY>50)});
+document.getElementById('hamburger').onclick=()=>document.getElementById('mobileMenu').classList.add('open');
+document.getElementById('mobileClose').onclick=()=>document.getElementById('mobileMenu').classList.remove('open');
+document.querySelectorAll('.mobile-menu a').forEach(a=>a.onclick=()=>document.getElementById('mobileMenu').classList.remove('open'));
+function toggleFaq(el){document.querySelectorAll('.faq-card').forEach(c=>{if(c!==el)c.classList.remove('open')});el.classList.toggle('open')}
+function copyWallet(btn){const addr='0xFe3b8aEB4102e904dFCF80e29711Abeaac711C4e';navigator.clipboard.writeText(addr).then(()=>{btn.textContent='Copied!';btn.classList.add('copied');setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied')},2000)})}
+const observer=new IntersectionObserver((entries)=>{entries.forEach((entry,i)=>{if(entry.isIntersecting){setTimeout(()=>entry.target.classList.add('visible'),i*100);observer.unobserve(entry.target)}})},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
 </script>
 </body>
 </html>
