@@ -968,69 +968,91 @@ def setup():
     cfg.set("engine.provider", prov)
     print(f"\n  {C.GRN}✓ Default provider → {prov}{C.RST}")
 
-    # ── Phase 2: Configure provider keys ──
-    print(f"\n  {C.B}Step 2:{C.RST} Configure API keys\n")
-    print(f"  {C.DIM}Press Enter to skip, 'q' to quit, 'a' to add all{C.RST}\n")
+    # ── Phase 2: Configure selected provider key ──
+    print(f"\n  {C.B}Step 2:{C.RST} Configure API key for {C.ACC}{prov}{C.RST}\n")
 
-    configured = 0
-    skipped = 0
-    new_keys = []
-
+    # Find the selected provider's info
+    selected = None
     for name, key_var, signup_url, default_model, desc, tag in all_providers:
+        if name == prov:
+            selected = (name, key_var, signup_url, default_model, desc, tag)
+            break
+
+    if selected:
+        name, key_var, signup_url, default_model, desc, tag = selected
+
         if not key_var:
-            continue  # Skip providers that don't need keys
-
-        # Check if already set
-        if key_var in existing and existing[key_var]:
+            print(f"    {C.CYN}{name}{C.RST} — No API key needed (local)")
+        elif key_var in existing and existing[key_var]:
             masked = f"***{existing[key_var][-4:]}" if len(existing[key_var]) > 4 else "***"
-            print(f"    {C.CYN}{name:<16}{C.RST} {C.GRN}✓{C.RST} {key_var}={masked}")
-            skipped += 1
-            continue
-
-        tag_color = C.GRN if tag == "free" else C.YEL
-        print(f"\n    {C.CYN}{name}{C.RST} {tag_color}[{tag}]{C.RST} — {desc}")
-        if signup_url:
-            print(f"    {C.DIM}Get key: {signup_url}{C.RST}")
-
-        try:
-            key = input(f"    {key_var}: ").strip()
-        except (EOFError, KeyboardInterrupt):
-            print(f"\n  {C.YEL}Interrupted. Saving progress...{C.RST}")
-            break
-
-        if key.lower() == "q":
-            break
-
-        if key:
-            new_keys.append((key_var, key))
-            existing[key_var] = key
-            configured += 1
-            print(f"    {C.GRN}✓ saved{C.RST}")
+            print(f"    {C.CYN}{name}{C.RST} — {C.GRN}✓ already set{C.RST} ({key_var}={masked})")
+            ans = input(f"    Replace? [skip]: ").strip().lower()
+            if ans in ("y", "yes"):
+                tag_color = C.GRN if tag == "free" else C.YEL
+                print(f"\n    {C.CYN}{name}{C.RST} {tag_color}[{tag}]{C.RST} — {desc}")
+                if signup_url:
+                    print(f"    {C.DIM}Get key: {signup_url}{C.RST}")
+                try:
+                    key = input(f"    {key_var}: ").strip()
+                except (EOFError, KeyboardInterrupt):
+                    key = ""
+                if key:
+                    _save_env_key(key_var, key)
+                    print(f"    {C.GRN}✓ saved{C.RST}")
         else:
-            skipped += 1
+            tag_color = C.GRN if tag == "free" else C.YEL
+            print(f"    {C.CYN}{name}{C.RST} {tag_color}[{tag}]{C.RST} — {desc}")
+            if signup_url:
+                print(f"    {C.DIM}Get key: {signup_url}{C.RST}")
+            try:
+                key = input(f"    {key_var}: ").strip()
+            except (EOFError, KeyboardInterrupt):
+                key = ""
+            if key:
+                _save_env_key(key_var, key)
+                print(f"    {C.GRN}✓ saved{C.RST}")
 
-    # Save all keys to .env
-    if new_keys:
-        d.mkdir(parents=True, exist_ok=True)
-        lines = []
-        if env_path.exists():
-            with open(env_path, "r") as f:
-                lines = f.readlines()
-        keys_to_update = {k for k, _ in new_keys}
-        lines = [l for l in lines if not any(l.strip().startswith(f"{k}=") for k in keys_to_update)]
-        for key_var, key in new_keys:
-            lines.append(f"{key_var}={key}\n")
-            os.environ[key_var] = key
-        with open(env_path, "w") as f:
-            f.writelines(lines)
-        print(f"\n  {C.GRN}✓ {configured} keys saved to {env_path}{C.RST}")
+    # ── Phase 3: Optionally configure more providers ──
+    print(f"\n  {C.B}Step 3:{C.RST} Configure more providers? (optional)\n")
+    try:
+        more = input(f"  Add more keys? [y/N]: ").strip().lower()
+    except (EOFError, KeyboardInterrupt):
+        more = ""
+
+    if more in ("y", "yes"):
+        print(f"\n  {C.DIM}Press Enter to skip, 'q' to quit{C.RST}\n")
+        configured = 0
+        for name, key_var, signup_url, default_model, desc, tag in all_providers:
+            if name == prov:
+                continue  # Skip the one we already configured
+            if not key_var:
+                continue
+            if key_var in existing and existing[key_var]:
+                continue  # Skip already set
+
+            tag_color = C.GRN if tag == "free" else C.YEL
+            print(f"    {C.CYN}{name}{C.RST} {tag_color}[{tag}]{C.RST} — {desc}")
+            if signup_url:
+                print(f"    {C.DIM}Get key: {signup_url}{C.RST}")
+            try:
+                key = input(f"    {key_var}: ").strip()
+            except (EOFError, KeyboardInterrupt):
+                break
+            if key.lower() == "q":
+                break
+            if key:
+                _save_env_key(key_var, key)
+                configured += 1
+                print(f"    {C.GRN}✓ saved{C.RST}")
+
+        if configured:
+            print(f"\n  {C.GRN}✓ {configured} more keys configured{C.RST}")
 
     # ── Summary ──
+    cfg.save()
     print(f"\n  {'─' * 50}")
     print(f"  {C.B}Setup Complete!{C.RST}")
     print(f"    Default provider: {C.ACC}{prov}{C.RST}")
-    print(f"    Keys configured:  {configured}")
-    print(f"    Keys skipped:     {skipped}")
     print(f"\n  Next steps:")
     print(f"    {C.CYN}exort shell{C.RST}         Start chatting")
     print(f"    {C.CYN}exort providers list{C.RST}  See all providers")
