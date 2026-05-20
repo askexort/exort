@@ -490,6 +490,359 @@ def providers_test(name):
         print()
 
 
+# ── Provider setup wizard data ──────────────────────────────────────────────
+
+_PROVIDER_CATALOG = {
+    # ── Free Providers (no credit card) ──
+    "free": {
+        "title": "Free Providers (no credit card needed)",
+        "providers": [
+            ("groq", "GROQ_API_KEY", "https://console.groq.com", "llama-3.3-70b-versatile", "Fast inference, 100K tok/day free"),
+            ("cerebras", "CEREBRAS_API_KEY", "https://cloud.cerebras.ai", "llama-3.3-70b", "Ultra-fast, 1M tok/day free"),
+            ("sambanova", "SAMBANOVA_API_KEY", "https://cloud.sambanova.ai", "Meta-Llama-3.1-8B-Instruct", "Fast inference, free tier"),
+            ("nvidia", "NVIDIA_API_KEY", "https://build.nvidia.com", "nvidia/llama-3.3-nemotron-super-49b-a3b", "NVIDIA NIM, free tier"),
+            ("openrouter", "OPENROUTER_API_KEY", "https://openrouter.ai", "meta-llama/llama-3.3-70b-instruct:free", "200+ models, many free"),
+            ("gemini", "GEMINI_API_KEY", "https://aistudio.google.com", "gemini-2.0-flash", "Google Gemini, free tier"),
+            ("ollama", None, "http://localhost:11434", "llama3.1", "Local models, unlimited"),
+            ("ollama_cloud", "OLLAMA_CLOUD_API_KEY", "https://ollama.com", "nemotron-3-nano:30b", "Ollama cloud inference"),
+            ("huggingface", "HF_TOKEN", "https://huggingface.co", "meta-llama/Meta-Llama-3.1-70B-Instruct", "Serverless free inference"),
+            ("novita", "NOVITA_API_KEY", "https://novita.ai", "deepseek/deepseek-v3-0324", "AI-native cloud, free tier"),
+            ("nous", "NOUS_API_KEY", "https://nousresearch.com", "Hermes-3-Llama-3.1-70B", "Nous Research portal"),
+            ("deepinfra", "DEEPINFRA_API_KEY", "https://deepinfra.com", "meta-llama/Meta-Llama-3.1-70B-Instruct", "Cheap inference, free models"),
+            ("lepton", "LEPTON_API_KEY", "https://lepton.ai", "llama-3.3-70b", "Fast API, free tier"),
+            ("nebius", "NEBIUS_API_KEY", "https://studio.nebius.ai", "meta-llama/Meta-Llama-3.1-70B-Instruct", "Nebius AI Studio, free"),
+            ("gmi", "GMI_API_KEY", "https://www.gmicloud.ai", "deepseek-ai/DeepSeek-R1", "GMI Cloud, free tier"),
+            ("baseten", "BASETEN_API_KEY", "https://baseten.co", "meta-llama/Meta-Llama-3.1-70B-Instruct", "Model serving, free tier"),
+            ("anyscale", "ANYSCALE_API_KEY", "https://anyscale.com", "meta-llama/Meta-Llama-3.1-70B-Instruct", "Anyscale endpoints"),
+            ("textsynth", "TEXTSYNTH_API_KEY", "https://textsynth.com", "Mistral-7B-v0.3", "Free inference"),
+            ("mimo", "MIMO_API_KEY", "https://mimo.xiaomi.com", "mimo-v2.5-pro", "Xiaomi MiMo, free"),
+            ("stepfun", "STEPFUN_API_KEY", "https://stepfun.com", "step-3.5-flash", "StepFun, free tier"),
+        ],
+    },
+    # ── Paid Providers ──
+    "paid": {
+        "title": "Paid Providers",
+        "providers": [
+            ("openai", "OPENAI_API_KEY", "https://platform.openai.com", "gpt-4o-mini", "GPT-4, GPT-4o, DALL-E"),
+            ("anthropic", "ANTHROPIC_API_KEY", "https://console.anthropic.com", "claude-sonnet-4-20250514", "Claude 4, Sonnet, Haiku"),
+            ("deepseek", "DEEPSEEK_API_KEY", "https://platform.deepseek.com", "deepseek-chat", "Strong reasoning, cheap"),
+            ("mistral", "MISTRAL_API_KEY", "https://console.mistral.ai", "mistral-large-latest", "European AI, free tier"),
+            ("together", "TOGETHER_API_KEY", "https://api.together.xyz", "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo", "Open models, cheap"),
+            ("fireworks", "FIREWORKS_API_KEY", "https://fireworks.ai", "accounts/fireworks/models/llama-v3p3-70b-instruct", "Fast inference"),
+            ("perplexity", "PERPLEXITY_API_KEY", "https://perplexity.ai", "sonar-pro", "Search-augmented AI"),
+            ("cohere", "COHERE_API_KEY", "https://cohere.com", "command-r-plus", "Enterprise AI"),
+            ("replicate", "REPLICATE_API_TOKEN", "https://replicate.com", "meta/meta-llama-3.1-405b-instruct", "Run any model"),
+            ("xai", "XAI_API_KEY", "https://x.ai", "grok-3", "xAI Grok"),
+            ("moonshot", "MOONSHOT_API_KEY", "https://platform.moonshot.cn", "moonshot-v1-128k", "Moonshot AI, 128K context"),
+            ("kimi", "KIMI_API_KEY", "https://platform.moonshot.cn", "kimi-k2", "Kimi Coding, 128K context"),
+            ("siliconflow", "SILICONFLOW_API_KEY", "https://siliconflow.cn", "Qwen/Qwen2.5-72B-Instruct", "Chinese model hub"),
+            ("minimax", "MINIMAX_API_KEY", "https://platform.minimax.io", "MiniMax-M2.7", "MiniMax M-series"),
+            ("qwen", "DASHSCOPE_API_KEY", "https://dashscope.aliyun.com", "qwen-plus", "Alibaba Qwen (DashScope)"),
+            ("arcee", "ARCEEAI_API_KEY", "https://arcee.ai", "arcee-spotlight", "Arcee AI"),
+            ("zai", "ZAI_API_KEY", "https://z.ai", "glm-4-flash", "Z.AI / Zhipu GLM"),
+            ("zhipu", "ZHIPU_API_KEY", "https://open.bigmodel.cn", "glm-4-flash", "Zhipu AI (China endpoint)"),
+            ("volcengine", "VOLCENGINE_API_KEY", "https://console.volcengine.com", "doubao-1.5-pro-256k", "ByteDance Doubao"),
+            ("yi", "YI_API_KEY", "https://platform.lingyiwanwu.com", "yi-large", "01.AI Yi models"),
+            ("baichuan", "BAICHUAN_API_KEY", "https://platform.baichuan-ai.com", "Baichuan4", "Baichuan AI"),
+            ("writer", "WRITER_API_KEY", "https://writer.com", "palmyra-x-004", "Writer (Palmyra)"),
+            ("ai21", "AI21_API_KEY", "https://studio.ai21.com", "jamba-1.5-large", "AI21 Jamba"),
+            ("upstage", "UPSTAGE_API_KEY", "https://console.upstage.ai", "solar-1-mini-chat", "Upstage Solar"),
+            ("lambda", "LAMBDA_API_KEY", "https://lambdalabs.com", "llama3.3-70b-instruct", "Lambda Cloud"),
+            ("databricks", "DATABRICKS_API_KEY", "https://databricks.com", "dbrx-instruct", "Databricks (needs host)"),
+            ("voyage", "VOYAGE_API_KEY", "https://voyageai.com", "voyage-3", "Voyage AI"),
+        ],
+    },
+}
+
+
+@providers.command("setup-all")
+@click.option("--category", "-c", type=click.Choice(["free", "paid", "all"]), default="all",
+              help="Which providers to set up")
+@click.option("--batch", "-b", is_flag=True, help="Batch mode: enter keys one by one")
+def providers_setup_all(category, batch):
+    """Interactive setup wizard for ALL providers at once.
+
+    Walks through every provider, asks for API keys, and saves them
+    to ~/.exort/.env. Skips providers that already have keys.
+
+    \b
+    Examples:
+        exort providers setup-all                 # interactive, all providers
+        exort providers setup-all -c free         # only free providers
+        exort providers setup-all -c paid         # only paid providers
+        exort providers setup-all --batch         # batch mode (no descriptions)
+    """
+    from exort.config import exort_dir
+    cfg = Config()
+    d = exort_dir()
+
+    # Load existing keys
+    env_path = d / ".env"
+    existing = {}
+    if env_path.exists():
+        with open(env_path, "r") as f:
+            for line in f:
+                line = line.strip()
+                if "=" in line and not line.startswith("#"):
+                    k, v = line.split("=", 1)
+                    existing[k.strip()] = v.strip()
+
+    # Determine which categories to show
+    cats_to_show = []
+    if category in ("all", "free"):
+        cats_to_show.append("free")
+    if category in ("all", "paid"):
+        cats_to_show.append("paid")
+
+    total_configured = 0
+    total_skipped = 0
+    new_keys = []
+
+    print(f"\n{C.B}  Exort Provider Setup — Configure All Providers{C.RST}")
+    print(f"  {'─' * 55}")
+    print(f"  {C.DIM}Press Enter to skip, 'q' to quit{C.RST}\n")
+
+    for cat_key in cats_to_show:
+        cat = _PROVIDER_CATALOG[cat_key]
+        print(f"\n  {C.ACC}{cat['title']}{C.RST}")
+        print(f"  {'─' * 50}")
+
+        for name, key_var, signup_url, default_model, desc in cat["providers"]:
+            # Check if already configured
+            if key_var and key_var in existing and existing[key_var]:
+                status = f"{C.GRN}✓ already set{C.RST}"
+                if not batch:
+                    print(f"\n    {C.CYN}{name}{C.RST} — {desc}")
+                    print(f"      {status}  ({key_var}=***{existing[key_var][-4:]})")
+                    ans = input(f"      Replace? [skip]: ").strip().lower()
+                    if ans not in ("y", "yes"):
+                        total_skipped += 1
+                        continue
+                else:
+                    total_skipped += 1
+                    continue
+            else:
+                if not batch:
+                    print(f"\n    {C.CYN}{name}{C.RST} — {desc}")
+                    print(f"      Model: {default_model}")
+                    if signup_url:
+                        print(f"      Get key: {C.DIM}{signup_url}{C.RST}")
+
+            if not key_var:
+                # No key needed (e.g. ollama)
+                print(f"    {C.CYN}{name}{C.RST} — No key needed (local)")
+                total_configured += 1
+                continue
+
+            try:
+                key = input(f"      {key_var}: ").strip()
+            except (EOFError, KeyboardInterrupt):
+                print(f"\n  {C.YEL}Interrupted. Saving progress...{C.RST}")
+                break
+
+            if key.lower() == "q":
+                print(f"\n  {C.YEL}Stopping. Saving configured keys...{C.RST}")
+                break
+
+            if key:
+                new_keys.append((key_var, key))
+                existing[key_var] = key
+                total_configured += 1
+                print(f"      {C.GRN}✓ saved{C.RST}")
+            else:
+                total_skipped += 1
+
+    # Save all new keys to .env
+    if new_keys:
+        d.mkdir(parents=True, exist_ok=True)
+        # Read existing content
+        lines = []
+        if env_path.exists():
+            with open(env_path, "r") as f:
+                lines = f.readlines()
+
+        # Remove keys we're updating
+        keys_to_update = {k for k, _ in new_keys}
+        lines = [l for l in lines if not any(
+            l.strip().startswith(f"{k}=") for k in keys_to_update
+        )]
+
+        # Add new keys
+        for key_var, key in new_keys:
+            lines.append(f"{key_var}={key}\n")
+            os.environ[key_var] = key
+
+        with open(env_path, "w") as f:
+            f.writelines(lines)
+
+    # Optionally set default provider
+    print(f"\n  {'─' * 50}")
+    print(f"  {C.B}Summary:{C.RST} {total_configured} configured, {total_skipped} skipped")
+
+    if total_configured > 0:
+        try:
+            set_default = input(f"\n  Set default provider? [groq]: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            set_default = ""
+
+        if set_default:
+            from exort.providers import list_providers
+            available = list_providers()
+            if set_default in available:
+                cfg.set("engine.provider", set_default)
+                cfg.save()
+                print(f"  {C.GRN}✓ Default provider → {set_default}{C.RST}")
+            else:
+                print(f"  {C.YEL}? Unknown provider: {set_default}{C.RST}")
+        else:
+            cfg.set("engine.provider", "groq")
+            cfg.save()
+            print(f"  {C.GRN}✓ Default provider → groq{C.RST}")
+
+    print(f"\n  {C.GRN}✓ Setup complete! Run 'exort shell' to start.{C.RST}")
+    print(f"  {C.DIM}Keys saved to: {env_path}{C.RST}\n")
+
+
+@providers.command("setup-free")
+def providers_setup_free():
+    """Quick setup: configure only free providers (no credit card needed).
+
+    \b
+    Shortcut for: exort providers setup-all --category free
+    """
+    from exort.config import exort_dir
+    cfg = Config()
+    d = exort_dir()
+
+    # Load existing keys
+    env_path = d / ".env"
+    existing = {}
+    if env_path.exists():
+        with open(env_path, "r") as f:
+            for line in f:
+                line = line.strip()
+                if "=" in line and not line.startswith("#"):
+                    k, v = line.split("=", 1)
+                    existing[k.strip()] = v.strip()
+
+    cat = _PROVIDER_CATALOG["free"]
+    new_keys = []
+    configured = 0
+
+    print(f"\n{C.B}  Free Provider Setup{C.RST}")
+    print(f"  {'─' * 40}")
+    print(f"  {C.DIM}Press Enter to skip, 'q' to quit{C.RST}\n")
+
+    for name, key_var, signup_url, default_model, desc in cat["providers"]:
+        if not key_var:
+            print(f"    {C.CYN}{name}{C.RST} — {desc} {C.GRN}(no key needed){C.RST}")
+            configured += 1
+            continue
+
+        if key_var in existing and existing[key_var]:
+            print(f"    {C.CYN}{name}{C.RST} — {C.GRN}✓ already set{C.RST}")
+            configured += 1
+            continue
+
+        print(f"\n    {C.CYN}{name}{C.RST} — {desc}")
+        if signup_url:
+            print(f"    Get key: {C.DIM}{signup_url}{C.RST}")
+
+        try:
+            key = input(f"    {key_var}: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            break
+
+        if key.lower() == "q":
+            break
+
+        if key:
+            new_keys.append((key_var, key))
+            existing[key_var] = key
+            configured += 1
+            print(f"    {C.GRN}✓ saved{C.RST}")
+
+    # Save keys
+    if new_keys:
+        d.mkdir(parents=True, exist_ok=True)
+        lines = []
+        if env_path.exists():
+            with open(env_path, "r") as f:
+                lines = f.readlines()
+        keys_to_update = {k for k, _ in new_keys}
+        lines = [l for l in lines if not any(l.strip().startswith(f"{k}=") for k in keys_to_update)]
+        for key_var, key in new_keys:
+            lines.append(f"{key_var}={key}\n")
+            os.environ[key_var] = key
+        with open(env_path, "w") as f:
+            f.writelines(lines)
+
+    cfg.set("engine.provider", "groq")
+    cfg.save()
+
+    print(f"\n  {C.GRN}✓ {configured} free providers configured!{C.RST}")
+    print(f"  {C.GRN}✓ Default → groq. Run 'exort shell' to start.{C.RST}\n")
+
+
+@providers.command("env-show")
+def providers_env_show():
+    """Show all configured API keys (masked) and their status.
+
+    Reads from ~/.exort/.env and shows which providers have keys set.
+    """
+    from exort.config import exort_dir
+    d = exort_dir()
+    env_path = d / ".env"
+
+    if not env_path.exists():
+        print(f"\n  {C.YEL}No .env file found at {env_path}{C.RST}")
+        print(f"  Run 'exort providers setup-all' to configure.\n")
+        return
+
+    # Read env file
+    keys = {}
+    with open(env_path, "r") as f:
+        for line in f:
+            line = line.strip()
+            if "=" in line and not line.startswith("#"):
+                k, v = line.split("=", 1)
+                keys[k.strip()] = v.strip()
+
+    # Map key vars to provider names
+    key_to_provider = {}
+    for cat in _PROVIDER_CATALOG.values():
+        for name, key_var, _, _, _ in cat["providers"]:
+            if key_var:
+                key_to_provider[key_var] = name
+
+    print(f"\n{C.B}  Configured API Keys ({len(keys)} total){C.RST}")
+    print(f"  {C.DIM}{env_path}{C.RST}")
+    print(f"  {'─' * 50}")
+
+    for key_var, value in sorted(keys.items()):
+        provider = key_to_provider.get(key_var, "unknown")
+        masked = f"***{value[-4:]}" if len(value) > 4 else "***"
+        status = f"{C.GRN}✓{C.RST}" if value else f"{C.RED}✗ empty{C.RST}"
+        print(f"  {status} {C.CYN}{provider:<18}{C.RST} {key_var}={masked}")
+
+    # Show which providers have no keys
+    configured_vars = set(keys.keys())
+    missing = []
+    for cat in _PROVIDER_CATALOG.values():
+        for name, key_var, _, _, _ in cat["providers"]:
+            if key_var and key_var not in configured_vars:
+                missing.append((name, key_var))
+
+    if missing:
+        print(f"\n  {C.DIM}Not configured:{C.RST}")
+        for name, key_var in missing[:10]:
+            print(f"    {C.DIM}○ {name} ({key_var}){C.RST}")
+        if len(missing) > 10:
+            print(f"    {C.DIM}... and {len(missing) - 10} more{C.RST}")
+
+    print()
+
+
 @cli.command()
 def gear():
     """List available gear (tools)."""
