@@ -46,7 +46,7 @@ def register(gearbox):
                 "url": {"type": "string", "description": "URL to request"},
                 "method": {"type": "string", "description": "HTTP method", "default": "GET", "enum": ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD"]},
                 "body": {"type": "string", "description": "Request body (JSON string for POST/PUT)"},
-                "headers": {"type": "string", "description": "JSON string of headers (e.g. '{"Authorization": "Bearer sk-..."}')"},
+                "headers": {"type": "string", "description": "JSON string of headers"},
                 "timeout": {"type": "integer", "description": "Timeout in seconds", "default": 15},
             },
             "required": ["url"],
