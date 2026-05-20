@@ -904,71 +904,138 @@ def bot():
 
 @cli.command()
 def setup():
-    """First-time setup wizard."""
+    """First-time setup wizard. Configure ALL 49 providers interactively."""
     banner()
-    print(f"{C.B}  Setup Wizard{C.RST}\n")
+    print(f"{C.B}  Exort Setup Wizard — All 49 Providers{C.RST}\n")
 
     cfg = Config()
     d = ensure_exort_dir()
     print(f"  data dir: {d}\n")
 
-    print("  Which provider?")
-    providers_list = [
-        ("1", "groq", "Groq (free, fast — recommended)"),
-        ("2", "openai", "OpenAI (GPT-4, paid)"),
-        ("3", "ollama", "Ollama (local, free)"),
-        ("4", "anthropic", "Anthropic (Claude, paid)"),
-        ("5", "together", "Together AI (open models, cheap)"),
-        ("6", "deepseek", "DeepSeek (strong reasoning, cheap)"),
-        ("7", "openrouter", "OpenRouter (200+ models, some free)"),
-        ("8", "mistral", "Mistral (European AI)"),
-        ("9", "gemini", "Google Gemini (free tier)"),
-        ("10", "perplexity", "Perplexity (search-augmented)"),
-    ]
-    for num, name, desc in providers_list:
-        print(f"    {C.CYN}{num}{C.RST}. {desc}")
+    # Load existing keys
+    env_path = d / ".env"
+    existing = {}
+    if env_path.exists():
+        with open(env_path, "r") as f:
+            for line in f:
+                line = line.strip()
+                if "=" in line and not line.startswith("#"):
+                    k, v = line.split("=", 1)
+                    existing[k.strip()] = v.strip()
 
+    # ── Phase 1: Pick default provider ──
+    print(f"  {C.B}Step 1:{C.RST} Choose your default provider\n")
+
+    # Build flat list from catalog
+    all_providers = []
+    for cat_key in ("free", "paid"):
+        cat = _PROVIDER_CATALOG[cat_key]
+        for name, key_var, signup_url, default_model, desc in cat["providers"]:
+            tag = "free" if cat_key == "free" else "paid"
+            all_providers.append((name, key_var, signup_url, default_model, desc, tag))
+
+    # Print in two columns
+    for i, (name, _, _, model, desc, tag) in enumerate(all_providers, 1):
+        num = f"{i:>2}"
+        tag_color = C.GRN if tag == "free" else C.YEL
+        status = ""
+        key_var = all_providers[i-1][1]
+        if key_var and key_var in existing and existing[key_var]:
+            status = f" {C.GRN}✓{C.RST}"
+        print(f"    {C.CYN}{num}{C.RST}. {name:<16} {tag_color}[{tag}]{C.RST} {desc}{status}")
+
+    print(f"\n  {C.DIM}Enter number or provider name{C.RST}")
     try:
-        choice = input(f"\n  choice [1]: ").strip() or "1"
+        choice = input(f"  choice [1]: ").strip() or "1"
     except (EOFError, KeyboardInterrupt):
         return
 
-    prov_map = {num: name for num, name, _ in providers_list}
-    prov = prov_map.get(choice, "groq")
-    cfg.set("engine.provider", prov)
+    # Parse choice
+    prov = None
+    if choice.isdigit():
+        idx = int(choice) - 1
+        if 0 <= idx < len(all_providers):
+            prov = all_providers[idx][0]
+    else:
+        # Direct name
+        choice_lower = choice.lower()
+        for name, *_ in all_providers:
+            if name == choice_lower:
+                prov = name
+                break
+    prov = prov or "groq"
 
-    key_var = cfg.get(f"providers.{prov}.key_var")
-    if key_var:
-        print(f"\n  To use {prov}, you need {key_var}.")
-        print(f"  Get a key and paste it below (or press Enter to skip).")
-        urls = {
-            "groq": "https://console.groq.com (free, no credit card)",
-            "openai": "https://platform.openai.com",
-            "anthropic": "https://console.anthropic.com",
-            "together": "https://api.together.xyz",
-            "deepseek": "https://platform.deepseek.com",
-            "openrouter": "https://openrouter.ai (free models available)",
-            "mistral": "https://console.mistral.ai (free tier)",
-            "gemini": "https://aistudio.google.com (free)",
-            "perplexity": "https://www.perplexity.ai",
-        }
-        if prov in urls:
-            print(f"  {C.DIM}→ {urls[prov]}{C.RST}")
+    cfg.set("engine.provider", prov)
+    print(f"\n  {C.GRN}✓ Default provider → {prov}{C.RST}")
+
+    # ── Phase 2: Configure provider keys ──
+    print(f"\n  {C.B}Step 2:{C.RST} Configure API keys\n")
+    print(f"  {C.DIM}Press Enter to skip, 'q' to quit, 'a' to add all{C.RST}\n")
+
+    configured = 0
+    skipped = 0
+    new_keys = []
+
+    for name, key_var, signup_url, default_model, desc, tag in all_providers:
+        if not key_var:
+            continue  # Skip providers that don't need keys
+
+        # Check if already set
+        if key_var in existing and existing[key_var]:
+            masked = f"***{existing[key_var][-4:]}" if len(existing[key_var]) > 4 else "***"
+            print(f"    {C.CYN}{name:<16}{C.RST} {C.GRN}✓{C.RST} {key_var}={masked}")
+            skipped += 1
+            continue
+
+        tag_color = C.GRN if tag == "free" else C.YEL
+        print(f"\n    {C.CYN}{name}{C.RST} {tag_color}[{tag}]{C.RST} — {desc}")
+        if signup_url:
+            print(f"    {C.DIM}Get key: {signup_url}{C.RST}")
 
         try:
-            key = input(f"  {key_var}: ").strip()
+            key = input(f"    {key_var}: ").strip()
         except (EOFError, KeyboardInterrupt):
-            return
+            print(f"\n  {C.YEL}Interrupted. Saving progress...{C.RST}")
+            break
+
+        if key.lower() == "q":
+            break
 
         if key:
-            env = d / ".env"
-            with open(env, "a") as f:
-                f.write(f"\n{key_var}={key}\n")
-            os.environ[key_var] = key
-            print(f"  {C.GRN}✓ saved to {env}{C.RST}")
+            new_keys.append((key_var, key))
+            existing[key_var] = key
+            configured += 1
+            print(f"    {C.GRN}✓ saved{C.RST}")
+        else:
+            skipped += 1
 
-    cfg.save()
-    print(f"\n  {C.GRN}✓ Setup complete! Run 'exort shell' to start.{C.RST}\n")
+    # Save all keys to .env
+    if new_keys:
+        d.mkdir(parents=True, exist_ok=True)
+        lines = []
+        if env_path.exists():
+            with open(env_path, "r") as f:
+                lines = f.readlines()
+        keys_to_update = {k for k, _ in new_keys}
+        lines = [l for l in lines if not any(l.strip().startswith(f"{k}=") for k in keys_to_update)]
+        for key_var, key in new_keys:
+            lines.append(f"{key_var}={key}\n")
+            os.environ[key_var] = key
+        with open(env_path, "w") as f:
+            f.writelines(lines)
+        print(f"\n  {C.GRN}✓ {configured} keys saved to {env_path}{C.RST}")
+
+    # ── Summary ──
+    print(f"\n  {'─' * 50}")
+    print(f"  {C.B}Setup Complete!{C.RST}")
+    print(f"    Default provider: {C.ACC}{prov}{C.RST}")
+    print(f"    Keys configured:  {configured}")
+    print(f"    Keys skipped:     {skipped}")
+    print(f"\n  Next steps:")
+    print(f"    {C.CYN}exort shell{C.RST}         Start chatting")
+    print(f"    {C.CYN}exort providers list{C.RST}  See all providers")
+    print(f"    {C.CYN}exort providers test{C.RST}  Test connections")
+    print()
 
 
 def _save_env_key(key_var: str, key: str):
