@@ -799,3 +799,7 @@ def providers_setup():
     from click.testing import CliRunner
     # Actually, let's just forward to setup
     setup.callback()
+
+
+# Backward-compatible alias
+main = cli

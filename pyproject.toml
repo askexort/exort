@@ -57,7 +57,7 @@ dev = [
 ]
 
 [project.scripts]
-exort = "exort.cli:main"
+exort = "exort.cli:cli"
 
 [project.urls]
 Homepage = "https://github.com/askexort/exort"
