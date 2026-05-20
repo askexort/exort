@@ -50,7 +50,9 @@ a{text-decoration:none;color:inherit}
 .stat-label{font-size:.9rem;color:var(--gold);margin-top:4px;opacity:0.6}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:32px;transition:transform .3s,border-color .3s,box-shadow .3s}
 .card:hover{transform:translateY(-4px);border-color:rgba(249,227,131,0.12);box-shadow:0 20px 60px rgba(0,0,0,0.5)}
-.features{padding:100px 0;position:relative;z-index:2}
+.features{padding:100px 0;position:relative;z-index:2;overflow:hidden}
+.features::before{content:'';position:absolute;inset:0;z-index:0;background-image:linear-gradient(rgba(249,227,131,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(249,227,131,0.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+.features .container{position:relative;z-index:1}
 .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
 .feature-icon{width:52px;height:52px;background:rgba(249,227,131,0.08);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:1.3rem;color:var(--gold)}
 .feature-card h4{font-size:1.15rem;margin-bottom:10px}
