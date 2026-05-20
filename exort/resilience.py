@@ -293,6 +293,316 @@ class ResilientProviderChain:
                 priority=11,
             ))
 
+        # NVIDIA NIM
+        nvidia_keys = self._split_keys(os.getenv("NVIDIA_API_KEY", ""))
+        if nvidia_keys:
+            self.providers.append(ProviderConfig(
+                name="NVIDIA/nemotron-super-49b",
+                url="https://integrate.api.nvidia.com/v1/chat/completions",
+                model="nvidia/llama-3.3-nemotron-super-49b-v1",
+                keys=[ProviderKey(key=k, provider="NVIDIA") for k in nvidia_keys],
+                priority=12,
+            ))
+
+        # SambaNova
+        sambanova_keys = self._split_keys(os.getenv("SAMBANOVA_API_KEY", ""))
+        if sambanova_keys:
+            self.providers.append(ProviderConfig(
+                name="SambaNova/Llama-3.1-8B",
+                url="https://api.sambanova.ai/v1/chat/completions",
+                model="Meta-Llama-3.1-8B-Instruct",
+                keys=[ProviderKey(key=k, provider="SambaNova") for k in sambanova_keys],
+                priority=13,
+            ))
+
+        # NovitaAI
+        novita_keys = self._split_keys(os.getenv("NOVITA_API_KEY", ""))
+        if novita_keys:
+            self.providers.append(ProviderConfig(
+                name="Novita/deepseek-v3",
+                url="https://api.novita.ai/openai/v1/chat/completions",
+                model="deepseek/deepseek-v3-0324",
+                keys=[ProviderKey(key=k, provider="Novita") for k in novita_keys],
+                priority=14,
+            ))
+
+        # Nous Research
+        nous_keys = self._split_keys(os.getenv("NOUS_API_KEY", ""))
+        if nous_keys:
+            self.providers.append(ProviderConfig(
+                name="Nous/Hermes-3-70B",
+                url="https://inference.nousresearch.com/v1/chat/completions",
+                model="Hermes-3-Llama-3.1-70B",
+                keys=[ProviderKey(key=k, provider="Nous") for k in nous_keys],
+                priority=15,
+            ))
+
+        # MiniMax
+        minimax_keys = self._split_keys(os.getenv("MINIMAX_API_KEY", ""))
+        if minimax_keys:
+            self.providers.append(ProviderConfig(
+                name="MiniMax/M2.7",
+                url="https://api.minimax.io/v1/chat/completions",
+                model="MiniMax-M2.7",
+                keys=[ProviderKey(key=k, provider="MiniMax") for k in minimax_keys],
+                priority=16,
+            ))
+
+        # StepFun
+        stepfun_keys = self._split_keys(os.getenv("STEPFUN_API_KEY", ""))
+        if stepfun_keys:
+            self.providers.append(ProviderConfig(
+                name="StepFun/step-3.5-flash",
+                url="https://api.stepfun.ai/v1/chat/completions",
+                model="step-3.5-flash",
+                keys=[ProviderKey(key=k, provider="StepFun") for k in stepfun_keys],
+                priority=17,
+            ))
+
+        # Qwen (DashScope)
+        qwen_keys = self._split_keys(os.getenv("DASHSCOPE_API_KEY", ""))
+        if qwen_keys:
+            self.providers.append(ProviderConfig(
+                name="Qwen/qwen-plus",
+                url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
+                model="qwen-plus",
+                keys=[ProviderKey(key=k, provider="Qwen") for k in qwen_keys],
+                priority=18,
+            ))
+
+        # Kimi (Moonshot)
+        kimi_keys = self._split_keys(os.getenv("KIMI_API_KEY", ""))
+        if kimi_keys:
+            self.providers.append(ProviderConfig(
+                name="Kimi/kimi-k2",
+                url="https://api.moonshot.ai/v1/chat/completions",
+                model="kimi-k2",
+                keys=[ProviderKey(key=k, provider="Kimi") for k in kimi_keys],
+                priority=19,
+            ))
+
+        # GMI Cloud
+        gmi_keys = self._split_keys(os.getenv("GMI_API_KEY", ""))
+        if gmi_keys:
+            self.providers.append(ProviderConfig(
+                name="GMI/DeepSeek-R1",
+                url="https://api.gmi-serving.com/v1/chat/completions",
+                model="deepseek-ai/DeepSeek-R1",
+                keys=[ProviderKey(key=k, provider="GMI") for k in gmi_keys],
+                priority=20,
+            ))
+
+        # Arcee AI
+        arcee_keys = self._split_keys(os.getenv("ARCEEAI_API_KEY", ""))
+        if arcee_keys:
+            self.providers.append(ProviderConfig(
+                name="Arcee/spotlight",
+                url="https://api.arcee.ai/api/v1/chat/completions",
+                model="arcee-spotlight",
+                keys=[ProviderKey(key=k, provider="Arcee") for k in arcee_keys],
+                priority=21,
+            ))
+
+        # Z.AI (Zhipu)
+        zai_keys = self._split_keys(os.getenv("ZAI_API_KEY", "") or os.getenv("GLM_API_KEY", ""))
+        if zai_keys:
+            self.providers.append(ProviderConfig(
+                name="ZAI/glm-4-flash",
+                url="https://api.z.ai/api/paas/v4/chat/completions",
+                model="glm-4-flash",
+                keys=[ProviderKey(key=k, provider="ZAI") for k in zai_keys],
+                priority=22,
+            ))
+
+        # Volcengine (ByteDance)
+        volc_keys = self._split_keys(os.getenv("VOLCENGINE_API_KEY", ""))
+        if volc_keys:
+            self.providers.append(ProviderConfig(
+                name="Volcengine/doubao",
+                url="https://ark.cn-beijing.volces.com/api/v3/chat/completions",
+                model="doubao-1.5-pro-256k",
+                keys=[ProviderKey(key=k, provider="Volcengine") for k in volc_keys],
+                priority=23,
+            ))
+
+        # Yi (01.AI)
+        yi_keys = self._split_keys(os.getenv("YI_API_KEY", ""))
+        if yi_keys:
+            self.providers.append(ProviderConfig(
+                name="Yi/yi-large",
+                url="https://api.lingyiwanwu.com/v1/chat/completions",
+                model="yi-large",
+                keys=[ProviderKey(key=k, provider="Yi") for k in yi_keys],
+                priority=24,
+            ))
+
+        # Zhipu AI
+        zhipu_keys = self._split_keys(os.getenv("ZHIPU_API_KEY", ""))
+        if zhipu_keys:
+            self.providers.append(ProviderConfig(
+                name="Zhipu/glm-4-flash",
+                url="https://open.bigmodel.cn/api/paas/v4/chat/completions",
+                model="glm-4-flash",
+                keys=[ProviderKey(key=k, provider="Zhipu") for k in zhipu_keys],
+                priority=25,
+            ))
+
+        # Baichuan
+        baichuan_keys = self._split_keys(os.getenv("BAICHUAN_API_KEY", ""))
+        if baichuan_keys:
+            self.providers.append(ProviderConfig(
+                name="Baichuan/Baichuan4",
+                url="https://api.baichuan-ai.com/v1/chat/completions",
+                model="Baichuan4",
+                keys=[ProviderKey(key=k, provider="Baichuan") for k in baichuan_keys],
+                priority=26,
+            ))
+
+        # Cloudflare Workers AI
+        cf_keys = self._split_keys(os.getenv("CLOUDFLARE_API_KEY", ""))
+        cf_account = os.getenv("CLOUDFLARE_ACCOUNT_ID", "")
+        if cf_keys and cf_account:
+            self.providers.append(ProviderConfig(
+                name="Cloudflare/llama-3.3-70b",
+                url=f"https://api.cloudflare.com/client/v4/accounts/{cf_account}/ai/v1/chat/completions",
+                model="@cf/meta/llama-3.3-70b-instruct",
+                keys=[ProviderKey(key=k, provider="Cloudflare") for k in cf_keys],
+                priority=27,
+            ))
+
+        # DeepInfra
+        deepinfra_keys = self._split_keys(os.getenv("DEEPINFRA_API_KEY", ""))
+        if deepinfra_keys:
+            self.providers.append(ProviderConfig(
+                name="DeepInfra/Llama-3.1-70B",
+                url="https://api.deepinfra.com/v1/openai/chat/completions",
+                model="meta-llama/Meta-Llama-3.1-70B-Instruct",
+                keys=[ProviderKey(key=k, provider="DeepInfra") for k in deepinfra_keys],
+                priority=28,
+            ))
+
+        # Lepton AI
+        lepton_keys = self._split_keys(os.getenv("LEPTON_API_KEY", ""))
+        if lepton_keys:
+            self.providers.append(ProviderConfig(
+                name="Lepton/llama-3.3-70b",
+                url="https://api.lepton.ai/v1/chat/completions",
+                model="llama-3.3-70b",
+                keys=[ProviderKey(key=k, provider="Lepton") for k in lepton_keys],
+                priority=29,
+            ))
+
+        # Writer
+        writer_keys = self._split_keys(os.getenv("WRITER_API_KEY", ""))
+        if writer_keys:
+            self.providers.append(ProviderConfig(
+                name="Writer/palmyra-x-004",
+                url="https://api.writer.com/v1/chat/completions",
+                model="palmyra-x-004",
+                keys=[ProviderKey(key=k, provider="Writer") for k in writer_keys],
+                priority=30,
+            ))
+
+        # AI21 Labs
+        ai21_keys = self._split_keys(os.getenv("AI21_API_KEY", ""))
+        if ai21_keys:
+            self.providers.append(ProviderConfig(
+                name="AI21/jamba-1.5-large",
+                url="https://api.ai21.com/v1/chat/completions",
+                model="jamba-1.5-large",
+                keys=[ProviderKey(key=k, provider="AI21") for k in ai21_keys],
+                priority=31,
+            ))
+
+        # Databricks
+        dbx_keys = self._split_keys(os.getenv("DATABRICKS_API_KEY", ""))
+        dbx_host = os.getenv("DATABRICKS_HOST", "")
+        if dbx_keys and dbx_host:
+            self.providers.append(ProviderConfig(
+                name="Databricks/dbrx-instruct",
+                url=f"https://{dbx_host}/serving-endpoints/chat/completions",
+                model="dbrx-instruct",
+                keys=[ProviderKey(key=k, provider="Databricks") for k in dbx_keys],
+                priority=32,
+            ))
+
+        # Anyscale
+        anyscale_keys = self._split_keys(os.getenv("ANYSCALE_API_KEY", ""))
+        if anyscale_keys:
+            self.providers.append(ProviderConfig(
+                name="Anyscale/Llama-3.1-70B",
+                url="https://api.endpoints.anyscale.com/v1/chat/completions",
+                model="meta-llama/Meta-Llama-3.1-70B-Instruct",
+                keys=[ProviderKey(key=k, provider="Anyscale") for k in anyscale_keys],
+                priority=33,
+            ))
+
+        # Lambda Cloud
+        lambda_keys = self._split_keys(os.getenv("LAMBDA_API_KEY", ""))
+        if lambda_keys:
+            self.providers.append(ProviderConfig(
+                name="Lambda/llama3.3-70b",
+                url="https://api.lambdalabs.com/v1/chat/completions",
+                model="llama3.3-70b-instruct",
+                keys=[ProviderKey(key=k, provider="Lambda") for k in lambda_keys],
+                priority=34,
+            ))
+
+        # Nebius AI Studio
+        nebius_keys = self._split_keys(os.getenv("NEBIUS_API_KEY", ""))
+        if nebius_keys:
+            self.providers.append(ProviderConfig(
+                name="Nebius/Llama-3.1-70B",
+                url="https://api.studio.nebius.ai/v1/chat/completions",
+                model="meta-llama/Meta-Llama-3.1-70B-Instruct",
+                keys=[ProviderKey(key=k, provider="Nebius") for k in nebius_keys],
+                priority=35,
+            ))
+
+        # Upstage
+        upstage_keys = self._split_keys(os.getenv("UPSTAGE_API_KEY", ""))
+        if upstage_keys:
+            self.providers.append(ProviderConfig(
+                name="Upstage/solar-1-mini",
+                url="https://api.upstage.ai/v1/chat/completions",
+                model="solar-1-mini-chat",
+                keys=[ProviderKey(key=k, provider="Upstage") for k in upstage_keys],
+                priority=36,
+            ))
+
+        # Baseten
+        baseten_keys = self._split_keys(os.getenv("BASETEN_API_KEY", ""))
+        if baseten_keys:
+            self.providers.append(ProviderConfig(
+                name="Baseten/Llama-3.1-70B",
+                url="https://api.baseten.co/v1/chat/completions",
+                model="meta-llama/Meta-Llama-3.1-70B-Instruct",
+                keys=[ProviderKey(key=k, provider="Baseten") for k in baseten_keys],
+                priority=37,
+            ))
+
+        # TextSynth
+        textsynth_keys = self._split_keys(os.getenv("TEXTSYNTH_API_KEY", ""))
+        if textsynth_keys:
+            self.providers.append(ProviderConfig(
+                name="TextSynth/Mistral-7B",
+                url="https://api.textsynth.com/v1/chat/completions",
+                model="Mistral-7B-v0.3",
+                keys=[ProviderKey(key=k, provider="TextSynth") for k in textsynth_keys],
+                priority=38,
+            ))
+
+        # Ollama Cloud
+        ollama_cloud_keys = self._split_keys(os.getenv("OLLAMA_CLOUD_API_KEY", ""))
+        if ollama_cloud_keys:
+            self.providers.append(ProviderConfig(
+                name="OllamaCloud/nemotron-3-nano",
+                url="https://ollama.com/v1/chat/completions",
+                model="nemotron-3-nano:30b",
+                keys=[ProviderKey(key=k, provider="OllamaCloud") for k in ollama_cloud_keys],
+                priority=39,
+            ))
+
         # Sort by priority
         self.providers.sort(key=lambda p: p.priority)
         logger.info(f"Loaded {len(self.providers)} providers")

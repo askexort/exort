@@ -139,6 +139,171 @@ BUILT_IN_DEFAULTS = {
             "endpoint": "https://api.x.ai/v1",
             "model": "grok-3",
         },
+        # ── New Providers (2026) ──
+        "nvidia": {
+            "key_var": "NVIDIA_API_KEY",
+            "endpoint": "https://integrate.api.nvidia.com/v1",
+            "model": "nvidia/llama-3.3-nemotron-super-49b-v1",
+            "free": True,
+        },
+        "cerebras": {
+            "key_var": "CEREBRAS_API_KEY",
+            "endpoint": "https://api.cerebras.ai/v1",
+            "model": "llama-3.3-70b",
+            "free": True,
+        },
+        "sambanova": {
+            "key_var": "SAMBANOVA_API_KEY",
+            "endpoint": "https://api.sambanova.ai/v1",
+            "model": "Meta-Llama-3.1-8B-Instruct",
+            "free": True,
+        },
+        "novita": {
+            "key_var": "NOVITA_API_KEY",
+            "endpoint": "https://api.novita.ai/openai/v1",
+            "model": "deepseek/deepseek-v3-0324",
+            "free": True,
+        },
+        "nous": {
+            "key_var": "NOUS_API_KEY",
+            "endpoint": "https://inference.nousresearch.com/v1",
+            "model": "Hermes-3-Llama-3.1-70B",
+            "free": True,
+        },
+        "minimax": {
+            "key_var": "MINIMAX_API_KEY",
+            "endpoint": "https://api.minimax.io/v1",
+            "model": "MiniMax-M2.7",
+        },
+        "stepfun": {
+            "key_var": "STEPFUN_API_KEY",
+            "endpoint": "https://api.stepfun.ai/v1",
+            "model": "step-3.5-flash",
+        },
+        "qwen": {
+            "key_var": "DASHSCOPE_API_KEY",
+            "endpoint": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+            "model": "qwen-plus",
+        },
+        "ollama-cloud": {
+            "key_var": "OLLAMA_CLOUD_API_KEY",
+            "endpoint": "https://ollama.com/v1",
+            "model": "nemotron-3-nano:30b",
+            "free": True,
+        },
+        "kimi": {
+            "key_var": "KIMI_API_KEY",
+            "endpoint": "https://api.moonshot.ai/v1",
+            "model": "kimi-k2",
+        },
+        "gmi": {
+            "key_var": "GMI_API_KEY",
+            "endpoint": "https://api.gmi-serving.com/v1",
+            "model": "deepseek-ai/DeepSeek-R1",
+            "free": True,
+        },
+        "arcee": {
+            "key_var": "ARCEEAI_API_KEY",
+            "endpoint": "https://api.arcee.ai/api/v1",
+            "model": "arcee-spotlight",
+        },
+        "zai": {
+            "key_var": "ZAI_API_KEY",
+            "endpoint": "https://api.z.ai/api/paas/v4",
+            "model": "glm-4-flash",
+        },
+        "volcengine": {
+            "key_var": "VOLCENGINE_API_KEY",
+            "endpoint": "https://ark.cn-beijing.volces.com/api/v3",
+            "model": "doubao-1.5-pro-256k",
+        },
+        "yi": {
+            "key_var": "YI_API_KEY",
+            "endpoint": "https://api.lingyiwanwu.com/v1",
+            "model": "yi-large",
+        },
+        "zhipu": {
+            "key_var": "ZHIPU_API_KEY",
+            "endpoint": "https://open.bigmodel.cn/api/paas/v4",
+            "model": "glm-4-flash",
+        },
+        "baichuan": {
+            "key_var": "BAICHUAN_API_KEY",
+            "endpoint": "https://api.baichuan-ai.com/v1",
+            "model": "Baichuan4",
+        },
+        "cloudflare": {
+            "key_var": "CLOUDFLARE_API_KEY",
+            "endpoint": None,  # built dynamically with CLOUDFLARE_ACCOUNT_ID
+            "model": "@cf/meta/llama-3.3-70b-instruct",
+            "free": True,
+        },
+        "deepinfra": {
+            "key_var": "DEEPINFRA_API_KEY",
+            "endpoint": "https://api.deepinfra.com/v1/openai",
+            "model": "meta-llama/Meta-Llama-3.1-70B-Instruct",
+            "free": True,
+        },
+        "lepton": {
+            "key_var": "LEPTON_API_KEY",
+            "endpoint": "https://api.lepton.ai/v1",
+            "model": "llama-3.3-70b",
+            "free": True,
+        },
+        "writer": {
+            "key_var": "WRITER_API_KEY",
+            "endpoint": "https://api.writer.com/v1",
+            "model": "palmyra-x-004",
+        },
+        "ai21": {
+            "key_var": "AI21_API_KEY",
+            "endpoint": "https://api.ai21.com/v1",
+            "model": "jamba-1.5-large",
+        },
+        "databricks": {
+            "key_var": "DATABRICKS_API_KEY",
+            "endpoint": None,  # built from DATABRICKS_HOST
+            "model": "dbrx-instruct",
+        },
+        "voyage": {
+            "key_var": "VOYAGE_API_KEY",
+            "endpoint": "https://api.voyageai.com/v1",
+            "model": "voyage-3",
+        },
+        "baseten": {
+            "key_var": "BASETEN_API_KEY",
+            "endpoint": "https://api.baseten.co/v1",
+            "model": "meta-llama/Meta-Llama-3.1-70B-Instruct",
+            "free": True,
+        },
+        "anyscale": {
+            "key_var": "ANYSCALE_API_KEY",
+            "endpoint": "https://api.endpoints.anyscale.com/v1",
+            "model": "meta-llama/Meta-Llama-3.1-70B-Instruct",
+            "free": True,
+        },
+        "lambda": {
+            "key_var": "LAMBDA_API_KEY",
+            "endpoint": "https://api.lambdalabs.com/v1",
+            "model": "llama3.3-70b-instruct",
+        },
+        "textsynth": {
+            "key_var": "TEXTSYNTH_API_KEY",
+            "endpoint": "https://api.textsynth.com/v1",
+            "model": "Mistral-7B-v0.3",
+            "free": True,
+        },
+        "nebius": {
+            "key_var": "NEBIUS_API_KEY",
+            "endpoint": "https://api.studio.nebius.ai/v1",
+            "model": "meta-llama/Meta-Llama-3.1-70B-Instruct",
+            "free": True,
+        },
+        "upstage": {
+            "key_var": "UPSTAGE_API_KEY",
+            "endpoint": "https://api.upstage.ai/v1",
+            "model": "solar-1-mini-chat",
+        },
     },
 
     # Conversation memory

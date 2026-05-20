@@ -75,6 +75,9 @@ _BUILTIN_MODULES = [
     "exort.tools.url_tool",
     "exort.tools.diff_tool",
     "exort.tools.color_tool",
+    "exort.tools.markdown_tool",
+    "exort.tools.translation_tool",
+    "exort.tools.image_tool",
 ]
 
 

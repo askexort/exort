@@ -4,7 +4,12 @@ Provider registry — maps names to LLM backends.
 Supported: groq (free), openai, ollama (local), anthropic,
            together, mistral, gemini, deepseek, perplexity,
            fireworks, cohere, replicate, xai, huggingface,
-           moonshot, siliconflow, openrouter, custom
+           moonshot, siliconflow, openrouter, custom,
+           nvidia, cerebras, sambanova, novita, nous, minimax,
+           stepfun, qwen, ollama-cloud, kimi, gmi, arcee, zai,
+           volcengine, yi, zhipu, baichuan, cloudflare, deepinfra,
+           lepton, writer, ai21, databricks, voyage, baseten,
+           anyscale, lambda, textsynth, nebius, upstage
 """
 
 from typing import Optional
@@ -53,6 +58,17 @@ def _boot():
         "fireworks_provider", "cohere_provider", "replicate_provider",
         "xai_provider", "huggingface_provider", "moonshot_provider",
         "siliconflow_provider", "openrouter_provider",
+        # New providers (2026)
+        "nvidia_provider", "cerebras_provider", "sambanova_provider",
+        "novita_provider", "nous_provider", "minimax_provider",
+        "stepfun_provider", "qwen_provider", "ollama_cloud_provider",
+        "kimi_provider", "gmi_provider", "arcee_provider",
+        "zai_provider", "volcengine_provider", "yi_provider",
+        "zhipu_provider", "baichuan_provider", "cloudflare_provider",
+        "deepinfra_provider", "lepton_provider", "writer_provider",
+        "ai21_provider", "databricks_provider", "voyage_provider",
+        "baseten_provider", "anyscale_provider", "lambda_provider",
+        "textsynth_provider", "nebius_provider", "upstage_provider",
     ]:
         try:
             __import__(f"exort.providers.{mod_name}")
