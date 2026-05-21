@@ -801,5 +801,18 @@ def providers_setup():
     setup.callback()
 
 
+@cli.command()
+def bot():
+    """Start the Exort Telegram bot.
+
+    \b
+    Requires TELEGRAM_BOT_TOKEN env var.
+    Optional: GROQ_API_KEY, OPENROUTER_API_KEY, CEREBRAS_API_KEY, MIMO_API_KEY
+    """
+    from exort.bot.telegram_bot import run_bot
+    token = os.getenv("TELEGRAM_BOT_TOKEN", "")
+    run_bot(token)
+
+
 # Backward-compatible alias
 main = cli
