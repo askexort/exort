@@ -43,6 +43,8 @@ logger = logging.getLogger(__name__)
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "google/gemma-4-26b-a4b-it:free")
 RATE_LIMIT = int(os.getenv("RATE_LIMIT_PER_MIN", "10"))
+TRIAL_LIMIT = int(os.getenv("TRIAL_LIMIT", "5"))
+ADMIN_IDS = [int(x) for x in os.getenv("ADMIN_IDS", "").split(",") if x.strip()]
 
 AVAILABLE_MODELS = {
     "deepseek-v4-flash": "deepseek/deepseek-v4-flash:free",
@@ -83,6 +85,10 @@ class RateLimiter:
 
 
 rate_limiter = RateLimiter(RATE_LIMIT)
+
+# ─── Trial Message Counter ──────────────────────────────────────────────────
+
+user_message_count: dict[int, int] = defaultdict(int)
 
 # ─── Stats ────────────────────────────────────────────────────────────────────
 
@@ -133,6 +139,7 @@ async def cmd_start(update, context):
         "• Just send me any message to chat\n"
         "• `/help` — All commands\n"
         "• `/health` — Provider status\n\n"
+        f"🆓 **Trial Phase:** {TRIAL_LIMIT} free messages per user\n\n"
         "🆓 **100% Free** • 🔓 **Open Source** • 🌍 **For Everyone**\n\n"
         "_Built by the Exort community_"
     )
@@ -162,6 +169,7 @@ async def cmd_help(update, context):
         "• `/new` — Fresh conversation\n"
         "• `/help` — This message\n\n"
         f"**Rate Limit:** {RATE_LIMIT} messages/min\n"
+        f"**Trial Limit:** {TRIAL_LIMIT} messages/user\n"
         f"**Current Model:** `{DEFAULT_MODEL}`"
     )
 
@@ -334,6 +342,18 @@ async def handle_message(update, context, explicit_msg: str = None):
         )
         return
 
+    # Trial limit check (admins exempt)
+    if user_id not in ADMIN_IDS:
+        if user_message_count[user_id] >= TRIAL_LIMIT:
+            await update.message.reply_text(
+                "🚫 *Trial Limit Reached!*\n\n"
+                "You already consumed your trial phase! "
+                "We are still working on it for you to use it non stop! "
+                "🔄✨",
+                parse_mode=ParseMode.MARKDOWN,
+            )
+            return
+
     # Show typing indicator
     await update.message.chat.send_action(ChatAction.TYPING)
 
@@ -341,6 +361,9 @@ async def handle_message(update, context, explicit_msg: str = None):
     stats["total_messages"] += 1
     stats["total_users"].add(user_id)
     stats["model_usage"][DEFAULT_MODEL] += 1
+
+    # Increment trial counter
+    user_message_count[user_id] += 1
 
     logger.info(f"User {username} ({user_id}): {message[:80]}...")
 
